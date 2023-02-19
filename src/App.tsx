@@ -27,6 +27,7 @@ import Box from "@mui/material/Box";
 import Slider from "@mui/material/Slider";
 import VolumeDown from "@mui/icons-material/VolumeDown";
 import VolumeUp from "@mui/icons-material/VolumeUp";
+import Modal from "@mui/material/Modal";
 import {
   createTheme,
   CssBaseline,
@@ -151,6 +152,7 @@ function RangeSlider(props: {
   audioRef: HTMLAudioElement;
   intervalRef: React.MutableRefObject<number | undefined>;
   isClip: boolean;
+  userGuilds: UserGuilds[] | null;
 }) {
   const [playing, setPlaying] = useState(false);
   const [startEnd, setStartEnd] = React.useState<number[]>([
@@ -306,6 +308,7 @@ function RangeSlider(props: {
         )}
       </Button>
       <ClipDialog params={params} startEnd={startEnd} disabled={props.isClip} />
+      <JamIt disabled={props.isClip} userGuilds={props.userGuilds} />
       {/* <Button variant="contained" onClick={handleClip}>
         <a
           href={`https://dev.patrykstyla.com/download/${params.guild_id}/${
@@ -427,6 +430,7 @@ function YearSelection(props: {
   >;
   setFormOpen: React.Dispatch<React.SetStateAction<boolean>>;
   guildSelected: UserGuilds | null;
+  userGuilds: UserGuilds[] | null;
 }) {
   let params = useParams();
 
@@ -440,12 +444,17 @@ function YearSelection(props: {
         setFormOpen={props.setFormOpen}
         guildSelected={props.guildSelected}
       />
-      {params.year && <AudioInterface isClip={false} />}
+      {params.year && (
+        <AudioInterface isClip={false} userGuilds={props.userGuilds} />
+      )}
     </div>
   );
 }
 
-export function AudioInterface(props: { isClip: boolean }) {
+export function AudioInterface(props: {
+  isClip: boolean;
+  userGuilds: UserGuilds[] | null;
+}) {
   console.log("render Audio Interface");
   const intervalRef = useRef<number | undefined>();
   let params = useParams<"guild_id" | "file_name" | "month" | "year">();
@@ -458,11 +467,15 @@ export function AudioInterface(props: { isClip: boolean }) {
     let audioRef: HTMLAudioElement;
     if (props.isClip) {
       audioRef = new Audio(
-        `https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${params.file_name}`
+        `https://dev.patrykstyla.com/audio/clips/${
+          params.guild_id
+        }/${encodeURIComponent(params.file_name!)}`
       );
     } else {
       audioRef = new Audio(
-        `https://dev.patrykstyla.com/audio/${params.guild_id}/${params.year}/${params.month}/${params.file_name}.ogg`
+        `https://dev.patrykstyla.com/audio/${params.guild_id}/${params.year}/${
+          params.month
+        }/${encodeURIComponent(params.file_name!)}.ogg`
       );
     }
 
@@ -498,6 +511,7 @@ export function AudioInterface(props: { isClip: boolean }) {
             audioRef={audioRef!}
             intervalRef={intervalRef}
             isClip={props.isClip}
+            userGuilds={props.userGuilds}
           />
         ) : (
           "Downloading"
@@ -883,6 +897,7 @@ function App({}: AppProps) {
                           setMenuItems={setMenuItems}
                           setFormOpen={setIsFormOpen}
                           guildSelected={guildSelected}
+                          userGuilds={userGuilds}
                         />
                       }
                     />
@@ -894,6 +909,7 @@ function App({}: AppProps) {
                           setMenuItems={setMenuItems}
                           setFormOpen={setIsFormOpen}
                           guildSelected={guildSelected}
+                          userGuilds={userGuilds}
                         />
                       }
                     />
@@ -901,11 +917,21 @@ function App({}: AppProps) {
                   <Route path="clips">
                     <Route
                       path=":guild_id"
-                      element={<Clips guildSelected={guildSelected} />}
+                      element={
+                        <Clips
+                          guildSelected={guildSelected}
+                          userGuilds={userGuilds}
+                        />
+                      }
                     />
                     <Route
                       path=":guild_id/:file_name"
-                      element={<Clips guildSelected={guildSelected} />}
+                      element={
+                        <Clips
+                          guildSelected={guildSelected}
+                          userGuilds={userGuilds}
+                        />
+                      }
                     />
                   </Route>
                 </Route>
@@ -1082,6 +1108,109 @@ function ItemsEl(props: {
         {props.file.file}
       </div>
     </Tooltip>
+  );
+}
+
+enum RespStatus {
+  CONNECTED,
+  NOT_CONNECTED,
+  UNKOWN,
+}
+
+function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
+  if (!props.disabled) return <></>;
+
+  let [isError, setIsError] = useState<{ type: RespStatus; code: number }>({
+    type: RespStatus.UNKOWN,
+    code: 0,
+  });
+  let location = useLocation();
+  let params = useParams();
+
+  const handleJamIt = async () => {
+    let req = fetch("https://dev.patrykstyla.com/jamit", {
+      body: JSON.stringify({
+        guild_id: params.guild_id as any as string,
+        clip_name: params.file_name as any as string,
+      }),
+
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    });
+
+    let res = await req;
+    if (!res.ok) {
+      setIsError({ type: RespStatus.NOT_CONNECTED, code: 0 });
+      setOpen(true);
+
+      return;
+    }
+    let c = await res.json();
+
+    console.log(c);
+
+    if (c.code) {
+      setIsError({ type: RespStatus.CONNECTED, code: c.code as number });
+      setOpen(true);
+    } else {
+      // prob success or unhandled
+    }
+  };
+
+  const style = {
+    position: "absolute" as "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    border: "2px solid #000",
+    boxShadow: 24,
+    p: 4,
+  };
+
+  const [open, setOpen] = React.useState(false);
+  const handleClose = () => {
+    setOpen(false), setIsError({ type: RespStatus.CONNECTED, code: 0 });
+  };
+
+  return (
+    <>
+      <Button onClick={handleJamIt} variant="contained">
+        Jam It
+      </Button>
+      {/* if Error show a modal explaining the error */}
+      {(isError.code > 0 || isError.type === RespStatus.NOT_CONNECTED) && (
+        <div>
+          <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box sx={style}>
+              <Typography id="modal-modal-title" variant="h6" component="h2">
+                Error
+              </Typography>
+              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                error code: {isError.code}
+                <br />
+                TODO: proper messages
+                <br />
+                number 0 = I probably broke something
+                <br />
+                number 1 = bot is not in voice channel
+                <br />
+                number &gt;= 2 =¯\_(ツ)_/¯
+              </Typography>
+            </Box>
+          </Modal>
+        </div>
+      )}
+    </>
   );
 }
 

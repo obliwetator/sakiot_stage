@@ -72,7 +72,10 @@ interface Clips {
   id: string;
 }
 
-export default function Clips(props: { guildSelected: UserGuilds | null }) {
+export default function Clips(props: {
+  guildSelected: UserGuilds | null;
+  userGuilds: UserGuilds[] | null;
+}) {
   let params = useParams();
   const [data, setData] = useState<Clips[] | null>(null);
 
@@ -94,7 +97,9 @@ export default function Clips(props: { guildSelected: UserGuilds | null }) {
     return (
       <div className="flex">
         <SimpleAccordion data={data} />
-        {params.file_name && <AudioInterface isClip={true} />}
+        {params.file_name && (
+          <AudioInterface isClip={true} userGuilds={props.userGuilds} />
+        )}
       </div>
     );
   } else {
