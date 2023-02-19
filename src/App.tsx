@@ -231,7 +231,7 @@ function RangeSlider(props: {
           } else {
             setPlaying((prev) => !prev);
             // source?.stop();
-            startTimer();
+            clearInterval(props.intervalRef.current);
 
             props.audioRef.pause();
             e.currentTarget.innerHTML = "Play";
