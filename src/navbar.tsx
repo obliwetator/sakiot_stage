@@ -206,6 +206,11 @@ function BasicSelect(props: {
     const index = props
       .userGuilds!.map((item) => item.name)
       .indexOf(event.target.value);
+    if (!params.guild_id) {
+      props.setGuildSelected(props.userGuilds![index]);
+      // If there is no guild id param dont do navigate, just change the state and the menu
+      return;
+    }
 
     props.setGuildSelected(props.userGuilds![index]);
     let pathname = location.pathname;
