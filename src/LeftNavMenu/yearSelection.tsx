@@ -1,12 +1,12 @@
 import { Tooltip } from '@mui/material';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import {
+	Location as ReactLocation,
 	NavigateFunction,
 	Params,
 	useLocation,
 	useNavigate,
 	useParams,
-	Location as ReactLocation,
 } from 'react-router-dom';
 import {
 	Channels,

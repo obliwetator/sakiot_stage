@@ -1,26 +1,9 @@
-import React, { useState, useEffect, Fragment, useRef, createContext, useContext } from 'react';
-import {
-	BrowserRouter,
-	Routes,
-	Route,
-	Link,
-	useNavigate,
-	NavigateFunction,
-	useParams,
-	useLocation,
-	Location as ReactLocation,
-	Params,
-	Outlet,
-} from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { BrowserRouter, Outlet, Params, Route, Routes, useLocation, useParams } from 'react-router-dom';
 
-import { styled, useTheme } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import Slider from '@mui/material/Slider';
+import { VolumeMute } from '@mui/icons-material';
 import VolumeDown from '@mui/icons-material/VolumeDown';
 import VolumeUp from '@mui/icons-material/VolumeUp';
-import Modal from '@mui/material/Modal';
 import {
 	createTheme,
 	CssBaseline,
@@ -28,22 +11,20 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogContentText,
-	DialogTitle,
-	Divider,
-	ListItemIcon,
-	ListItemText,
 	Menu,
 	MenuItem,
-	MenuList,
-	Paper,
 	Stack,
 	TextField,
 	ThemeProvider,
-	Tooltip,
 } from '@mui/material';
-import { Cloud, ContentCopy, ContentCut, ContentPaste, PropaneSharp, VolumeMute } from '@mui/icons-material';
-import ResponsiveAppBar from './navbar';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Modal from '@mui/material/Modal';
+import Slider from '@mui/material/Slider';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import Clips from './clips';
+import ResponsiveAppBar from './navbar';
 
 export interface Channels {
 	channel_id: string;
@@ -480,9 +461,8 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 //   <button id="mute-icon"></button>
 // </div> */}
 import Grid from '@mui/material/Unstable_Grid2'; // Grid version 2
-import { transform_to_months } from './data';
-import { AllYears, ItemsEl, MonthsEl } from './LeftNavMenu/yearSelection';
 import { db } from './db';
+import { AllYears, ItemsEl } from './LeftNavMenu/yearSelection';
 
 const ProtectedLayout = (props: {
 	isLoggedIn: boolean;

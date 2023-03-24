@@ -1,4 +1,3 @@
-import { SliderValueLabelUnstyled } from '@mui/base';
 import { Channels, Dirs, IndividualFile, IndividualFileArray } from './App';
 
 type months =
