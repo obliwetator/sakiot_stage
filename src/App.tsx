@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BrowserRouter, Outlet, Params, Route, Routes, useLocation, useParams } from 'react-router-dom';
+import { BrowserRouter, Outlet, Params, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { VolumeMute } from '@mui/icons-material';
 import VolumeDown from '@mui/icons-material/VolumeDown';
@@ -479,11 +479,15 @@ const ProtectedLayout = (props: {
 	setGuildSelected: React.Dispatch<React.SetStateAction<UserGuilds | null>>;
 	userGuilds: UserGuilds[] | null;
 }) => {
+	const navigate = useNavigate();
+
 	if (!props.userGuilds) {
 		return <>No guilds</>;
 	}
 	const handleGuildSelect = (index: number) => {
-		props.setGuildSelected(props.userGuilds![index]);
+		let value = props.userGuilds![index];
+		props.setGuildSelected(value);
+		navigate(value.id);
 	};
 
 	const guilds = props.userGuilds?.map((value, index) => {
@@ -750,7 +754,7 @@ function App() {
 								/>
 							}
 						>
-							<Route path="/" element={<div>Void</div>} />
+							<Route path="/" element={<div>Cool homepage</div>} />
 
 							<Route
 								path="/dashboard"
@@ -764,6 +768,10 @@ function App() {
 								}
 							>
 								<Route path="" element={<Dashboard />} />
+								<Route path=":guild_id">
+									<Route path="" element={'select from top navbar'} /> <Route path="audio"></Route>
+									<Route path="clips"></Route>
+								</Route>
 								<Route path="audio">
 									<Route
 										path=":guild_id/:channel_id/:year/:month/:file_name"
