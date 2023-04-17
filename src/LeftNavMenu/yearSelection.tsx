@@ -1,5 +1,5 @@
 import { Tooltip } from '@mui/material';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import {
 	Location as ReactLocation,
 	NavigateFunction,
@@ -72,7 +72,7 @@ export function AllYears(props: {
 	const params = useParams();
 
 	useEffect(() => {
-		fetch(`https://dev.patrykstyla.com/current/${params.guild_id}`, {
+		fetch(`https://dev.patrykstyla.com/api/current/${params.guild_id}`, {
 			method: 'GET',
 			credentials: 'include',
 		}).then((response) => {
@@ -81,7 +81,7 @@ export function AllYears(props: {
 			} else {
 				console.log('got directory data');
 				response.json().then((result: Dirs[]) => {
-					let res = transform_to_months(result as any as Channels[]);
+					const res = transform_to_months(result as any as Channels[]);
 					// let { newData, newFavorites } = addCommentsToData(res);
 					// TODO: change to function data
 					setData(res);
@@ -176,10 +176,10 @@ export function YearsEl(props: {
 		setClicked(index);
 	};
 
-	let months_obj = Object.keys(props.el.months);
-	let result = months_obj.map((month_name, index) => {
-		let month = month_name as months;
-		let files = props.el.months[month]!;
+	const months_obj = Object.keys(props.el.months);
+	const result = months_obj.map((month_name, index) => {
+		const month = month_name as months;
+		const files = props.el.months[month]!;
 		return (
 			<MonthsEl
 				index={index}
@@ -207,7 +207,7 @@ export function YearsEl(props: {
 					(props.active ? 'bg-green-800' : 'bg-green-500') +
 					' hover:bg-green-700 active:bg-red-800'
 				}
-				onClick={(e) => {
+				onClick={(_) => {
 					props.onToggle(props.index);
 				}}
 				onContextMenu={(e) => {
@@ -291,8 +291,8 @@ export function MonthsEl(props: {
 	let file_names: IndividualFileArray = [];
 	const days = props.files.map((el, index) => {
 		// get the timestamp from the file
-		let timestamp = parseInt(el.file.slice(0, 13));
-		var date = new Date(timestamp);
+		const timestamp = parseInt(el.file.slice(0, 13));
+		const date = new Date(timestamp);
 
 		// Return a different day el
 		if (prevDay != date.getDate()) {
@@ -331,7 +331,7 @@ export function MonthsEl(props: {
 		<Fragment>
 			<div
 				onClick={() => props.onToggle(props.index)}
-				onContextMenu={(e) => {
+				onContextMenu={(_) => {
 					console.log('months');
 				}}
 				className="bg-blue-700"
@@ -448,9 +448,9 @@ export function ItemsEl(props: {
 		setFavorites: React.Dispatch<React.SetStateAction<IndividualFileArray | null>>;
 	};
 }) {
-	let navigate = useNavigate();
-	let location = useLocation();
-	let params = useParams();
+	const navigate = useNavigate();
+	const location = useLocation();
+	const params = useParams();
 
 	// TODO: DB
 	const handleFavorite = (e: any) => {
@@ -532,7 +532,7 @@ export function ItemsEl(props: {
 	);
 }
 
-export const handleContextMenu = (
+const handleContextMenu = (
 	event: React.MouseEvent,
 	setContextMenu: React.Dispatch<
 		React.SetStateAction<{
@@ -559,7 +559,7 @@ export const handleContextMenu = (
 	);
 };
 
-export function handleClickOnFile(
+function handleClickOnFile(
 	e: React.MouseEvent<HTMLDivElement, MouseEvent>,
 	navigate: NavigateFunction,
 	location: ReactLocation,

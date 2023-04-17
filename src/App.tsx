@@ -31,6 +31,15 @@ export interface Channels {
 	dirs: Dirs[];
 }
 
+export type AudioParams2 = {
+	dashboard?: string;
+	audio?: string;
+	guild_id?: string;
+	channel_id?: string;
+	file_name?: string;
+	month?: string;
+	year?: string;
+};
 export type AudioParams = 'guild_id' | 'channel_id' | 'file_name' | 'month' | 'year';
 
 export interface Dirs {
@@ -134,7 +143,7 @@ function RangeSlider(props: {
 	//     console.log(currentPercentage);
 	//   }, 10);
 
-	useEffect(() => {}, [props.audioRef]);
+	// useEffect(() => {}, [props.audioRef]);
 	function formatDuration(value: number) {
 		const minute = Math.floor(value / 60);
 		const secondLeft = Math.floor(value - minute * 60);
@@ -154,7 +163,7 @@ function RangeSlider(props: {
 			setStartEnd([startEnd[0], Math.max(newValue[1], startEnd[0] + minDistance)]);
 		}
 	};
-	let params = useParams<AudioParams>();
+	const params = useParams<AudioParams>();
 
 	return (
 		<Box sx={{ width: 2 / 4 }} className="m-16">
@@ -228,7 +237,7 @@ function RangeSlider(props: {
 					</a>
 				) : (
 					<a
-						href={`https://dev.patrykstyla.com/download/${params.guild_id}/${params.year}/${params.month}/${params.file_name}.ogg`}
+						href={`https://dev.patrykstyla.com/download/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${params.file_name}.ogg`}
 					>
 						Download
 					</a>
@@ -346,7 +355,7 @@ function YearSelection(props: {
 	guildSelected: UserGuilds | null;
 	userGuilds: UserGuilds[] | null;
 }) {
-	let params = useParams();
+	const params = useParams();
 
 	return (
 		// render the audio playback functionality if we have the full url
@@ -366,7 +375,7 @@ function YearSelection(props: {
 export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[] | null }) {
 	console.log('render Audio Interface');
 	const intervalRef = useRef<number | undefined>();
-	let params = useParams<AudioParams>();
+	const params = useParams<AudioParams>();
 	const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
 	const [readyToPlay, setReadyToPlay] = useState(false);
 	const [error, setError] = useState(false);
@@ -477,7 +486,7 @@ const ProtectedLayout = (props: {
 		props.setGuildSelected(props.userGuilds![index]);
 	};
 
-	let guilds = props.userGuilds?.map((value, index) => {
+	const guilds = props.userGuilds?.map((value, index) => {
 		return (
 			<Grid xs={1} key={index}>
 				<div onClick={() => handleGuildSelect(index)}>{value.name}</div>
@@ -501,8 +510,6 @@ const ProtectedLayout = (props: {
 function Dashboard() {
 	return <div>TODO: BIG MENU WITH A LOT OF FEATURES THAT WILL SURELY GET ADDED SOON</div>;
 }
-
-interface AppProps {}
 
 const darkTheme = createTheme({
 	palette: {
@@ -551,23 +558,24 @@ export interface UserGuilds {
 	permissions: string;
 }
 
-function App({}: AppProps) {
+function App() {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [user, setUser] = useState<User | null>(null);
 	const [userGuilds, setUserGuilds] = useState<UserGuilds[] | null>(null);
+
 	const [guildSelected, setGuildSelected] = useState<UserGuilds | null>(null);
 
 	const getUserDetails = () => {
-		let users = fetch('https://dev.patrykstyla.com/api/users/@me', {
+		const users = fetch('https://dev.patrykstyla.com/api/users/@me', {
 			credentials: 'include',
 		});
 
-		let guilds = fetch('https://dev.patrykstyla.com/api/users/@me/guilds', {
+		const guilds = fetch('https://dev.patrykstyla.com/api/users/@me/guilds', {
 			credentials: 'include',
 		});
 
-		let token = fetch('https://dev.patrykstyla.com/api/token', {
+		const token = fetch('https://dev.patrykstyla.com/api/token', {
 			credentials: 'include',
 		});
 
@@ -587,8 +595,21 @@ function App({}: AppProps) {
 				return;
 			}
 
+			let guilds = (await values[1].json()) as UserGuilds[];
+
 			setUser((await values[0].json()) as User);
-			setUserGuilds((await values[1].json()) as UserGuilds[]);
+			setUserGuilds(guilds);
+
+			let url = window.location.href;
+			let split = url.split('/');
+			let res = split[5];
+			if (res) {
+				console.log('here');
+				let guild = guilds.find(({ id }) => id === res) as UserGuilds | null;
+
+				console.log(guild);
+				setGuildSelected(guild);
+			}
 
 			localStorage.setItem('token', (await values[2].json()).token as any);
 			setIsLoggedIn(true);
@@ -676,7 +697,7 @@ function App({}: AppProps) {
 				  null
 		);
 	};
-
+	console.log(guildSelected);
 	// Return the App component.
 	if (!db || isLoading || !isLoggedIn) {
 		if (!isLoggedIn) {
@@ -814,15 +835,15 @@ enum RespStatus {
 function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 	if (!props.disabled) return <></>;
 
-	let [isError, setIsError] = useState<{ type: RespStatus; code: number }>({
+	const [isError, setIsError] = useState<{ type: RespStatus; code: number }>({
 		type: RespStatus.UNKOWN,
 		code: 0,
 	});
-	let location = useLocation();
-	let params = useParams();
+	const location = useLocation();
+	const params = useParams();
 
 	const handleJamIt = async () => {
-		let req = fetch('https://dev.patrykstyla.com/jamit', {
+		const req = fetch('https://dev.patrykstyla.com/jamit', {
 			body: JSON.stringify({
 				guild_id: params.guild_id as any as string,
 				clip_name: params.file_name as any as string,
@@ -835,14 +856,14 @@ function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 			method: 'POST',
 		});
 
-		let res = await req;
+		const res = await req;
 		if (!res.ok) {
 			setIsError({ type: RespStatus.NOT_CONNECTED, code: 0 });
 			setOpen(true);
 
 			return;
 		}
-		let c = await res.json();
+		const c = await res.json();
 
 		console.log(c);
 
@@ -855,7 +876,7 @@ function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 	};
 
 	const style = {
-		position: 'absolute' as 'absolute',
+		position: 'absolute' as const,
 		top: '50%',
 		left: '50%',
 		transform: 'translate(-50%, -50%)',
@@ -908,11 +929,7 @@ function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 	);
 }
 
-function ClipDialog(props: {
-	params: Readonly<Params<'file_name' | 'guild_id' | 'month' | 'year'>>;
-	startEnd: number[];
-	disabled: boolean;
-}) {
+function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: number[]; disabled: boolean }) {
 	const [open, setOpen] = useState(false);
 	const [text, setText] = useState('');
 
@@ -956,11 +973,11 @@ function ClipDialog(props: {
 
 					<Button onClick={handleClose}>
 						<a
-							href={`https://dev.patrykstyla.com/download/${props.params.guild_id}/${props.params.year}/${
-								props.params.month
-							}/${props.params.file_name}.ogg?start=${props.startEnd[0]}&end=${
-								props.startEnd[1] - props.startEnd[0]
-							}${text.length > 0 ? `&name=${text}` : ''}`}
+							href={`https://dev.patrykstyla.com/download/${props.params.guild_id}/${
+								props.params.channel_id
+							}/${props.params.year}/${props.params.month}/${props.params.file_name}.ogg?start=${
+								props.startEnd[0]
+							}&end=${props.startEnd[1] - props.startEnd[0]}${text.length > 0 ? `&name=${text}` : ''}`}
 						>
 							Clip
 						</a>
@@ -1087,13 +1104,13 @@ export function Favorites(props: {
 		setFavorites: React.Dispatch<React.SetStateAction<IndividualFileArray | null>>;
 	};
 }) {
-	let items: JSX.Element[] = [];
+	const items: JSX.Element[] = [];
 	if (props.favorites.favorites) {
 		props.favorites.favorites.forEach((el, index) => {
-			let timestamp = parseInt(el.file.slice(0, 13));
-			var date = new Date(timestamp);
+			const timestamp = parseInt(el.file.slice(0, 13));
+			const date = new Date(timestamp);
 
-			let item = (
+			const item = (
 				<ItemsEl
 					key={index}
 					file={el}
