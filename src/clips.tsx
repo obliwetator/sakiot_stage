@@ -1,14 +1,20 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
+import Button from '@mui/material/Button/Button';
+
 import Typography from '@mui/material/Typography';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AudioInterface, PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from './App';
+
+import { AudioInterface } from './AudioInterface';
+import { BASE_URL, PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from './Constants';
 
 function SimpleAccordion(props: { data: Clips[] }) {
-	let navigate = useNavigate();
+	const navigate = useNavigate();
+	const [expanded, setExpanded] = useState<string | false>(false);
 
 	const handleClickAccordion = (guild_id: string, clip_name: string) => {
 		console.log('here');
@@ -20,13 +26,20 @@ function SimpleAccordion(props: { data: Clips[] }) {
 			navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/clips/${guild_id}/${encodeURIComponent(clip_name)}`);
 		}
 	};
-	let elements = props.data.map((el, index) => {
+
+	const handleChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+		setExpanded(isExpanded ? panel : false);
+	};
+
+	const elements = props.data.map((el, index) => {
 		return (
 			<Accordion
 				key={index}
 				onClick={() => {
 					handleClickAccordion(el.guild_id, el.clip_name);
 				}}
+				onChange={handleChange(`panel${index}`)}
+				expanded={expanded === `panel${index}`}
 			>
 				<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
 					<Typography>CLIP_NAME: {el.clip_name}</Typography>
@@ -37,11 +50,66 @@ function SimpleAccordion(props: { data: Clips[] }) {
 					<Typography>start: {el.clip_start}</Typography>
 					<Typography>end: {el.clip_end}</Typography>
 					<Typography>OG file: {el.file_name}</Typography>
+					<div>
+						<AlertDialog name={el.file_name} />
+					</div>
 				</AccordionDetails>
 			</Accordion>
 		);
 	});
 	return <div>{elements}</div>;
+}
+
+function AlertDialog(props: { name: string }) {
+	const [open, setOpen] = useState(false);
+
+	const handleClickOpen = () => {
+		setOpen(true);
+	};
+
+	const handleClose = () => {
+		setOpen(false);
+	};
+	const params = useParams();
+
+	const handleYes = () => {
+		fetch(`${BASE_URL + 'api/audio/clips/delete/' + params.guild_id}`, {
+			credentials: 'include',
+			method: 'POST',
+			headers: {
+				'Content-Type': 'text/plain',
+			},
+			body: props.name,
+		});
+		setOpen(false);
+	};
+
+	return (
+		<div>
+			<Button variant="contained" color="error" onClick={handleClickOpen}>
+				Delete
+			</Button>
+			<Dialog
+				open={open}
+				onClose={handleClose}
+				aria-labelledby="alert-dialog-title"
+				aria-describedby="alert-dialog-description"
+			>
+				<DialogTitle id="alert-dialog-title">{"Use Google's location service?"}</DialogTitle>
+				<DialogContent>
+					<DialogContentText id="alert-dialog-description">
+						Are you sure you want to delete the clip?
+					</DialogContentText>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={handleClose}>No</Button>
+					<Button onClick={handleYes} autoFocus>
+						YEP
+					</Button>
+				</DialogActions>
+			</Dialog>
+		</div>
+	);
 }
 
 interface Clips {
@@ -58,19 +126,21 @@ interface Clips {
 }
 
 export default function Clips(props: { guildSelected: UserGuilds | null; userGuilds: UserGuilds[] | null }) {
-	let params = useParams();
+	const params = useParams();
 	const [data, setData] = useState<Clips[] | null>(null);
 
 	useEffect(() => {
-		fetch(`https://dev.patrykstyla.com/audio/clips/${props.guildSelected?.id}`).then((response) => {
-			if (!response.ok) {
-				console.log('cannot get clip data');
-			} else {
-				response.json().then((result: Clips[]) => {
-					setData(result);
-				});
+		fetch(`https://dev.patrykstyla.com/audio/clips/${props.guildSelected?.id}`, { credentials: 'include' }).then(
+			(response) => {
+				if (!response.ok) {
+					console.log('cannot get clip data');
+				} else {
+					response.json().then((result: Clips[]) => {
+						setData(result);
+					});
+				}
 			}
-		});
+		);
 	}, [props.guildSelected]);
 
 	if (data) {
