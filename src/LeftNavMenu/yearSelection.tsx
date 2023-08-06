@@ -1,23 +1,23 @@
-import { Tooltip } from '@mui/material';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import {
-	Location as ReactLocation,
 	NavigateFunction,
 	Params,
+	Location as ReactLocation,
 	useLocation,
 	useNavigate,
 	useParams,
 } from 'react-router-dom';
+
+import { Favorites } from '../App';
 import {
 	Channels,
 	Dirs,
-	Favorites,
 	IndividualFile,
 	IndividualFileArray,
-	months,
 	PATH_PREFIX_FOR_LOGGED_USERS,
 	UserGuilds,
-} from '../App';
+	months,
+} from '../Constants';
 import { transform_to_months } from '../data';
 
 // TODO: DB
@@ -80,8 +80,8 @@ export function AllYears(props: {
 				console.log('cannot get guild_iddirectory data');
 			} else {
 				console.log('got directory data');
-				response.json().then((result: Dirs[]) => {
-					const res = transform_to_months(result as any as Channels[]);
+				response.json().then((result: Channels[]) => {
+					const res = transform_to_months(result);
 					// let { newData, newFavorites } = addCommentsToData(res);
 					// TODO: change to function data
 					setData(res);
@@ -207,7 +207,7 @@ export function YearsEl(props: {
 					(props.active ? 'bg-green-800' : 'bg-green-500') +
 					' hover:bg-green-700 active:bg-red-800'
 				}
-				onClick={(_) => {
+				onClick={() => {
 					props.onToggle(props.index);
 				}}
 				onContextMenu={(e) => {
@@ -331,7 +331,7 @@ export function MonthsEl(props: {
 		<Fragment>
 			<div
 				onClick={() => props.onToggle(props.index)}
-				onContextMenu={(_) => {
+				onContextMenu={() => {
 					console.log('months');
 				}}
 				className="bg-blue-700"
@@ -403,7 +403,7 @@ export function DayEl(props: {
 		<>
 			<div
 				onClick={() => props.onToggle(props.index)}
-				onContextMenu={(e) => {
+				onContextMenu={() => {
 					console.log('days');
 				}}
 				className="bg-pink-700"
@@ -490,45 +490,37 @@ export function ItemsEl(props: {
 	};
 
 	return (
-		<Tooltip title={props.file.comment ? props.file.comment : ''}>
-			<div
-				className={`${props.file.comment !== null ? 'bg-orange-600' : 'bg-violet-600'} `}
-				onClick={(e) =>
-					handleClickOnFile(
-						e,
-						navigate,
-						location,
-						props.year,
-						props.month_name,
-						props.file.channel_id!,
-						params
-					)
-				}
-				style={{ cursor: 'context-menu' }}
-				onContextMenu={(e) => {
-					handleContextMenu(e, props.setContextMenu, props.file.file);
-					props.file.comment !== null
-						? props.setMenuItems([
-								{
-									name: 'Remove From Favorite',
-									cb: () => {
-										handleFavorite(e);
-									},
+		// <Tooltip title={props.file.comment ? props.file.comment : ''}>
+		<div
+			className={`${props.file.comment !== null ? 'bg-orange-600' : 'bg-violet-600'} `}
+			onClick={(e) =>
+				handleClickOnFile(e, navigate, location, props.year, props.month_name, props.file.channel_id!, params)
+			}
+			style={{ cursor: 'context-menu' }}
+			onContextMenu={(e) => {
+				handleContextMenu(e, props.setContextMenu, props.file.file);
+				props.file.comment !== null
+					? props.setMenuItems([
+							{
+								name: 'Remove From Favorite',
+								cb: () => {
+									handleFavorite(e);
 								},
-						  ])
-						: props.setMenuItems([
-								{
-									name: 'Add To Favorite',
-									cb: () => {
-										handleFavorite(e);
-									},
+							},
+					  ])
+					: props.setMenuItems([
+							{
+								name: 'Add To Favorite',
+								cb: () => {
+									handleFavorite(e);
 								},
-						  ]);
-				}}
-			>
-				{props.file.file}
-			</div>
-		</Tooltip>
+							},
+					  ]);
+			}}
+		>
+			{props.file.file}
+		</div>
+		// </Tooltip>
 	);
 }
 
