@@ -1,11 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { BrowserRouter, Outlet, Params, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
-
-import { VolumeMute } from '@mui/icons-material';
-import VolumeDown from '@mui/icons-material/VolumeDown';
-import VolumeUp from '@mui/icons-material/VolumeUp';
 import {
-	createTheme,
 	CssBaseline,
 	Dialog,
 	DialogActions,
@@ -13,326 +6,22 @@ import {
 	DialogContentText,
 	Menu,
 	MenuItem,
-	Stack,
 	TextField,
 	ThemeProvider,
+	createTheme,
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Modal from '@mui/material/Modal';
-import Slider from '@mui/material/Slider';
-import { styled } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Unstable_Grid2'; // Grid version 2
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter, Outlet, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { AudioInterface } from './AudioInterface';
+import { AudioParams, IndividualFileArray, Months, UserGuilds } from './Constants';
+import { ItemsEl } from './LeftNavMenu/yearSelection';
+import { useAppDispatch, useAppSelector } from './app/hooks';
 import Clips from './clips';
+import CustomizedTreeView from './components/TreeView';
 import ResponsiveAppBar from './navbar';
-
-export interface Channels {
-	channel_id: string;
-	dirs: Dirs[];
-}
-
-export type AudioParams2 = {
-	dashboard?: string;
-	audio?: string;
-	guild_id?: string;
-	channel_id?: string;
-	file_name?: string;
-	month?: string;
-	year?: string;
-};
-export type AudioParams = 'guild_id' | 'channel_id' | 'file_name' | 'month' | 'year';
-
-export interface Dirs {
-	year: number;
-	months: Partial<Record<months, IndividualFileArray>>;
-}
-
-export type IndividualFileArray = IndividualFile[];
-export type IndividualFile = { channel_id?: string; file: string; comment: string | null };
-
-enum Months {
-	'January' = 0,
-	'February',
-	'March',
-	'April',
-	'May',
-	'June',
-	'July',
-	'August',
-	'September',
-	'October',
-	'November',
-	'December',
-}
-
-export type months =
-	| 'January'
-	| 'February'
-	| 'March'
-	| 'April'
-	| 'May'
-	| 'June'
-	| 'July'
-	| 'August'
-	| 'September'
-	| 'October'
-	| 'November'
-	| 'December';
-
-const TinyText = styled(Typography)({
-	fontSize: '0.75rem',
-	opacity: 0.38,
-	fontWeight: 500,
-	letterSpacing: 0.2,
-});
-
-export const PATH_PREFIX_FOR_LOGGED_USERS = '/dashboard';
-
-function BasicTextFields(props: { startEnd: number[]; setStartEnd: React.Dispatch<React.SetStateAction<number[]>> }) {
-	return (
-		<Box component="form" noValidate autoComplete="off">
-			<TextField
-				id="standard-basic"
-				label="Go to"
-				variant="standard"
-				value={props.startEnd[0]}
-				inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-				onChange={(e) => props.setStartEnd((prev) => [e.target.value as any as number, prev[1]])}
-			/>
-		</Box>
-	);
-}
-
-function valuetext(value: number) {
-	return `${value}°C`;
-}
-
-function RangeSlider(props: {
-	audioRef: HTMLAudioElement;
-	intervalRef: React.MutableRefObject<number | undefined>;
-	isClip: boolean;
-	userGuilds: UserGuilds[] | null;
-}) {
-	const [playing, setPlaying] = useState(false);
-	const [startEnd, setStartEnd] = React.useState<number[]>([0, props.audioRef.duration]);
-
-	//   const currentPercentage = duration
-	//     ? `${(trackProgress / duration) * 100}%`
-	//     : "0%";
-	const startTimer = () => {
-		// Clear any timers already running
-
-		clearInterval(props.intervalRef.current);
-
-		props.intervalRef.current = setInterval(() => {
-			//   console.log(props.intervalRef);
-			//   if (audioRef.current.ended) {
-			//     // toNextTrack();
-			//   } else {
-			//   console.log(startEnd);
-			setStartEnd((prev) => [props.audioRef.currentTime, prev[1]]);
-			//   }
-		}, 1000);
-	};
-
-	//   const currentPercentage = audioCtx.currentTime
-	//     ? `${(audioCtx.currentTime / source!.buffer!.duration!) * 100}%`
-	//     : "0%";
-
-	//   setInterval(() => {
-	//     console.log(currentPercentage);
-	//   }, 10);
-
-	// useEffect(() => {}, [props.audioRef]);
-	function formatDuration(value: number) {
-		const minute = Math.floor(value / 60);
-		const secondLeft = Math.floor(value - minute * 60);
-		return `${minute}:${secondLeft < 10 ? `0${secondLeft}` : secondLeft}`;
-	}
-
-	const handleChange = (event: Event, newValue: number | number[], activeThumb: number) => {
-		const minDistance = 10;
-		if (!Array.isArray(newValue)) {
-			return;
-		}
-
-		if (activeThumb === 0) {
-			props.audioRef.currentTime = newValue[0];
-			setStartEnd([Math.min(newValue[0], startEnd[1] - minDistance), startEnd[1]]);
-		} else {
-			setStartEnd([startEnd[0], Math.max(newValue[1], startEnd[0] + minDistance)]);
-		}
-	};
-	const params = useParams<AudioParams>();
-
-	return (
-		<Box sx={{ width: 2 / 4 }} className="m-16">
-			<Button
-				onClick={(e) => {
-					if (!playing) {
-						props.audioRef.play();
-						setPlaying((prev) => !prev);
-						startTimer();
-						e.currentTarget.innerHTML = 'Pause';
-					} else {
-						setPlaying((prev) => !prev);
-						// source?.stop();
-						clearInterval(props.intervalRef.current);
-
-						props.audioRef.pause();
-						e.currentTarget.innerHTML = 'Play';
-					}
-				}}
-			>
-				Play
-			</Button>
-			<Slider
-				sx={{
-					'& .MuiSlider-thumb': {
-						// height: 28,
-						// width: 28,
-					},
-				}}
-				max={props.audioRef.duration}
-				getAriaLabel={() => 'Minimum distance'}
-				value={startEnd}
-				onChange={handleChange}
-				valueLabelDisplay="auto"
-				getAriaValueText={valuetext}
-				disableSwap
-			/>
-			<Box
-				sx={{
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'space-between',
-					mt: -2,
-				}}
-			>
-				<TinyText>{formatDuration(startEnd[0])} </TinyText>
-				<TinyText>{formatDuration(Math.round(props.audioRef.duration))}</TinyText>
-			</Box>
-			<Stack spacing={40} direction="row" alignItems="center" justifyContent="space-around">
-				<VolumeSlider audioRef={props.audioRef} />
-				<PlaybackSpeedSlider audioRef={props.audioRef} />
-			</Stack>
-			<div className="flex">
-				<div className="flex-1 w-32">value 1: {formatDuration(Math.round(startEnd[0]))}</div>
-				<div className="flex-1 w-32">Recorded in channel: {params.channel_id}</div>
-				<div>
-					<BasicTextFields startEnd={startEnd} setStartEnd={setStartEnd} />
-				</div>
-			</div>
-			<br />
-			value 2: {formatDuration(startEnd[1])}
-			<br></br>
-			Cropped length: {formatDuration(startEnd[1] - startEnd[0])}
-			<br></br>
-			<br></br>
-			<br></br>
-			<Button variant="contained">
-				{props.isClip ? (
-					<a href={`https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${params.file_name}`}>
-						Download
-					</a>
-				) : (
-					<a
-						href={`https://dev.patrykstyla.com/download/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${params.file_name}.ogg`}
-					>
-						Download
-					</a>
-				)}
-			</Button>
-			<ClipDialog params={params} startEnd={startEnd} disabled={props.isClip} />
-			<JamIt disabled={props.isClip} userGuilds={props.userGuilds} />
-			{/* <Button variant="contained" onClick={handleClip}>
-        <a
-          href={`https://dev.patrykstyla.com/download/${params.guild_id}/${
-            params.year
-          }/${params.month}/${params.file_name}.ogg?start=${startEnd[0]}&end=${
-            startEnd[1] - startEnd[0]
-          }`}
-        >
-          Clip
-        </a>
-      </Button> */}
-		</Box>
-	);
-}
-
-function PlaybackSpeedSlider(props: { audioRef: HTMLAudioElement }) {
-	const handleChangePlaybackSpeed = (event: Event, newValue: number | number[]) => {
-		setPlaybackSpeed(newValue as number);
-		props.audioRef.playbackRate = newValue as number;
-	};
-	const [playbackSpeed, setPlaybackSpeed] = useState(1);
-	return (
-		<Stack spacing={2} direction="row" sx={{ mb: 1, width: 200 }} alignItems="center">
-			<Slider
-				sx={{
-					'& .MuiSlider-thumb': {
-						// height: 28,
-						// width: 28,
-					},
-				}}
-				max={10}
-				step={0.1}
-				getAriaLabel={() => 'Minimum distance'}
-				value={playbackSpeed}
-				onChange={handleChangePlaybackSpeed}
-				valueLabelDisplay="auto"
-				getAriaValueText={valuetext}
-			/>
-		</Stack>
-	);
-}
-
-function VolumeSlider(props: { audioRef: HTMLAudioElement }) {
-	const handleChangeVolume = (event: Event, newValue: number | number[]) => {
-		setVolume(newValue as number);
-		props.audioRef.volume = newValue as number;
-	};
-	// 0 current volume, 1 prev volume
-	const [volume, setVolume] = useState(0.5);
-	const [muted, setMuted] = useState(false);
-
-	return (
-		<Stack spacing={2} direction="row" sx={{ mb: 1, width: 200 }} alignItems="center">
-			{muted ? (
-				<VolumeMute
-					onClick={() => {
-						props.audioRef.muted = false;
-						setMuted(false);
-					}}
-				/>
-			) : (
-				<VolumeDown
-					onClick={() => {
-						props.audioRef.muted = true;
-						setMuted(true);
-					}}
-				/>
-			)}
-
-			<Slider
-				sx={{
-					'& .MuiSlider-thumb': {
-						// height: 28,
-						// width: 28,
-					},
-				}}
-				max={1}
-				step={0.01}
-				getAriaLabel={() => 'Minimum distance'}
-				value={volume}
-				onChange={handleChangeVolume}
-				valueLabelDisplay="auto"
-				getAriaValueText={valuetext}
-			/>
-			<VolumeUp />
-		</Stack>
-	);
-}
 
 function YearSelection(props: {
 	setContextMenu: React.Dispatch<
@@ -361,82 +50,15 @@ function YearSelection(props: {
 		// render the audio playback functionality if we have the full url
 
 		<div className="flex">
-			<AllYears
+			{/* <AllYears
 				setContextMenu={props.setContextMenu}
 				setMenuItems={props.setMenuItems}
 				setFormOpen={props.setFormOpen}
 				guildSelected={props.guildSelected}
-			/>
+			/> */}
+			<CustomizedTreeView guildSelected={props.guildSelected} />
 			{params.year && <AudioInterface isClip={false} userGuilds={props.userGuilds} />}
 		</div>
-	);
-}
-
-export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[] | null }) {
-	console.log('render Audio Interface');
-	const intervalRef = useRef<number | undefined>();
-	const params = useParams<AudioParams>();
-	const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
-	const [readyToPlay, setReadyToPlay] = useState(false);
-	const [error, setError] = useState(false);
-
-	useEffect(() => {
-		console.log(
-			`https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name!)}`
-		);
-		//TODO: FIX THIS
-		let audioRef: HTMLAudioElement;
-		if (props.isClip) {
-			audioRef = new Audio(
-				`https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name!)}`
-			);
-		} else {
-			audioRef = new Audio(
-				`https://dev.patrykstyla.com/audio/${params.guild_id}/${params.channel_id}/${params.year}/${
-					params.month
-				}/${encodeURIComponent(params.file_name!)}.ogg`
-			);
-		}
-
-		audioRef!.addEventListener('canplaythrough', (e) => {
-			setReadyToPlay(true);
-			setAudioRef(audioRef);
-		});
-		audioRef.onerror = () => {
-			setError(true);
-		};
-		console.log('mount Audio Interface');
-
-		return function cleanup() {
-			audioRef?.pause();
-			//   setAudioRef(null);
-			setReadyToPlay(false);
-			setError(false);
-		};
-	}, [params.file_name]);
-	// return function cleanup() {
-	//   setData(null)
-	// }
-
-	if (error) {
-		return <div>An error occured</div>;
-	}
-
-	return (
-		<>
-			<div className="flex-initial w-4/5">
-				{readyToPlay ? (
-					<RangeSlider
-						audioRef={audioRef!}
-						intervalRef={intervalRef}
-						isClip={props.isClip}
-						userGuilds={props.userGuilds}
-					/>
-				) : (
-					'Downloading'
-				)}
-			</div>
-		</>
 	);
 }
 
@@ -469,9 +91,6 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 //   <input type="range" id="volume-slider" max="100" defaultValue="100" />
 //   <button id="mute-icon"></button>
 // </div> */}
-import Grid from '@mui/material/Unstable_Grid2'; // Grid version 2
-import { db } from './db';
-import { AllYears, ItemsEl } from './LeftNavMenu/yearSelection';
 
 const ProtectedLayout = (props: {
 	isLoggedIn: boolean;
@@ -480,15 +99,23 @@ const ProtectedLayout = (props: {
 	userGuilds: UserGuilds[] | null;
 }) => {
 	const navigate = useNavigate();
+	const params = useParams<AudioParams>();
+
+	const handleGuildSelect = (index: number) => {
+		const value = props.userGuilds![index];
+		props.setGuildSelected(value);
+		navigate(value.id);
+	};
+	useEffect(() => {
+		if (params.guild_id) {
+			const guild = props.userGuilds!.find((element) => element.id === params.guild_id!)!;
+			props.setGuildSelected(guild);
+		}
+	});
 
 	if (!props.userGuilds) {
 		return <>No guilds</>;
 	}
-	const handleGuildSelect = (index: number) => {
-		let value = props.userGuilds![index];
-		props.setGuildSelected(value);
-		navigate(value.id);
-	};
 
 	const guilds = props.userGuilds?.map((value, index) => {
 		return (
@@ -529,7 +156,7 @@ function LayoutsWithNavbar(props: {
 	userGuilds: UserGuilds[] | null;
 }) {
 	return (
-		<>
+		<div className="h-full">
 			{/* Your navbar component */}
 			<ResponsiveAppBar
 				isLoggedIn={props.isLoggedIn}
@@ -543,7 +170,7 @@ function LayoutsWithNavbar(props: {
 			<Outlet />
 
 			{/* You can add a footer to get fancy in here :) */}
-		</>
+		</div>
 	);
 }
 
@@ -554,15 +181,10 @@ interface User {
 	name: string;
 }
 
-export interface UserGuilds {
-	id: string;
-	name: string;
-	icon?: string;
-	owner: boolean;
-	permissions: string;
-}
-
 function App() {
+	// useAppSelector((state) => {
+	// 	state.counter.value;
+	// });
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [user, setUser] = useState<User | null>(null);
@@ -599,19 +221,17 @@ function App() {
 				return;
 			}
 
-			let guilds = (await values[1].json()) as UserGuilds[];
+			const guilds = (await values[1].json()) as UserGuilds[];
 
 			setUser((await values[0].json()) as User);
 			setUserGuilds(guilds);
 
-			let url = window.location.href;
-			let split = url.split('/');
-			let res = split[5];
+			const url = window.location.href;
+			const split = url.split('/');
+			const res = split[5];
 			if (res) {
 				console.log('here');
-				let guild = guilds.find(({ id }) => id === res) as UserGuilds | null;
-
-				console.log(guild);
+				const guild = guilds.find(({ id }) => id === res) as UserGuilds | null;
 				setGuildSelected(guild);
 			}
 
@@ -621,7 +241,11 @@ function App() {
 		});
 	};
 
+	const disp = useAppDispatch();
+	const sel = useAppSelector((state) => state.token.value);
 	useEffect(() => {
+		console.log('laa');
+		// disp(setToken('alalaal'));
 		if (localStorage.getItem('token')) {
 			getUserDetails();
 		} else {
@@ -675,7 +299,7 @@ function App() {
 		return (
 			<MenuItem
 				key={value}
-				onClick={(e) => {
+				onClick={() => {
 					el.cb();
 					//   setContextMenu(null);
 				}}
@@ -701,9 +325,9 @@ function App() {
 				  null
 		);
 	};
-	console.log(guildSelected);
+
 	// Return the App component.
-	if (!db || isLoading || !isLoggedIn) {
+	if (isLoading || !isLoggedIn) {
 		if (!isLoggedIn) {
 			return (
 				<ThemeProvider theme={darkTheme}>
@@ -769,7 +393,33 @@ function App() {
 							>
 								<Route path="" element={<Dashboard />} />
 								<Route path=":guild_id">
-									<Route path="" element={'select from top navbar'} /> <Route path="audio"></Route>
+									<Route path="" element={'select from top navbar'} />
+									<Route path="audio">
+										<Route
+											path=""
+											element={
+												<YearSelection
+													setContextMenu={setContextMenu}
+													setMenuItems={setMenuItems}
+													setFormOpen={setIsFormOpen}
+													guildSelected={guildSelected}
+													userGuilds={userGuilds}
+												/>
+											}
+										/>
+										<Route
+											path=":channel_id/:year/:month/:file_name"
+											element={
+												<YearSelection
+													setContextMenu={setContextMenu}
+													setMenuItems={setMenuItems}
+													setFormOpen={setIsFormOpen}
+													guildSelected={guildSelected}
+													userGuilds={userGuilds}
+												/>
+											}
+										/>
+									</Route>
 									<Route path="clips"></Route>
 								</Route>
 								<Route path="audio">
@@ -832,168 +482,6 @@ function App() {
 			</ThemeProvider>
 		);
 	}
-}
-
-enum RespStatus {
-	CONNECTED,
-	NOT_CONNECTED,
-	UNKOWN,
-}
-
-function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
-	if (!props.disabled) return <></>;
-
-	const [isError, setIsError] = useState<{ type: RespStatus; code: number }>({
-		type: RespStatus.UNKOWN,
-		code: 0,
-	});
-	const location = useLocation();
-	const params = useParams();
-
-	const handleJamIt = async () => {
-		const req = fetch('https://dev.patrykstyla.com/jamit', {
-			body: JSON.stringify({
-				guild_id: params.guild_id as any as string,
-				clip_name: params.file_name as any as string,
-			}),
-
-			headers: {
-				Accept: 'application/json',
-				'Content-Type': 'application/json',
-			},
-			method: 'POST',
-		});
-
-		const res = await req;
-		if (!res.ok) {
-			setIsError({ type: RespStatus.NOT_CONNECTED, code: 0 });
-			setOpen(true);
-
-			return;
-		}
-		const c = await res.json();
-
-		console.log(c);
-
-		if (c.code) {
-			setIsError({ type: RespStatus.CONNECTED, code: c.code as number });
-			setOpen(true);
-		} else {
-			// prob success or unhandled
-		}
-	};
-
-	const style = {
-		position: 'absolute' as const,
-		top: '50%',
-		left: '50%',
-		transform: 'translate(-50%, -50%)',
-		width: 400,
-		bgcolor: 'background.paper',
-		border: '2px solid #000',
-		boxShadow: 24,
-		p: 4,
-	};
-
-	const [open, setOpen] = React.useState(false);
-	const handleClose = () => {
-		setOpen(false), setIsError({ type: RespStatus.CONNECTED, code: 0 });
-	};
-
-	return (
-		<>
-			<Button onClick={handleJamIt} variant="contained">
-				Jam It
-			</Button>
-			{/* if Error show a modal explaining the error */}
-			{(isError.code > 0 || isError.type === RespStatus.NOT_CONNECTED) && (
-				<div>
-					<Modal
-						open={open}
-						onClose={handleClose}
-						aria-labelledby="modal-modal-title"
-						aria-describedby="modal-modal-description"
-					>
-						<Box sx={style}>
-							<Typography id="modal-modal-title" variant="h6" component="h2">
-								Error
-							</Typography>
-							<Typography id="modal-modal-description" sx={{ mt: 2 }}>
-								error code: {isError.code}
-								<br />
-								TODO: proper messages
-								<br />
-								number 0 = I probably broke something
-								<br />
-								number 1 = bot is not in voice channel
-								<br />
-								number &gt;= 2 =¯\_(ツ)_/¯
-							</Typography>
-						</Box>
-					</Modal>
-				</div>
-			)}
-		</>
-	);
-}
-
-function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: number[]; disabled: boolean }) {
-	const [open, setOpen] = useState(false);
-	const [text, setText] = useState('');
-
-	const handleClickOpen = () => {
-		setOpen(true);
-		setText('');
-	};
-
-	const handleClose = () => {
-		setOpen(false);
-	};
-
-	return (
-		<>
-			<Button variant="contained" onClick={handleClickOpen} disabled={props.disabled}>
-				Clip
-			</Button>
-			<Dialog open={open} onClose={handleClose}>
-				<DialogContent>
-					<DialogContentText>
-						Enter a name for this clip. Will return an error if name is a duplicate. Leave blank for default
-						name
-					</DialogContentText>
-					<TextField
-						value={text}
-						onChange={(e) => {
-							setText(e.currentTarget.value);
-						}}
-						autoFocus
-						margin="dense"
-						id="name"
-						label="Name"
-						type="text"
-						fullWidth
-						variant="standard"
-						autoComplete="off"
-					/>
-				</DialogContent>
-				<DialogActions>
-					<Button onClick={handleClose}>Cancel</Button>
-
-					<Button onClick={handleClose}>
-						<a
-							href={`https://dev.patrykstyla.com/download/${props.params.guild_id}/${
-								props.params.channel_id
-							}/${props.params.year}/${props.params.month}/${props.params.file_name}.ogg?start=${
-								props.startEnd[0]
-							}&end=${props.startEnd[1] - props.startEnd[0]}${text.length > 0 ? `&name=${text}` : ''}`}
-						>
-							Clip
-						</a>
-					</Button>
-				</DialogActions>
-			</Dialog>
-		</>
-	);
 }
 
 function FormDialog(props: {
