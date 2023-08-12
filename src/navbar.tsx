@@ -1,20 +1,22 @@
 import MenuIcon from '@mui/icons-material/Menu';
+import { Select, SelectChangeEvent } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
+import FormControl from '@mui/material/FormControl/FormControl';
 import IconButton from '@mui/material/IconButton';
+import InputLabel from '@mui/material/InputLabel/InputLabel';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
-
-import { FormControl, InputLabel, Select, SelectChangeEvent } from '@mui/material';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from './App';
+
+import { PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from './Constants';
 import Login from './login/login';
 
 const pages = ['Audio', 'Clips', 'DashBoard'];
@@ -27,7 +29,7 @@ function ResponsiveAppBar(props: {
 	setGuildSelected: React.Dispatch<React.SetStateAction<UserGuilds | null>>;
 	userGuilds: UserGuilds[] | null;
 }) {
-	let navigate = useNavigate();
+	const navigate = useNavigate();
 	const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
 	const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
@@ -41,18 +43,20 @@ function ResponsiveAppBar(props: {
 	const handleCloseMenuNav = (name: string) => {
 		setAnchorElNav(null);
 
-		// if (!props.guildSelected) {
-		//   return;
-		// }
+		if (!props.guildSelected) {
+			console.log('a');
+			navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}`);
+			return;
+		}
 		switch (name) {
 			case 'Audio':
 				// TODO: Dynamic need auth
-				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${props.guildSelected!.id}`);
+				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${props.guildSelected.id}`);
 				break;
 
 			case 'Clips':
 				// TODO: Dynamic need auth
-				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/clips/${props.guildSelected!.id}`);
+				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/clips/${props.guildSelected.id}`);
 				break;
 			case 'DashBoard':
 				// TODO: Dynamic need auth
@@ -179,8 +183,8 @@ function BasicSelect(props: {
 	userGuilds: UserGuilds[] | null;
 }) {
 	const navigate = useNavigate();
-	let params = useParams();
-	let location = useLocation();
+	const params = useParams();
+	const location = useLocation();
 	const handleChange = (event: SelectChangeEvent) => {
 		const index = props.userGuilds!.map((item) => item.name).indexOf(event.target.value);
 		if (!params.guild_id) {
@@ -190,10 +194,10 @@ function BasicSelect(props: {
 		}
 
 		props.setGuildSelected(props.userGuilds![index]);
-		let pathname = location.pathname;
-		let replaced_path = pathname.replace(params.guild_id as any as string, props.userGuilds![index].id);
+		const pathname = location.pathname;
+		// const replaced_path = pathname.replace(params.guild_id as any as string, props.userGuilds![index].id);
 
-		let result = pathname.split(params.guild_id as any as string);
+		const result = pathname.split(params.guild_id);
 
 		navigate(result[0] + props.userGuilds![index].id);
 	};

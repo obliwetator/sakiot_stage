@@ -298,43 +298,43 @@ function RangeSlider(props: {
 		// 	// Do something when the waveform is displayed and ready
 		// });
 
-		const wavesurfer = WaveSurfer.create({
-			container: '#waveform',
-			waveColor: '#4F4A85',
-			progressColor: '#383351',
-			media: props.audioRef,
-			hideScrollbar: true,
-			height: 'auto',
-			minPxPerSec: 0.5,
-			peaks: [Array(100).fill(0)],
-			normalize: true,
-			// url: 'https://dev.patrykstyla.com/audio/362257054829641758/763782256980131892/2023/July/1688216556253-161172393719496704-qazz.ogg',
-		});
+		// const wavesurfer = WaveSurfer.create({
+		// 	container: '#waveform',
+		// 	waveColor: '#4F4A85',
+		// 	progressColor: '#383351',
+		// 	media: props.audioRef,
+		// 	hideScrollbar: true,
+		// 	height: 'auto',
+		// 	minPxPerSec: 0.5,
+		// 	peaks: [Array(100).fill(0)],
+		// 	normalize: true,
+		// 	// url: 'https://dev.patrykstyla.com/audio/362257054829641758/763782256980131892/2023/July/1688216556253-161172393719496704-qazz.ogg',
+		// });
 
-		// wavesurfer.once('interaction', () => {});
+		// // wavesurfer.once('interaction', () => {});
 
-		fetch('https://dev.patrykstyla.com/audio/waveform/long_clip.json')
-			.then((response) => {
-				if (!response.ok) {
-					throw new Error('HTTP error ' + response.status);
-				}
-				return response.json();
-			})
-			.then((peaks) => {
-				console.log('loaded peaks! sample_rate: ' + peaks.sample_rate);
+		// fetch('https://dev.patrykstyla.com/audio/waveform/long_clip.json')
+		// 	.then((response) => {
+		// 		if (!response.ok) {
+		// 			throw new Error('HTTP error ' + response.status);
+		// 		}
+		// 		return response.json();
+		// 	})
+		// 	.then((peaks) => {
+		// 		console.log('loaded peaks! sample_rate: ' + peaks.sample_rate);
 
-				const minimap = MinimapPlugin.create({ container: '#waveform-minimap', height: 'auto' });
-				wavesurfer.registerPlugin(minimap);
-				// load peaks into wavesurfer.js
-				wavesurfer.load(
-					'https://dev.patrykstyla.com/audio/362257054829641758/763782256980131892/2023/July/1688216556253-161172393719496704-qazz.ogg',
-					peaks.data
-				);
-			})
+		// 		const minimap = MinimapPlugin.create({ container: '#waveform-minimap', height: 'auto' });
+		// 		wavesurfer.registerPlugin(minimap);
+		// 		// load peaks into wavesurfer.js
+		// 		wavesurfer.load(
+		// 			'https://dev.patrykstyla.com/audio/362257054829641758/763782256980131892/2023/July/1688216556253-161172393719496704-qazz.ogg',
+		// 			peaks.data
+		// 		);
+		// 	})
 
-			.catch((e) => {
-				console.error('error', e);
-			});
+		// 	.catch((e) => {
+		// 		console.error('error', e);
+		// 	});
 
 		return () => {
 			// wavesurfer.destroy();
@@ -343,7 +343,7 @@ function RangeSlider(props: {
 
 	return (
 		<Box className="m-16">
-			<button
+			{/* <button
 				onClick={() =>
 					setSwitchAduio((prev) => {
 						return !prev;
@@ -351,7 +351,7 @@ function RangeSlider(props: {
 				}
 			>
 				Switch
-			</button>
+			</button> */}
 			<Button
 				onClick={(e) => {
 					if (!playing) {
@@ -371,8 +371,8 @@ function RangeSlider(props: {
 			>
 				Play
 			</Button>
-			<div id="waveform"></div>
-			<div id="waveform-minimap"></div>
+			{/* <div id="waveform"></div>
+			<div id="waveform-minimap"></div> */}
 			{/* <div>
 				<div id="zoomview-container"></div>
 				<div id="overview-container"></div>
@@ -384,16 +384,14 @@ function RangeSlider(props: {
 					Your browser does not support the audio element.
 				</audio>
 			</div> */}
-			{switchAudio && (
-				<DoubleSlider
-					audioRef={props.audioRef}
-					handleChange={handleChange}
-					setStartEnd={setStartEnd}
-					startEnd={startEnd}
-					zoomInStartEnd={zoomInStartEnd}
-					setIsSliderClicked={setIsSliderClicked}
-				/>
-			)}
+			<DoubleSlider
+				audioRef={props.audioRef}
+				handleChange={handleChange}
+				setStartEnd={setStartEnd}
+				startEnd={startEnd}
+				zoomInStartEnd={zoomInStartEnd}
+				setIsSliderClicked={setIsSliderClicked}
+			/>
 			<Stack spacing={40} direction="row" alignItems="center" justifyContent="space-around">
 				<VolumeSlider audioRef={props.audioRef} />
 				<PlaybackSpeedSlider audioRef={props.audioRef} />

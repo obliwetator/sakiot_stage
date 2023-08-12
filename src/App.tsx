@@ -378,7 +378,19 @@ function App() {
 								/>
 							}
 						>
-							<Route path="/" element={<div>Cool homepage</div>} />
+							<Route
+								path="/"
+								element={
+									<ProtectedLayout
+										isLoggedIn={isLoggedIn}
+										guildSelected={guildSelected}
+										setGuildSelected={setGuildSelected}
+										userGuilds={userGuilds}
+									/>
+								}
+							/>
+							<Route path=":guild_id" element={'select from top navbar'} />
+							<Route />
 
 							<Route
 								path="/dashboard"
@@ -391,7 +403,6 @@ function App() {
 									/>
 								}
 							>
-								<Route path="" element={<Dashboard />} />
 								<Route path=":guild_id">
 									<Route path="" element={'select from top navbar'} />
 									<Route path="audio">
