@@ -16,3 +16,16 @@
 	opacity: 1;
 	transition: opacity 0.5s linear;
   }
+
+  #zoomview-container, #overview-container {
+	width: 1000px;
+	height: 100px;
+  }
+
+  #waveform {
+
+  }
+
+  #waveform-minimap {
+	height: 200px;
+  }

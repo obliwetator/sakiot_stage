@@ -1,33 +1,44 @@
 {
-  "name": "sakiot_stage",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build && sudo rm -r -f /var/www/patrykstyla.com/* && sudo cp -R ./dist/* /var/www/patrykstyla.com",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.10.4",
-    "@emotion/styled": "^11.10.4",
-    "@mui/icons-material": "^5.10.3",
-    "@mui/material": "^5.10.3",
-    "dexie": "^3.2.3",
-    "dexie-react-hooks": "^1.1.3",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.3.0"
-  },
-  "devDependencies": {
-    "@types/react": "^18.0.17",
-    "@types/react-dom": "^18.0.6",
-    "@typescript-eslint/eslint-plugin": "^5.38.0",
-    "@vitejs/plugin-react": "^2.0.1",
-    "autoprefixer": "^10.4.8",
-    "postcss": "^8.4.16",
-    "tailwindcss": "^3.1.8",
-    "typescript": "^4.8.3",
-    "vite": "^3.0.7"
-  }
+	"name": "sakiot_stage",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && sudo npx vite build && sudo rm -r -f /var/www/patrykstyla.com/* && sudo cp -R ./dist/* /var/www/patrykstyla.com",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"@emotion/react": "^11.10.4",
+		"@emotion/styled": "^11.10.4",
+		"@mui/icons-material": "^5.10.3",
+		"@mui/lab": "^5.0.0-alpha.137",
+		"@mui/material": "^5.10.3",
+		"@react-spring/web": "^9.7.3",
+		"@reduxjs/toolkit": "^1.9.5",
+		"dexie": "^3.2.3",
+		"dexie-react-hooks": "^1.1.3",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"react-redux": "^8.1.1",
+		"react-router-dom": "^6.3.0",
+		"waveform-data": "^4.3.0",
+		"wavesurfer.js": "^7.1.1"
+	},
+	"devDependencies": {
+		"@types/react": "^18.0.17",
+		"@types/react-dom": "^18.0.6",
+		"@typescript-eslint/eslint-plugin": "^5.57.0",
+		"@typescript-eslint/parser": "^5.57.0",
+		"@vitejs/plugin-react": "^4",
+		"@vitejs/plugin-react-swc": "^3.2.0",
+		"autoprefixer": "^10.4.8",
+		"eslint": "^8.46.0",
+		"eslint-plugin-react": "^7.32.2",
+		"eslint-plugin-react-refresh": "^0.3.5",
+		"postcss": "^8.4.16",
+		"tailwindcss": "^3.1.8",
+		"typescript": "^4.8.3",
+		"vite": "^4.0"
+	}
 }
