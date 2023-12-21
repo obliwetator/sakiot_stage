@@ -13,7 +13,7 @@ const TinyText = styled(Typography)({
 	letterSpacing: 0.2,
 });
 
-enum RespStatus {  
+enum RespStatus {
 	CONNECTED,
 	NOT_CONNECTED,
 	UNKOWN,
@@ -99,7 +99,7 @@ export function RangeSlider(props: {
 	// restart the interval on props change
 	// The inreval uses cached values, so if we want to use the state we have to create nnew intervals when the desired state changes
 	useEffect(() => {
-		if (isSliderClicked) 
+		if (isSliderClicked)
 			startTimer();
 		return () => clearInterval(props.intervalRef.current);
 	}, [isSliderClicked]);
@@ -244,7 +244,7 @@ export function RangeSlider(props: {
 		};
 	}, []);
 
-	return (  
+	return (
 		<Box className="m-16">
 			{/* <button
 				onClick={() =>
@@ -359,11 +359,15 @@ function DoubleSlider(props: {
 					'& .MuiSlider-thumb': {
 						// height: 28,
 						// width: 28,
-						transition: 'none',
+						height: 25,
+						width: 5,
+						borderRadius: '1px'
+						// transition: 'none',
 					},
 					'& .MuiSlider-track': {
-						transition: 'none',
+						// transition: 'none',
 					},
+
 				}}
 				max={props.audioRef.duration}
 				getAriaLabel={() => 'Minimum distance'}
@@ -382,16 +386,17 @@ function DoubleSlider(props: {
 					mt: -2,
 				}}
 			>
-				<TinyText>{formatDuration(props.startEnd[0])} </TinyText>
-				<TinyText>{formatDuration(Math.round(props.audioRef.duration))}</TinyText>
+				<TinyText>{formatDurationV2(props.startEnd[0])} </TinyText>
+				<TinyText>{formatDurationV2(Math.round(props.audioRef.duration))}</TinyText>
 			</Box>
 			<Box>
 				{/* Sub-Slider */}
 				<Slider
 					sx={{
 						'& .MuiSlider-thumb': {
-							// height: 28,
-							// width: 28,
+							height: 25,
+							width: 5,
+							borderRadius: '1px',
 							transition: 'none',
 						},
 						'& .MuiSlider-track': {
@@ -407,7 +412,7 @@ function DoubleSlider(props: {
 					onChangeCommitted={() => props.setIsSliderClicked(false)}
 					valueLabelDisplay="auto"
 					getAriaValueText={valuetext}
-					
+
 				/>
 				<TinyText>{formatDuration(props.zoomInStartEnd)} </TinyText>
 				<TinyText>{formatDuration(60)}</TinyText>
@@ -423,11 +428,7 @@ function BasicTextFields(props: {
 	setStartEnd: React.Dispatch<React.SetStateAction<number[]>>;
 	audioRef: HTMLAudioElement;
 }) {
-	const [isError, setIsError] = useState(false);
 
-	let hours = Math.floor(props.startEnd[0] / 3600);
-	var minutes = Math.floor((props.startEnd[0] % 3600) / 60);
-    var seconds = Math.floor((props.startEnd[0] % 3600) % 60);
 
 	function SetStartEndWithTime(start: number, end: number) {
 		props.setStartEnd([start, end]);
@@ -435,109 +436,203 @@ function BasicTextFields(props: {
 	}
 
 	return (
-		<Box>
-			<div>Upper Slider</div>
-			<TextField
-				id="standard-basic"
-				error={isError}
-				label="Hours"
-				variant="standard"
-				type="number"
-				value={hours}
-				helperText={isError ? 'Out of range' : ''}
-				inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-				onChange={(e) => {
-					if ((e.target.value as any as number) * 3600 > props.audioRef.duration) {
-						setIsError(true);
-						props.audioRef.currentTime = props.audioRef.duration;
-						props.setStartEnd((prev) => [props.audioRef.duration, prev[1]]);
-						return;
-					}
-					if (typeof e.target.value !== "string") return; 
-					
-					setIsError(false);
+		<>
+			<LeftSlider startEnd={props.startEnd} SetStartEndWithTime={SetStartEndWithTime} audioRef={props.audioRef} setStartEnd={props.setStartEnd} />
+			<RightSlider startEnd={props.startEnd} SetStartEndWithTime={SetStartEndWithTime} audioRef={props.audioRef} setStartEnd={props.setStartEnd} />
+		</>
 
-					let currentValue = parseInt(e.target.value);
-					if (currentValue > 60) {
-						setIsError(true);
-						return;
-					}
-					let diff = Math.abs(currentValue - hours) * 60 * 60
-
-					if (currentValue >= hours) {
-						SetStartEndWithTime(props.startEnd[0] + diff, props.startEnd[1]);
-						// props.setStartEnd((prev) => [props.startEnd[0] + diff, prev[1]])
-					} 
-					else {
-						SetStartEndWithTime(props.startEnd[0] - diff, props.startEnd[1]);
-
-						// props.setStartEnd((prev) => [props.startEnd[0] - diff, prev[1]])
-					}
-				}}
-			/>
-			<TextField
-				id="standard-basic"
-				error={isError}
-				label="Minutes"
-				variant="standard"
-				type="number"
-				value={minutes}
-				helperText={isError ? 'Out of range' : ''}
-				inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-				onChange={(e) => {
-					if (typeof e.target.value !== "string") return; 
-					
-					setIsError(false);
-
-					let currentValue = parseInt(e.target.value);
-					if (currentValue > 60) {
-						setIsError(true);
-						return;
-					}
-					let diff = Math.abs(currentValue - minutes) * 60
-
-					if (currentValue >= minutes) {
-						SetStartEndWithTime(props.startEnd[0] + diff, props.startEnd[1]);
-					} 
-					else {
-						SetStartEndWithTime(props.startEnd[0] - diff, props.startEnd[1]);
-					}
-				}}
-			/>
-			<TextField
-				id="standard-basic"
-				error={isError}
-				label="Seconds"
-				variant="standard"
-				type="number"
-				value={seconds}
-				helperText={isError ? 'Out of range' : ''}
-				inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-				onChange={(e) => {
-					if (typeof e.target.value !== "string") return; 
-
-					setIsError(false);
-
-					let currentValue = parseInt(e.target.value);
-					if (currentValue > 60) {
-						setIsError(true);
-						return;
-					}
-					let diff = Math.abs(currentValue - seconds)
-
-					if (currentValue >= seconds) {
-						SetStartEndWithTime(props.startEnd[0] + diff, props.startEnd[1]);
-					} 
-					else {
-						SetStartEndWithTime(props.startEnd[0] - diff, props.startEnd[1]);
-
-					}
-					
-				}}
-			/>
-		</Box>
 	);
 }
+
+function LeftSlider(props: { startEnd: number[], SetStartEndWithTime(start: number, end: number): void, setStartEnd: React.Dispatch<React.SetStateAction<number[]>>; audioRef: HTMLAudioElement; }) {
+	const [isError, setIsError] = useState(false);
+	let hours = Math.floor(props.startEnd[0] / 3600);
+	var minutes = Math.floor((props.startEnd[0] % 3600) / 60);
+	var seconds = Math.floor((props.startEnd[0] % 3600) % 60);
+
+	function SetNewTime(currentValue: number, hours: number, multiplier: number) {
+		let diff = Math.abs(currentValue - hours) * multiplier;
+
+		if (currentValue >= hours) {
+			props.SetStartEndWithTime(props.startEnd[0] + diff, props.startEnd[1]);
+		}
+		else {
+			props.SetStartEndWithTime(props.startEnd[0] - diff, props.startEnd[1]);
+		}
+	}
+
+	return <Box>
+		<div>Left Slider</div>
+		<TextField
+			id="standard-basic"
+			error={isError}
+			label="Hours"
+			variant="standard"
+			type="number"
+			value={hours}
+			helperText={isError ? 'Out of range' : ''}
+			inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+			onChange={(e) => {
+
+				if ((e.target.value as any as number) * 3600 > props.audioRef.duration) {
+					setIsError(true);
+					props.audioRef.currentTime = props.audioRef.duration;
+					props.setStartEnd((prev) => [props.audioRef.duration, prev[1]]);
+					return;
+				}
+				if (typeof e.target.value !== "string" || e.target.value == "") return;
+
+				setIsError(false);
+
+				let currentValue = parseInt(e.target.value);
+				if (currentValue > 60) {
+					setIsError(true);
+					return;
+				}
+				SetNewTime(currentValue, hours, 60 * 60)
+			}} />
+		<TextField
+			id="standard-basic"
+			error={isError}
+			label="Minutes"
+			variant="standard"
+			type="number"
+			value={minutes}
+			helperText={isError ? 'Out of range' : ''}
+			inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+			onChange={(e) => {
+				if (typeof e.target.value !== "string" || e.target.value == "") return;
+
+				setIsError(false);
+				let currentValue = parseInt(e.target.value);
+				if (currentValue > 60) {
+					setIsError(true);
+					return;
+				}
+				SetNewTime(currentValue, minutes, 60)
+
+			}} />
+		<TextField
+			id="standard-basic"
+			error={isError}
+			label="Seconds"
+			variant="standard"
+			type="number"
+			value={seconds}
+			helperText={isError ? 'Out of range' : ''}
+			inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+			onChange={(e) => {
+				if (typeof e.target.value !== "string" || e.target.value == "") return;
+
+				setIsError(false);
+
+				let currentValue = parseInt(e.target.value);
+				if (currentValue > 60) {
+					setIsError(true);
+					return;
+				}
+
+				SetNewTime(currentValue, seconds, 1)
+			}} />
+	</Box>;
+}
+
+
+function RightSlider(props: {
+	startEnd: number[], SetStartEndWithTime(start: number, end: number): void,
+	setStartEnd: React.Dispatch<React.SetStateAction<number[]>>;
+	audioRef: HTMLAudioElement;
+}) {
+	const [isError, setIsError] = useState(false);
+	let hours = Math.floor(props.startEnd[1] / 3600);
+	var minutes = Math.floor((props.startEnd[1] % 3600) / 60);
+	var seconds = Math.floor((props.startEnd[1] % 3600) % 60);
+
+	function SetNewTime(currentValue: number, timeInSeconds: number, multiplier: number) {
+		let diff = Math.abs(currentValue - timeInSeconds) * multiplier;
+
+		if (currentValue >= timeInSeconds) {
+			props.SetStartEndWithTime(props.startEnd[0], props.startEnd[1] + diff);
+		}
+		else {
+			props.SetStartEndWithTime(props.startEnd[0], props.startEnd[1] - diff);
+		}
+	}
+
+	return <Box>
+		<div>Right Slider</div>
+		<TextField
+			id="standard-basic"
+			error={isError}
+			label="Hours"
+			variant="standard"
+			type="number"
+			value={hours}
+			helperText={isError ? 'Out of range' : ''}
+			inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+			onChange={(e) => {
+				if ((e.target.value as any as number) * 3600 > props.audioRef.duration) {
+					setIsError(true);
+					props.audioRef.currentTime = props.audioRef.duration;
+					props.setStartEnd((prev) => [props.audioRef.duration, prev[1]]);
+					return;
+				}
+				if (typeof e.target.value !== "string" || e.target.value == "") return;
+
+				setIsError(false);
+
+				let currentValue = parseInt(e.target.value);
+				if (currentValue > 60) {
+					setIsError(true);
+					return;
+				}
+				SetNewTime(currentValue, hours, 60 * 60);
+			}} />
+		<TextField
+			id="standard-basic"
+			error={isError}
+			label="Minutes"
+			variant="standard"
+			type="number"
+			value={minutes}
+			helperText={isError ? 'Out of range' : ''}
+			inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+			onChange={(e) => {
+				if (typeof e.target.value !== "string" || e.target.value == "") return;
+
+				setIsError(false);
+
+				let currentValue = parseInt(e.target.value);
+				if (currentValue > 60) {
+					setIsError(true);
+					return;
+				}
+				SetNewTime(currentValue, minutes, 60);
+			}} />
+		<TextField
+			id="standard-basic"
+			error={isError}
+			label="Seconds"
+			variant="standard"
+			type="number"
+			value={seconds}
+			helperText={isError ? 'Out of range' : ''}
+			inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+			onChange={(e) => {
+				if (typeof e.target.value !== "string" || e.target.value == "") return;
+
+				setIsError(false);
+
+				let currentValue = parseInt(e.target.value);
+				if (currentValue > 60) {
+					setIsError(true);
+					return;
+				}
+				SetNewTime(currentValue, seconds, 1);
+			}} />
+	</Box>;
+}
+
 
 
 
@@ -763,11 +858,9 @@ function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: nu
 
 					<Button onClick={handleClose}>
 						<a
-							href={`https://dev.patrykstyla.com/download/${props.params.guild_id}/${
-								props.params.channel_id
-							}/${props.params.year}/${props.params.month}/${props.params.file_name}.ogg?start=${
-								props.startEnd[0]
-							}&end=${props.startEnd[1] - props.startEnd[0]}${text.length > 0 ? `&name=${text}` : ''}`}
+							href={`https://dev.patrykstyla.com/download/${props.params.guild_id}/${props.params.channel_id
+								}/${props.params.year}/${props.params.month}/${props.params.file_name}.ogg?start=${props.startEnd[0]
+								}&end=${props.startEnd[1] - props.startEnd[0]}${text.length > 0 ? `&name=${text}` : ''}`}
 						>
 							Clip
 						</a>
