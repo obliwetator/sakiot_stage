@@ -33,8 +33,9 @@ export function RangeSlider(props: {
 	const [switchAudio, setSwitchAduio] = React.useState(false);
 	function SetStartEndWithTIme(start: number, end: number) {
 		setStartEnd([start, end]);
-		props.audioRef.currentTime;
+		props.audioRef.currentTime = start;
 	}
+
 
 	useEffect(() => {
 		const handleKeyPress = (event: KeyboardEvent) => {
@@ -101,7 +102,8 @@ export function RangeSlider(props: {
 	// restart the interval on props change
 	// The inreval uses cached values, so if we want to use the state we have to create nnew intervals when the desired state changes
 	useEffect(() => {
-		startTimer();
+		if (isSliderClicked) 
+			startTimer();
 		return () => clearInterval(props.intervalRef.current);
 	}, [isSliderClicked]);
 
@@ -305,7 +307,7 @@ export function RangeSlider(props: {
 				<div className="flex-1 w-32">value 1: {formatDuration(Math.round(startEnd[0]))}</div>
 				<div className="flex-1 w-32">Recorded in channel: {params.channel_id}</div>
 				<div>
-					<BasicTextFields startEnd={startEnd} setStartEnd={setStartEnd} audioRef={props.audioRef} />
+					<BasicTextFields startEnd={startEnd} setStartEnd={setStartEnd} audioRef={props.audioRef} SetStartEndWithTIme={SetStartEndWithTIme} />
 				</div>
 			</div>
 			<br />
@@ -423,9 +425,23 @@ function BasicTextFields(props: {
 	startEnd: number[];
 	setStartEnd: React.Dispatch<React.SetStateAction<number[]>>;
 	audioRef: HTMLAudioElement;
+	SetStartEndWithTIme(start: number, end: number): void
 }) {
 	const [isError, setIsError] = useState(false);
-	const [time, setTime] = useState([0,0,0]);
+	const [localTime, setLocalTime] = useState(0);
+
+	let hours = Math.floor(props.startEnd[0] / 3600);
+	console.log("HOURS", hours)
+	var minutes = Math.floor((props.startEnd[0] % 3600) / 60);
+	console.log("MIN", minutes)
+    var seconds = Math.floor((props.startEnd[0] % 3600) % 60);
+	console.log("SEC", seconds)
+
+	console.log(props.startEnd);
+	function SetStartEndWithTIme(arg0: number, arg1: number) {
+		throw new Error("Function not implemented.");
+	}
+
 	return (
 		<Box>
 			<div>Upper Slider</div>
@@ -435,30 +451,35 @@ function BasicTextFields(props: {
 				label="Hours"
 				variant="standard"
 				type="number"
-				value={time[0]}
+				value={hours}
 				helperText={isError ? 'Out of range' : ''}
 				inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
 				onChange={(e) => {
-					if ((e.target.value as any as number) > props.audioRef.duration) {
-
-
+					if ((e.target.value as any as number) * 3600 > props.audioRef.duration) {
 						setIsError(true);
 						props.audioRef.currentTime = props.audioRef.duration;
 						props.setStartEnd((prev) => [props.audioRef.duration, prev[1]]);
 						return;
-					} else {
-
-						if (typeof e.target.value !== "string") return;
-						setIsError(false);
-
-
-						let currentValue = parseInt(e.target.value);
-						currentValue = currentValue * 3600 + time[1] * 60 + time[2]
-						props.setStartEnd((prev) => [currentValue, prev[1]]);
+					}
+					if (typeof e.target.value !== "string") return; 
 					
-						
-						setTime([parseInt(e.target.value), time[1], time[2]])
-						props.audioRef.currentTime = currentValue;
+					setIsError(false);
+
+					let currentValue = parseInt(e.target.value);
+					if (currentValue > 60) {
+						setIsError(true);
+						return;
+					}
+					let diff = Math.abs(currentValue - hours) * 60 * 60
+
+					if (currentValue >= hours) {
+						props.SetStartEndWithTIme(props.startEnd[0] + diff, props.startEnd[1]);
+						// props.setStartEnd((prev) => [props.startEnd[0] + diff, prev[1]])
+					} 
+					else {
+						props.SetStartEndWithTIme(props.startEnd[0] - diff, props.startEnd[1]);
+
+						// props.setStartEnd((prev) => [props.startEnd[0] - diff, prev[1]])
 					}
 				}}
 			/>
@@ -468,42 +489,26 @@ function BasicTextFields(props: {
 				label="Minutes"
 				variant="standard"
 				type="number"
-				value={time[1]}
+				value={minutes}
 				helperText={isError ? 'Out of range' : ''}
 				inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
 				onChange={(e) => {
-					if ((e.target.value as any as number) > props.audioRef.duration) {
+					if (typeof e.target.value !== "string") return; 
+					
+					setIsError(false);
+
+					let currentValue = parseInt(e.target.value);
+					if (currentValue > 60) {
 						setIsError(true);
-						props.audioRef.currentTime = props.audioRef.duration;
-						props.setStartEnd((prev) => [props.audioRef.duration, prev[1]]);
 						return;
-					} else {
-						if (typeof e.target.value !== "string") return;
-						let timeToSet = [time[0], parseInt(e.target.value), time[2]];
-						if (parseInt(e.target.value) < 0) {
-							// Decrement. Check if minutes go < 0
-							if (time[0] - 1 < 0)
-							{
-								setIsError(true);
-								return;
-							} else {
-								timeToSet = [time[0] - 1, 59, time[2]]
-							}
-						} else if (parseInt(e.target.value) >= 60) {
-							// Increment Check if minutes go > 60
-							timeToSet = [time[0] + 1, 0, time[2]];
-						}
+					}
+					let diff = Math.abs(currentValue - minutes) * 60
 
-						setTime(timeToSet)
-						setIsError(false);
-
-						let currentValue = parseInt(e.target.value);
-						currentValue = time[0] * 3600 + currentValue * 60 + time[2]
-						props.setStartEnd((prev) => [currentValue, prev[1]]);
-						
-						props.audioRef.currentTime = currentValue;
-
-						
+					if (currentValue >= minutes) {
+						props.SetStartEndWithTIme(props.startEnd[0] + diff, props.startEnd[1]);
+					} 
+					else {
+						props.SetStartEndWithTIme(props.startEnd[0] - diff, props.startEnd[1]);
 					}
 				}}
 			/>
@@ -513,57 +518,29 @@ function BasicTextFields(props: {
 				label="Seconds"
 				variant="standard"
 				type="number"
-				value={time[2]}
+				value={seconds}
 				helperText={isError ? 'Out of range' : ''}
 				inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
 				onChange={(e) => {
-					if ((e.target.value as any as number) > props.audioRef.duration) {
+					if (typeof e.target.value !== "string") return; 
+
+					setIsError(false);
+
+					let currentValue = parseInt(e.target.value);
+					if (currentValue > 60) {
 						setIsError(true);
-						props.audioRef.currentTime = props.audioRef.duration;
-						props.setStartEnd((prev) => [props.audioRef.duration, prev[1]]);
 						return;
-					} else {
-						let timeToSet = [time[0], time[1], parseInt(e.target.value)];
-						if (typeof e.target.value !== "string") return;
-						// Decrement. Check if seconds go < 0
-						if (parseInt(e.target.value) < 0) {
-							console.log("HEER")
-							if (time[1] - 1 < 0) {
-								if (time[0] - 1 < 0) {
-									setIsError(true)
-									return;
-								} else {
-									// setTime([time[0] - 1, 59, 59])
-									timeToSet = [time[0] - 1, 59, 59]
-									
-								}
-							} else {
-								// setTime([time[0], time[1] - 1, 59])
-								timeToSet = [time[0], time[1] - 1, 59]
-							}
-							// Increment Check if seconds go > 60
-						} else if (parseInt(e.target.value) >= 60) {
-							if (time[1] + 1 >= 60)
-							{
-								// Increment HOUR. Reset minutes and seconds
-								// setTime([time[0] + 1, 0, 0])
-								timeToSet = [time[0] + 1, 0, 0]
-							} else {
-								// Increment Minutes. Reset minutes and seconds
-								// setTime([time[0], time[1] + 1, 0])
-								timeToSet = [time[0], time[1] + 1, 0]
-							}
-						}
-						setIsError(false);
-
-
-						let currentValue = parseInt(e.target.value);
-						currentValue = time[0] * 3600 + time[1] * 60 + currentValue
-						props.setStartEnd((prev) => [currentValue, prev[1]]);
-						
-						setTime(timeToSet)
-						props.audioRef.currentTime = currentValue;
 					}
+					let diff = Math.abs(currentValue - seconds)
+
+					if (currentValue >= seconds) {
+						props.SetStartEndWithTIme(props.startEnd[0] + diff, props.startEnd[1]);
+					} 
+					else {
+						props.SetStartEndWithTIme(props.startEnd[0] - diff, props.startEnd[1]);
+
+					}
+					
 				}}
 			/>
 		</Box>
