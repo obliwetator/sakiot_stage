@@ -31,10 +31,7 @@ export function RangeSlider(props: {
 	const [isSliderClicked, setIsSliderClicked] = React.useState(false);
 	const [ArrowKeySkip, CtrlArrowKeySKip] = [5, 30];
 	const [switchAudio, setSwitchAduio] = React.useState(false);
-	function SetStartEndWithTIme(start: number, end: number) {
-		setStartEnd([start, end]);
-		props.audioRef.currentTime = start;
-	}
+
 
 
 	useEffect(() => {
@@ -119,7 +116,6 @@ export function RangeSlider(props: {
 
 	const handleChange = (event: Event, newValue: number | number[], activeThumb: number) => {
 		const minDistance = 10;
-		console.log('handle change');
 		if (!Array.isArray(newValue)) {
 			setIsSliderClicked(true);
 			if (startEnd[0] + newValue < 0) {
@@ -307,7 +303,7 @@ export function RangeSlider(props: {
 				<div className="flex-1 w-32">value 1: {formatDuration(Math.round(startEnd[0]))}</div>
 				<div className="flex-1 w-32">Recorded in channel: {params.channel_id}</div>
 				<div>
-					<BasicTextFields startEnd={startEnd} setStartEnd={setStartEnd} audioRef={props.audioRef} SetStartEndWithTIme={SetStartEndWithTIme} />
+					<BasicTextFields startEnd={startEnd} setStartEnd={setStartEnd} audioRef={props.audioRef} />
 				</div>
 			</div>
 			<br />
@@ -411,6 +407,7 @@ function DoubleSlider(props: {
 					onChangeCommitted={() => props.setIsSliderClicked(false)}
 					valueLabelDisplay="auto"
 					getAriaValueText={valuetext}
+					
 				/>
 				<TinyText>{formatDuration(props.zoomInStartEnd)} </TinyText>
 				<TinyText>{formatDuration(60)}</TinyText>
@@ -425,21 +422,16 @@ function BasicTextFields(props: {
 	startEnd: number[];
 	setStartEnd: React.Dispatch<React.SetStateAction<number[]>>;
 	audioRef: HTMLAudioElement;
-	SetStartEndWithTIme(start: number, end: number): void
 }) {
 	const [isError, setIsError] = useState(false);
-	const [localTime, setLocalTime] = useState(0);
 
 	let hours = Math.floor(props.startEnd[0] / 3600);
-	console.log("HOURS", hours)
 	var minutes = Math.floor((props.startEnd[0] % 3600) / 60);
-	console.log("MIN", minutes)
     var seconds = Math.floor((props.startEnd[0] % 3600) % 60);
-	console.log("SEC", seconds)
 
-	console.log(props.startEnd);
-	function SetStartEndWithTIme(arg0: number, arg1: number) {
-		throw new Error("Function not implemented.");
+	function SetStartEndWithTime(start: number, end: number) {
+		props.setStartEnd([start, end]);
+		props.audioRef.currentTime = start;
 	}
 
 	return (
@@ -473,11 +465,11 @@ function BasicTextFields(props: {
 					let diff = Math.abs(currentValue - hours) * 60 * 60
 
 					if (currentValue >= hours) {
-						props.SetStartEndWithTIme(props.startEnd[0] + diff, props.startEnd[1]);
+						SetStartEndWithTime(props.startEnd[0] + diff, props.startEnd[1]);
 						// props.setStartEnd((prev) => [props.startEnd[0] + diff, prev[1]])
 					} 
 					else {
-						props.SetStartEndWithTIme(props.startEnd[0] - diff, props.startEnd[1]);
+						SetStartEndWithTime(props.startEnd[0] - diff, props.startEnd[1]);
 
 						// props.setStartEnd((prev) => [props.startEnd[0] - diff, prev[1]])
 					}
@@ -505,10 +497,10 @@ function BasicTextFields(props: {
 					let diff = Math.abs(currentValue - minutes) * 60
 
 					if (currentValue >= minutes) {
-						props.SetStartEndWithTIme(props.startEnd[0] + diff, props.startEnd[1]);
+						SetStartEndWithTime(props.startEnd[0] + diff, props.startEnd[1]);
 					} 
 					else {
-						props.SetStartEndWithTIme(props.startEnd[0] - diff, props.startEnd[1]);
+						SetStartEndWithTime(props.startEnd[0] - diff, props.startEnd[1]);
 					}
 				}}
 			/>
@@ -534,10 +526,10 @@ function BasicTextFields(props: {
 					let diff = Math.abs(currentValue - seconds)
 
 					if (currentValue >= seconds) {
-						props.SetStartEndWithTIme(props.startEnd[0] + diff, props.startEnd[1]);
+						SetStartEndWithTime(props.startEnd[0] + diff, props.startEnd[1]);
 					} 
 					else {
-						props.SetStartEndWithTIme(props.startEnd[0] - diff, props.startEnd[1]);
+						SetStartEndWithTime(props.startEnd[0] - diff, props.startEnd[1]);
 
 					}
 					
@@ -794,7 +786,7 @@ function formatDuration(value: number) {
 }
 
 function formatDurationV2(value: number) {
-	if (typeof value === "number"  ) return 0;
+	// if (typeof value === "number"  ) return 0;
 
 	return new Date(value * 1000).toISOString().slice(11, 19);
 }
