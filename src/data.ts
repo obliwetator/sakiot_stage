@@ -87,6 +87,9 @@ export function transform_to_months(data: Channels[]) {
 		sorted_by_year.push({ year: key, months: value });
 	});
 
+	// Sort by years (descending)
+	sorted_by_year.sort((a, b) => b.year - a.year)
+
 	console.log(sorted_by_year);
 
 	return sorted_by_year;

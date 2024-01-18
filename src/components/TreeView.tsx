@@ -115,14 +115,16 @@ export default function CustomizedTreeView(props: { guildSelected: UserGuilds | 
 		const years = data.map((el, index) => {
 			return <TreeViewYears el={el} index={index} key={index} />;
 		});
+		const month = new Date().toLocaleString('default', { month: 'long' });
+
+		console.log(years)
 		return (
 			<TreeView
 				aria-label="customized"
-				defaultExpanded={['1']}
+				defaultExpanded={['2024', month]}
 				defaultCollapseIcon={<MinusSquare />}
 				defaultExpandIcon={<PlusSquare />}
 				defaultEndIcon={<CloseSquare />}
-				sx={{}}
 				className="flex-initial w-1/5 p-5"
 			>
 				{years}
@@ -149,32 +151,32 @@ function TreeViewYears(props: { el: Dirs; index: number }) {
 			className="bg-green-500 overflow-hidden"
 			label={props.el.year}
 			nodeId={`${props.el.year}`}
-			// className={
-			// 	'accordion ' +
-			// 	(props.active ? 'bg-green-800' : 'bg-green-500') +
-			// 	' hover:bg-green-700 active:bg-red-800'
-			// }
-			// onClick={(_) => {
-			// 	props.onToggle(props.index);
-			// }}
-			// onContextMenu={(e) => {
-			// 	handleContextMenu(e, props.setContextMenu);
-			// 	props.setMenuItems([
-			// 		{
-			// 			name: 'test 1',
-			// 			cb: () => {
-			// 				console.log('test 1');
-			// 			},
-			// 		},
-			// 		{
-			// 			name: 'test 2',
-			// 			cb: () => {
-			// 				console.log('test 2');
-			// 			},
-			// 		},
-			// 	]);
-			// 	console.log('Years');
-			// }}
+		// className={
+		// 	'accordion ' +
+		// 	(props.active ? 'bg-green-800' : 'bg-green-500') +
+		// 	' hover:bg-green-700 active:bg-red-800'
+		// }
+		// onClick={(_) => {
+		// 	props.onToggle(props.index);
+		// }}
+		// onContextMenu={(e) => {
+		// 	handleContextMenu(e, props.setContextMenu);
+		// 	props.setMenuItems([
+		// 		{
+		// 			name: 'test 1',
+		// 			cb: () => {
+		// 				console.log('test 1');
+		// 			},
+		// 		},
+		// 		{
+		// 			name: 'test 2',
+		// 			cb: () => {
+		// 				console.log('test 2');
+		// 			},
+		// 		},
+		// 	]);
+		// 	console.log('Years');
+		// }}
 		>
 			<div>{result}</div>
 		</StyledTreeItem>
@@ -221,11 +223,11 @@ function TreeViewMonths(props: { files: IndividualFileArray; month_name: months;
 		<StyledTreeItem
 			// onClick={() => props.onToggle(props.index)}
 			onContextMenu={() => {
-				console.log('months');
+				console.log(`${props.month_name}`);
 			}}
 			className="bg-blue-700"
 			label={props.month_name}
-			nodeId={`${props.year + props.month_name}`}
+			nodeId={`${props.month_name}`}
 		>
 			<div key={props.index} className="bg-green-500 overflow-hidden">
 				{days}
@@ -258,8 +260,8 @@ function TreeViewDays(props: {
 				<div
 					key={props.index}
 					className="bg-green-500 overflow-hidden"
-					// ref={contentEl}
-					// style={props.active ? { display: 'block' } : { display: 'none' }}
+				// ref={contentEl}
+				// style={props.active ? { display: 'block' } : { display: 'none' }}
 				>
 					{itemsEl}
 				</div>
@@ -318,26 +320,26 @@ export function ItemsEl(props: { file: IndividualFile; year: number; month_name:
 				handleClickOnFile(e, navigate, location, props.year, props.month_name, props.file.channel_id!, params)
 			}
 			style={{ cursor: 'context-menu' }}
-			// onContextMenu={(e) => {
-			// 	handleContextMenu(e, props.setContextMenu, props.file.file);
-			// 	props.file.comment !== null
-			// 		? props.setMenuItems([
-			// 				{
-			// 					name: 'Remove From Favorite',
-			// 					cb: () => {
-			// 						handleFavorite(e);
-			// 					},
-			// 				},
-			// 		  ])
-			// 		: props.setMenuItems([
-			// 				{
-			// 					name: 'Add To Favorite',
-			// 					cb: () => {
-			// 						handleFavorite(e);
-			// 					},
-			// 				},
-			// 		  ]);
-			// }}
+		// onContextMenu={(e) => {
+		// 	handleContextMenu(e, props.setContextMenu, props.file.file);
+		// 	props.file.comment !== null
+		// 		? props.setMenuItems([
+		// 				{
+		// 					name: 'Remove From Favorite',
+		// 					cb: () => {
+		// 						handleFavorite(e);
+		// 					},
+		// 				},
+		// 		  ])
+		// 		: props.setMenuItems([
+		// 				{
+		// 					name: 'Add To Favorite',
+		// 					cb: () => {
+		// 						handleFavorite(e);
+		// 					},
+		// 				},
+		// 		  ]);
+		// }}
 		>
 			{props.file.file}
 		</div>
@@ -357,15 +359,13 @@ function handleClickOnFile(
 	e.preventDefault();
 	if (
 		location.pathname ===
-		`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${
-			params.guild_id
+		`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${params.guild_id
 		}/${channel_id}/${year}/${month_name}${e.currentTarget.innerHTML.slice(0, -4)}`
 	) {
 		// same location dont do anything
 	} else {
 		navigate(
-			`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${
-				params.guild_id
+			`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${params.guild_id
 			}/${channel_id}/${year}/${month_name}/${e.currentTarget.innerHTML.slice(0, -4)}`
 		);
 	}
