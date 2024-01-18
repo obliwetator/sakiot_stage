@@ -4,6 +4,7 @@ import styled from '@mui/material/styles/styled';
 import React, { useEffect, useState } from "react";
 import { Params, useLocation, useParams } from "react-router-dom";
 import { AudioParams, UserGuilds, valuetext } from "./Constants";
+import { store } from "./store";
 
 
 const TinyText = styled(Typography)({
@@ -327,6 +328,7 @@ export function RangeSlider(props: {
 				)}
 			</Button>
 			<ClipDialog params={params} startEnd={startEnd} disabled={props.isClip} />
+			<SilenceButton params={params} />
 			<JamIt disabled={props.isClip} userGuilds={props.userGuilds} />
 			{/* <Button variant="contained" onClick={handleClip}>
         <a
@@ -444,11 +446,15 @@ function BasicTextFields(props: {
 	);
 }
 
-function LeftSlider(props: { startEnd: number[], SetStartEndWithTime(start: number, end: number): void, setStartEnd: React.Dispatch<React.SetStateAction<number[]>>; audioRef: HTMLAudioElement; }) {
+function LeftSlider(props: {
+	startEnd: number[], SetStartEndWithTime(start: number, end: number): void,
+	setStartEnd: React.Dispatch<React.SetStateAction<number[]>>,
+	audioRef: HTMLAudioElement
+}) {
 	const [isError, setIsError] = useState(false);
 	let hours = Math.floor(props.startEnd[0] / 3600);
-	var minutes = Math.floor((props.startEnd[0] % 3600) / 60);
-	var seconds = Math.floor((props.startEnd[0] % 3600) % 60);
+	let minutes = Math.floor((props.startEnd[0] % 3600) / 60);
+	let seconds = Math.floor((props.startEnd[0] % 3600) % 60);
 
 	function SetNewTime(currentValue: number, hours: number, multiplier: number) {
 		let diff = Math.abs(currentValue - hours) * multiplier;
@@ -545,8 +551,8 @@ function RightSlider(props: {
 }) {
 	const [isError, setIsError] = useState(false);
 	let hours = Math.floor(props.startEnd[1] / 3600);
-	var minutes = Math.floor((props.startEnd[1] % 3600) / 60);
-	var seconds = Math.floor((props.startEnd[1] % 3600) % 60);
+	let minutes = Math.floor((props.startEnd[1] % 3600) / 60);
+	let seconds = Math.floor((props.startEnd[1] % 3600) % 60);
 
 	function SetNewTime(currentValue: number, timeInSeconds: number, multiplier: number) {
 		let diff = Math.abs(currentValue - timeInSeconds) * multiplier;
@@ -812,7 +818,59 @@ function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 }
 
 
+function SilenceButton(props: { params: Readonly<Params<AudioParams>>; }) {
+	const handleOnClick = async () => {
+		console.log(store.getState().token.value)
 
+		const req = fetch(`https://dev.patrykstyla.com/api/remove_silence/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
+			credentials: 'include',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+				'Idempotency-Key': store.getState().token.value
+			},
+		})
+
+		const res = await req;
+		if (!res.ok) {
+			console.error(res);
+		}
+
+		// const json = await res.json();
+
+		return ""
+	}
+
+	const handleOnClickTEST = async () => {
+		console.log(store.getState().token.value)
+
+		const req = fetch(`https://dev.patrykstyla.com/api/find/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
+			credentials: 'include',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+			},
+		})
+
+		const res = await req;
+		if (!res.ok) {
+			console.error(res);
+		}
+
+		// const json = await res.json();
+
+		return ""
+	}
+	return (
+		<>
+			<Button variant="contained" onClick={handleOnClick}>
+				Remove Silence
+			</Button>
+			<Button variant="contained" onClick={handleOnClickTEST}>
+				TEST
+			</Button>
+		</>)
+}
 
 function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: number[]; disabled: boolean }) {
 	const [open, setOpen] = useState(false);
