@@ -1,4 +1,5 @@
 import {
+	Container,
 	CssBaseline,
 	Dialog,
 	DialogActions,
@@ -34,9 +35,9 @@ function YearSelection(props: {
 	setMenuItems: React.Dispatch<
 		React.SetStateAction<
 			| {
-					name: string;
-					cb: () => void;
-			  }[]
+				name: string;
+				cb: () => void;
+			}[]
 			| null
 		>
 	>;
@@ -57,33 +58,36 @@ function YearSelection(props: {
 				guildSelected={props.guildSelected}
 			/> */}
 			<CustomizedTreeView guildSelected={props.guildSelected} />
-			{params.year && <AudioInterface isClip={false} userGuilds={props.userGuilds} />}
+			<Container maxWidth={false}>
+				{params.year && <AudioInterface isClip={false} userGuilds={props.userGuilds} isSilence={false} />}
+				<AudioInterface isClip={false} userGuilds={props.userGuilds} isSilence={true} />
+			</Container>
 		</div>
 	);
 }
 
 {
 	/* // <div id="audio-player-container">
-    //   <p>Audio Player</p>
+	//   <p>Audio Player</p>
 
-    //   <button
-    //     id="play-icon"
-    //     onClick={(e) => {
-    //       if (!playing) {
-    //         e.currentTarget.children[0].innerHTML = "play_arrow";
-    //       } else {
-    //         e.currentTarget.children[0].innerHTML = "pause";
-    //       }
-    //       setPlaying((prev) => !prev);
-    //     }}
-    //   >
-    //     {" "}
-    //     <span className="material-icons">pause</span>
-    //   </button>
-    //   <span id="current-time" className="time">
-    //     0:00
-    //   </span>
-    //   {/* Current audio time slider */
+	//   <button
+	//     id="play-icon"
+	//     onClick={(e) => {
+	//       if (!playing) {
+	//         e.currentTarget.children[0].innerHTML = "play_arrow";
+	//       } else {
+	//         e.currentTarget.children[0].innerHTML = "pause";
+	//       }
+	//       setPlaying((prev) => !prev);
+	//     }}
+	//   >
+	//     {" "}
+	//     <span className="material-icons">pause</span>
+	//   </button>
+	//   <span id="current-time" className="time">
+	//     0:00
+	//   </span>
+	//   {/* Current audio time slider */
 }
 
 //   {/* Volume slider */}
@@ -315,14 +319,14 @@ function App() {
 		setContextMenu(
 			contextMenu === null
 				? {
-						mouseX: event.clientX + 2,
-						mouseY: event.clientY - 6,
-						file: null,
-				  }
+					mouseX: event.clientX + 2,
+					mouseY: event.clientY - 6,
+					file: null,
+				}
 				: // repeated contextmenu when it is already open closes it with Chrome 84 on Ubuntu
-				  // Other native context menus might behave different.
-				  // With this behavior we prevent contextmenu from the backdrop to re-locale existing context menus.
-				  null
+				// Other native context menus might behave different.
+				// With this behavior we prevent contextmenu from the backdrop to re-locale existing context menus.
+				null
 		);
 	};
 
@@ -599,9 +603,9 @@ export function Favorites(props: {
 	setMenuItems: React.Dispatch<
 		React.SetStateAction<
 			| {
-					name: string;
-					cb: () => void;
-			  }[]
+				name: string;
+				cb: () => void;
+			}[]
 			| null
 		>
 	>;

@@ -4,6 +4,7 @@ import styled from '@mui/material/styles/styled';
 import React, { useEffect, useState } from "react";
 import { Params, useLocation, useParams } from "react-router-dom";
 import { AudioParams, UserGuilds, valuetext } from "./Constants";
+import { setHasSilence } from "./reducers/silence";
 import { store } from "./store";
 
 
@@ -25,6 +26,7 @@ export function RangeSlider(props: {
 	intervalRef: React.MutableRefObject<number | undefined>;
 	isClip: boolean;
 	userGuilds: UserGuilds[] | null;
+	isSilence: boolean;
 }) {
 	const [playing, setPlaying] = useState(false);
 	const [startEnd, setStartEnd] = React.useState<number[]>([0, props.audioRef.duration]);
@@ -328,7 +330,7 @@ export function RangeSlider(props: {
 				)}
 			</Button>
 			<ClipDialog params={params} startEnd={startEnd} disabled={props.isClip} />
-			<SilenceButton params={params} />
+			<SilenceButton params={params} isSilence={props.isSilence} />
 			<JamIt disabled={props.isClip} userGuilds={props.userGuilds} />
 			{/* <Button variant="contained" onClick={handleClip}>
         <a
@@ -818,10 +820,8 @@ function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 }
 
 
-function SilenceButton(props: { params: Readonly<Params<AudioParams>>; }) {
+function SilenceButton(props: { params: Readonly<Params<AudioParams>>; isSilence: boolean }) {
 	const handleOnClick = async () => {
-		console.log(store.getState().token.value)
-
 		const req = fetch(`https://dev.patrykstyla.com/api/remove_silence/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
 			credentials: 'include',
 			headers: {
@@ -836,14 +836,29 @@ function SilenceButton(props: { params: Readonly<Params<AudioParams>>; }) {
 			console.error(res);
 		}
 
+		const req2 = fetch(`https://dev.patrykstyla.com/api/remove_silence/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
+			credentials: 'include',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+				'Idempotency-Key': store.getState().token.value
+			},
+		})
+
+		const res2 = await req2;
+		if (!res2.ok) {
+			console.error(res);
+		}
+
+		console.log("Silence removed")
+		store.dispatch(setHasSilence(true));
+
 		// const json = await res.json();
 
 		return ""
 	}
 
 	const handleOnClickTEST = async () => {
-		console.log(store.getState().token.value)
-
 		const req = fetch(`https://dev.patrykstyla.com/api/find/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
 			credentials: 'include',
 			headers: {
@@ -863,9 +878,9 @@ function SilenceButton(props: { params: Readonly<Params<AudioParams>>; }) {
 	}
 	return (
 		<>
-			<Button variant="contained" onClick={handleOnClick}>
+			{!store.getState().hasSilence.value && <Button variant="contained" onClick={handleOnClick}>
 				Remove Silence
-			</Button>
+			</Button>}
 			<Button variant="contained" onClick={handleOnClickTEST}>
 				TEST
 			</Button>

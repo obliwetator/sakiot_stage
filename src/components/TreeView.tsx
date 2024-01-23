@@ -356,6 +356,7 @@ function handleClickOnFile(
 	channel_id: string,
 	params: Readonly<Params<string>>
 ) {
+	console.log(location.search)
 	e.preventDefault();
 	if (
 		location.pathname ===
@@ -366,7 +367,7 @@ function handleClickOnFile(
 	} else {
 		navigate(
 			`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${params.guild_id
-			}/${channel_id}/${year}/${month_name}/${e.currentTarget.innerHTML.slice(0, -4)}`
+			}/${channel_id}/${year}/${month_name}/${e.currentTarget.innerHTML.slice(0, -4)}` + location.search
 		);
 	}
 }

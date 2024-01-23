@@ -1,12 +1,16 @@
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Params, useLocation, useParams } from 'react-router-dom';
 import { AudioParams, UserGuilds, valuetext } from './Constants';
 import { RangeSlider } from './RangeSlider';
- 
+import { useAppSelector } from './app/hooks';
+import { setHasSilence } from './reducers/silence';
+import { store } from './store';
 
- 
-export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[] | null }) {
+
+
+export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[] | null; isSilence: boolean }) {
 	console.log('render Audio Interface');
 	const intervalRef = useRef<number | undefined>();
 	const params = useParams<AudioParams>();
@@ -14,8 +18,11 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 	const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
 	const [readyToPlay, setReadyToPlay] = useState(false);
 	const [error, setError] = useState(false);
+	let value = useAppSelector(state => state.hasSilence.value)
+
 
 	useEffect(() => {
+		console.log("useffect")
 		console.log(
 			`https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name!)}`
 		);
@@ -27,9 +34,8 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 			);
 		} else {
 			audioRef = new Audio(
-				`https://dev.patrykstyla.com/audio/${params.guild_id}/${params.channel_id}/${params.year}/${
-					params.month
-				}/${encodeURIComponent(params.file_name!)}.ogg`
+				`https://dev.patrykstyla.com/audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month
+				}/${encodeURIComponent(params.file_name!)}.ogg${props.isSilence ? "?silence=true" : ""}`
 			);
 		}
 
@@ -37,11 +43,18 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 			console.log('canplaythrough');
 			setReadyToPlay(true);
 			setAudioRef(audioRef);
+			if (props.isSilence) {
+				store.dispatch(setHasSilence(true))
+			}
 		});
 
 		audioRef.onerror = (ev) => {
 			console.log('Audio Ref error', ev);
 			setError(true);
+			if (props.isSilence) {
+				store.dispatch(setHasSilence(false))
+			}
+
 		};
 		console.log('mount Audio Interface');
 
@@ -50,6 +63,7 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 			//   setAudioRef(null);
 			setReadyToPlay(false);
 			setError(false);
+			store.dispatch(setHasSilence(false))
 		};
 	}, [params.file_name]);
 	// return function cleanup() {
@@ -57,7 +71,15 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 	// }
 
 	if (error) {
-		return <div className="flex-initial w-4/5">An error occured</div>;
+
+
+		if (value) {
+
+			return <div className="flex-initial w-4/5">An error occured. Try refreshing</div>;
+		} else {
+			return <div className="flex-initial w-4/5">Audio file doesn't have silence free vesion</div>;
+
+		}
 	}
 
 	return (
@@ -69,6 +91,7 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 						intervalRef={intervalRef}
 						isClip={props.isClip}
 						userGuilds={props.userGuilds}
+						isSilence={props.isSilence}
 					/>
 				) : (
 					'Downloading'

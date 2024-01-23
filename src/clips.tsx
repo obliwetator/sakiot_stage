@@ -147,7 +147,7 @@ export default function Clips(props: { guildSelected: UserGuilds | null; userGui
 		return (
 			<div className="flex">
 				<SimpleAccordion data={data} />
-				{params.file_name && <AudioInterface isClip={true} userGuilds={props.userGuilds} />}
+				{params.file_name && <AudioInterface isClip={true} userGuilds={props.userGuilds} isSilence={false} />}
 			</div>
 		);
 	} else {

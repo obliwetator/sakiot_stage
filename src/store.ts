@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 // import counterSliceReducer from './reducers/Test';
 import TokenReducer from './reducers/Token';
+import hasSilenceReducer from './reducers/silence';
 
 export const store = configureStore({
 	reducer: {
 		token: TokenReducer,
+		hasSilence: hasSilenceReducer
 	},
 });
 
