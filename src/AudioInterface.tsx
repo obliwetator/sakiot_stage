@@ -1,12 +1,11 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Params, useLocation, useParams } from 'react-router-dom';
 import { AudioParams, UserGuilds, valuetext } from './Constants';
 import { RangeSlider } from './RangeSlider';
 import { useAppSelector } from './app/hooks';
 import { setHasSilence } from './reducers/silence';
-import { store } from './store';
 
 
 
@@ -18,7 +17,9 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 	const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
 	const [readyToPlay, setReadyToPlay] = useState(false);
 	const [error, setError] = useState(false);
+	const dispatch = useDispatch();
 	let value = useAppSelector(state => state.hasSilence.value)
+
 
 
 	useEffect(() => {
@@ -44,7 +45,7 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 			setReadyToPlay(true);
 			setAudioRef(audioRef);
 			if (props.isSilence) {
-				store.dispatch(setHasSilence(true))
+				// dispatch(setHasSilence(true))
 			}
 		});
 
@@ -52,7 +53,7 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 			console.log('Audio Ref error', ev);
 			setError(true);
 			if (props.isSilence) {
-				store.dispatch(setHasSilence(false))
+				// dispatch(setHasSilence(false))
 			}
 
 		};
@@ -63,22 +64,16 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 			//   setAudioRef(null);
 			setReadyToPlay(false);
 			setError(false);
-			store.dispatch(setHasSilence(false))
+			dispatch(setHasSilence(false))
 		};
-	}, [params.file_name]);
-	// return function cleanup() {
-	//   setData(null)
-	// }
+	}, [params.file_name, value]);
 
 	if (error) {
 
-
 		if (value) {
-
 			return <div className="flex-initial w-4/5">An error occured. Try refreshing</div>;
 		} else {
 			return <div className="flex-initial w-4/5">Audio file doesn't have silence free vesion</div>;
-
 		}
 	}
 
