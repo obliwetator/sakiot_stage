@@ -55,7 +55,7 @@ function YearSelection(props: {
 				guildSelected={props.guildSelected}
 			/> */}
 			<CustomizedTreeView guildSelected={props.guildSelected} />
-			<Container maxWidth={false}>
+			<Container maxWidth={false} style={{ minWidth: 0 }}>
 				{params.year && <AudioInterface isClip={false} userGuilds={props.userGuilds} isSilence={false} />}
 				<AudioInterface isClip={false} userGuilds={props.userGuilds} isSilence={true} />
 			</Container>

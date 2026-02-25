@@ -1,23 +1,40 @@
 import { useEffect, useRef, useState } from "react";
 import { Params } from "react-router-dom";
 import WaveSurfer from "wavesurfer.js";
+// @ts-ignore
+import Button from '@mui/material/Button';
+import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import { AudioParams } from "../Constants";
 
 function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd?: number[] }) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const wavesurferRef = useRef<WaveSurfer | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [zoomLevel, setZoomLevel] = useState(1);
+	const [minPxPerSec, setMinPxPerSec] = useState(1); // default minimum px per second
 
 	useEffect(() => {
 		if (containerRef.current && !wavesurferRef.current) {
 			wavesurferRef.current = WaveSurfer.create({
 				container: containerRef.current,
-				waveColor: "#4F4A85",
-				progressColor: "#383351",
+				waveColor: "#ff00ff", // magenta
+				progressColor: "#cc00cc", // darker magenta for progress
 				barWidth: 2,
 				barGap: 1,
 				barRadius: 2,
 				interact: false,
+				plugins: [
+					TimelinePlugin.create({
+						// Not providing a container renders it inside the main wavesurfer wrapper
+						height: 20,
+						timeInterval: 60,
+						primaryLabelInterval: 600,
+						style: {
+							fontSize: '12px',
+							color: '#6a6a6a',
+						}
+					}),
+				],
 			});
 		}
 		return () => {
@@ -85,7 +102,7 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd
 				});
 				// According to WaveSurfer v7, we pass the URL, peaks array of arrays, and duration.
 				// URL is empty as we only use peaks.
-				wavesurferRef.current.load("", [normalizedPeaks], duration);
+				wavesurferRef.current.load("", [peaks], duration);
 			}
 		} catch (err) {
 			console.error(err);
@@ -104,11 +121,34 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd
 		}
 	}, [props.startEnd]);
 
+	const handleZoom = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const newZoomLevel = Number(e.target.value);
+		setZoomLevel(newZoomLevel);
+		if (wavesurferRef.current) {
+			wavesurferRef.current.zoom(newZoomLevel);
+		}
+	};
+
+	// Reset zoom level to initial on waveform ready
+	useEffect(() => {
+		if (wavesurferRef.current) {
+			wavesurferRef.current.on('ready', () => {
+				setZoomLevel(0); // 0 or minimum possible value usually auto-fits the screen
+			});
+		}
+	}, [wavesurferRef.current]);
+
 	return (
-		<div>
-			<button onClick={handleClick}>Generate Waveform</button>
+		<div style={{ width: "100%", maxWidth: "100%", marginBottom: "20px" }}>
+			<Button variant="contained" onClick={handleClick}>Generate Waveform </Button>
+			<p>You have to click every time you want to generate a waveform. (for now). Be patient for big files</p>
 			{error && <p style={{ color: "red", padding: "10px" }}>{error}</p>}
-			<div ref={containerRef} style={{ width: "100%", height: "128px", backgroundColor: "#f5f5f5", border: "1px solid #ddd", borderRadius: "4px", marginTop: "10px" }}></div>
+			<div style={{ marginTop: "10px", marginBottom: "10px" }}>
+				<label>
+					Zoom: <input type="range" min="0" max="10" value={zoomLevel} onChange={handleZoom} style={{ width: "200px" }} />
+				</label>
+			</div>
+			<div ref={containerRef} style={{ width: "100%", height: "148px", backgroundColor: "transparent", border: "none", borderRadius: "4px", paddingBottom: "10px" }}></div>
 		</div>
 	)
 }
