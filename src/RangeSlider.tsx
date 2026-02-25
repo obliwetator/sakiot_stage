@@ -239,7 +239,6 @@ export function RangeSlider(props: {
 			</Button>
 			<ClipDialog params={params} startEnd={startEnd} disabled={props.isClip} />
 			<SilenceButton params={params} isSilence={props.isSilence} />
-			<WaveFormButton params={params} />
 			<JamIt disabled={props.isClip} userGuilds={props.userGuilds} />
 			{/* <Button variant="contained" onClick={handleClip}>
         <a
@@ -265,8 +264,11 @@ function DoubleSlider(props: {
 	setIsSliderClicked: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
 	const [min, max] = [-60, 60];
+	const params = useParams<AudioParams>();
+
 	return (
 		<>
+			<WaveFormButton params={params} startEnd={props.startEnd} />
 			<Slider
 				sx={{
 					'& .MuiSlider-thumb': {

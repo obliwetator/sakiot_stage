@@ -3,7 +3,7 @@ import { Params } from "react-router-dom";
 import WaveSurfer from "wavesurfer.js";
 import { AudioParams } from "../Constants";
 
-function WaveFormButton(props: { params: Readonly<Params<AudioParams>> }) {
+function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd?: number[] }) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const wavesurferRef = useRef<WaveSurfer | null>(null);
 	const [error, setError] = useState<string | null>(null);
@@ -17,6 +17,7 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>> }) {
 				barWidth: 2,
 				barGap: 1,
 				barRadius: 2,
+				interact: false,
 			});
 		}
 		return () => {
@@ -79,6 +80,9 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>> }) {
 			const duration = (length * samplesPerPixel) / sampleRate;
 
 			if (wavesurferRef.current) {
+				wavesurferRef.current.on('interaction', (newTime) => {
+					// We can implement seek here if needed
+				});
 				// According to WaveSurfer v7, we pass the URL, peaks array of arrays, and duration.
 				// URL is empty as we only use peaks.
 				wavesurferRef.current.load("", [normalizedPeaks], duration);
@@ -88,6 +92,17 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>> }) {
 			setError("Error generating waveform.");
 		}
 	}
+
+	// Update waveform position based on startEnd
+	useEffect(() => {
+		if (wavesurferRef.current && props.startEnd && props.startEnd.length > 0) {
+			const duration = wavesurferRef.current.getDuration();
+			if (duration > 0) {
+				const time = props.startEnd[0];
+				wavesurferRef.current.setTime(time);
+			}
+		}
+	}, [props.startEnd]);
 
 	return (
 		<div>
