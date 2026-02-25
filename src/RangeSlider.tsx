@@ -1,8 +1,21 @@
-import { VolumeDown, VolumeMute, VolumeUp } from "@mui/icons-material";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, Modal, Slider, Stack, TextField, Typography } from "@mui/material";
-import styled from '@mui/material/styles/styled';
+import VolumeDown from '@mui/icons-material/VolumeDown';
+import VolumeMute from '@mui/icons-material/VolumeMute';
+
+import { styled } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import Modal from '@mui/material/Modal';
+import Slider from '@mui/material/Slider';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from "react";
 import { Params, useLocation, useParams } from "react-router-dom";
+import WaveFormButton from './components/Waveform';
 import { AudioParams, UserGuilds, valuetext } from "./Constants";
 import { setHasSilence } from "./reducers/silence";
 import { store } from "./store";
@@ -155,98 +168,6 @@ export function RangeSlider(props: {
 	};
 	const params = useParams<AudioParams>();
 
-	useEffect(() => {
-		// const options: PeaksOptions = {
-		// 	zoomview: {
-		// 		container: document.getElementById('zoomview-container')!,
-		// 		waveformColor: '#00e180',
-		// 	},
-		// 	overview: {
-		// 		container: document.getElementById('overview-container')!,
-		// 		waveformColor: '#00e180',
-		// 	},
-		// 	mediaElement: audioElementRef.current!,
-
-		// 	dataUri: {
-		// 		// arraybuffer: 'https://dev.patrykstyla.com/audio/waveform/sample.dat',
-		// 		json: 'https://dev.patrykstyla.com/audio/waveform/sample2.json',
-		// 	},
-		// };
-
-		// Peaks.init(options, function (err, peaks) {
-		// 	if (err) {
-		// 		console.error('Failed to initialize Peaks instance: ' + err.message);
-		// 		return;
-		// 	}
-
-		// 	if (!peaks) return;
-
-		// 	peaks.views.getView('zoomview')?.setWheelMode('scroll', { captureVerticalScroll: true });
-		// 	console.log('Success?');
-
-		// 	setTimeout(async () => {
-		// 		let res = await fetch('https://dev.patrykstyla.com/audio/waveform/sample.dat');
-		// 		let buff = await res.arrayBuffer();
-		// 		peaks.setSource(
-		// 			{
-		// 				// waveformData: { arraybuffer: buff },
-		// 				dataUri: { arraybuffer: 'https://dev.patrykstyla.com/audio/waveform/sample.dat' },
-		// 			},
-		// 			(error) => {
-		// 				if (error) {
-		// 					console.error('setSource error', error);
-		// 				}
-		// 				console.log('Success2?');
-		// 			}
-		// 		);
-		// 	}, 3000);
-
-		// 	// Do something when the waveform is displayed and ready
-		// });
-
-		// const wavesurfer = WaveSurfer.create({
-		// 	container: '#waveform',
-		// 	waveColor: '#4F4A85',
-		// 	progressColor: '#383351',
-		// 	media: props.audioRef,
-		// 	hideScrollbar: true,
-		// 	height: 'auto',
-		// 	minPxPerSec: 0.5,
-		// 	peaks: [Array(100).fill(0)],
-		// 	normalize: true,
-		// 	// url: 'https://dev.patrykstyla.com/audio/362257054829641758/763782256980131892/2023/July/1688216556253-161172393719496704-qazz.ogg',
-		// });
-
-		// // wavesurfer.once('interaction', () => {});
-
-		// fetch('https://dev.patrykstyla.com/audio/waveform/long_clip.json')
-		// 	.then((response) => {
-		// 		if (!response.ok) {
-		// 			throw new Error('HTTP error ' + response.status);
-		// 		}
-		// 		return response.json();
-		// 	})
-		// 	.then((peaks) => {
-		// 		console.log('loaded peaks! sample_rate: ' + peaks.sample_rate);
-
-		// 		const minimap = MinimapPlugin.create({ container: '#waveform-minimap', height: 'auto' });
-		// 		wavesurfer.registerPlugin(minimap);
-		// 		// load peaks into wavesurfer.js
-		// 		wavesurfer.load(
-		// 			'https://dev.patrykstyla.com/audio/362257054829641758/763782256980131892/2023/July/1688216556253-161172393719496704-qazz.ogg',
-		// 			peaks.data
-		// 		);
-		// 	})
-
-		// 	.catch((e) => {
-		// 		console.error('error', e);
-		// 	});
-
-		return () => {
-			// wavesurfer.destroy();
-		};
-	}, []);
-
 	return (
 		<Box className="m-16">
 			{/* <button
@@ -277,19 +198,6 @@ export function RangeSlider(props: {
 			>
 				Play
 			</Button>
-			{/* <div id="waveform"></div>
-			<div id="waveform-minimap"></div> */}
-			{/* <div>
-				<div id="zoomview-container"></div>
-				<div id="overview-container"></div>
-				<audio ref={audioElementRef} controls>
-					<source
-						src="https://dev.patrykstyla.com/audio/362257054829641758/763782256980131892/2023/July/1688216556253-161172393719496704-qazz.ogg"
-						type='audio/ogg; codecs="vorbis"'
-					/>
-					Your browser does not support the audio element.
-				</audio>
-			</div> */}
 			<DoubleSlider
 				audioRef={props.audioRef}
 				handleChange={handleChange}
@@ -323,7 +231,7 @@ export function RangeSlider(props: {
 					</a>
 				) : (
 					<a
-						href={`https://dev.patrykstyla.com/download/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${params.file_name}.ogg`}
+						href={`https://dev.patrykstyla.com/download/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${params.file_name}.ogg${props.isSilence ? "?silence=true" : ""} `}
 					>
 						Download
 					</a>
@@ -331,6 +239,7 @@ export function RangeSlider(props: {
 			</Button>
 			<ClipDialog params={params} startEnd={startEnd} disabled={props.isClip} />
 			<SilenceButton params={params} isSilence={props.isSilence} />
+			<WaveFormButton params={params} />
 			<JamIt disabled={props.isClip} userGuilds={props.userGuilds} />
 			{/* <Button variant="contained" onClick={handleClip}>
         <a
@@ -687,7 +596,7 @@ function VolumeSlider(props: { audioRef: HTMLAudioElement }) {
 				valueLabelDisplay="auto"
 				getAriaValueText={valuetext}
 			/>
-			<VolumeUp />
+			{/* <VolumeUpIcon /> */}
 		</Stack>
 	);
 }
@@ -932,7 +841,7 @@ function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: nu
 					<Button onClick={handleClose}>
 						<a
 							href={`https://dev.patrykstyla.com/download/${props.params.guild_id}/${props.params.channel_id
-								}/${props.params.year}/${props.params.month}/${props.params.file_name}.ogg?start=${props.startEnd[0]
+								}/${props.params.year}/${props.params.month}/${props.params.file_name}?start=${props.startEnd[0]
 								}&end=${props.startEnd[1] - props.startEnd[0]}${text.length > 0 ? `&name=${text}` : ''}`}
 						>
 							Clip

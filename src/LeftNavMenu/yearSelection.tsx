@@ -57,9 +57,9 @@ export function AllYears(props: {
 	setMenuItems: React.Dispatch<
 		React.SetStateAction<
 			| {
-					name: string;
-					cb: () => void;
-			  }[]
+				name: string;
+				cb: () => void;
+			}[]
 			| null
 		>
 	>;
@@ -153,9 +153,9 @@ export function YearsEl(props: {
 	setMenuItems: React.Dispatch<
 		React.SetStateAction<
 			| {
-					name: string;
-					cb: () => void;
-			  }[]
+				name: string;
+				cb: () => void;
+			}[]
 			| null
 		>
 	>;
@@ -261,9 +261,9 @@ export function MonthsEl(props: {
 	setMenuItems: React.Dispatch<
 		React.SetStateAction<
 			| {
-					name: string;
-					cb: () => void;
-			  }[]
+				name: string;
+				cb: () => void;
+			}[]
 			| null
 		>
 	>;
@@ -368,9 +368,9 @@ export function DayEl(props: {
 	setMenuItems: React.Dispatch<
 		React.SetStateAction<
 			| {
-					name: string;
-					cb: () => void;
-			  }[]
+				name: string;
+				cb: () => void;
+			}[]
 			| null
 		>
 	>;
@@ -436,9 +436,9 @@ export function ItemsEl(props: {
 	setMenuItems: React.Dispatch<
 		React.SetStateAction<
 			| {
-					name: string;
-					cb: () => void;
-			  }[]
+				name: string;
+				cb: () => void;
+			}[]
 			| null
 		>
 	>;
@@ -501,21 +501,21 @@ export function ItemsEl(props: {
 				handleContextMenu(e, props.setContextMenu, props.file.file);
 				props.file.comment !== null
 					? props.setMenuItems([
-							{
-								name: 'Remove From Favorite',
-								cb: () => {
-									handleFavorite(e);
-								},
+						{
+							name: 'Remove From Favorite',
+							cb: () => {
+								handleFavorite(e);
 							},
-					  ])
+						},
+					])
 					: props.setMenuItems([
-							{
-								name: 'Add To Favorite',
-								cb: () => {
-									handleFavorite(e);
-								},
+						{
+							name: 'Add To Favorite',
+							cb: () => {
+								handleFavorite(e);
 							},
-					  ]);
+						},
+					]);
 			}}
 		>
 			{props.file.file}
@@ -540,14 +540,14 @@ const handleContextMenu = (
 	setContextMenu((contextMenu) =>
 		contextMenu === null
 			? {
-					mouseX: event.clientX + 2,
-					mouseY: event.clientY - 6,
-					file: file,
-			  }
+				mouseX: event.clientX + 2,
+				mouseY: event.clientY - 6,
+				file: file,
+			}
 			: // repeated contextmenu when it is already open closes it with Chrome 84 on Ubuntu
-			  // Other native context menus might behave different.
-			  // With this behavior we prevent contextmenu from the backdrop to re-locale existing context menus.
-			  null
+			// Other native context menus might behave different.
+			// With this behavior we prevent contextmenu from the backdrop to re-locale existing context menus.
+			null
 	);
 };
 
@@ -563,15 +563,13 @@ function handleClickOnFile(
 	e.preventDefault();
 	if (
 		location.pathname ===
-		`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${
-			params.guild_id
+		`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${params.guild_id
 		}/${channel_id}/${year}/${month_name}${e.currentTarget.innerHTML.slice(0, -4)}`
 	) {
 		// same location dont do anything
 	} else {
 		navigate(
-			`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${
-				params.guild_id
+			`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${params.guild_id
 			}/${channel_id}/${year}/${month_name}/${e.currentTarget.innerHTML.slice(0, -4)}`
 		);
 	}

@@ -11,7 +11,7 @@ import { setHasSilence } from './reducers/silence';
 
 export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[] | null; isSilence: boolean }) {
 	console.log('render Audio Interface');
-	const intervalRef = useRef<number | undefined>();
+	const intervalRef = useRef<number | undefined>(undefined);
 	const params = useParams<AudioParams>();
 	// const audioElementRef = React.useRef<HTMLMediaElement>(null);
 	const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
@@ -20,36 +20,38 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 	const dispatch = useDispatch();
 	let value = useAppSelector(state => state.hasSilence.value)
 
-
-
 	useEffect(() => {
+		// if (value) return;
 		console.log("useffect")
 		console.log(
 			`https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name!)}`
 		);
 		//TODO: FIX THIS
-		let audioRef: HTMLAudioElement;
+		let localAudioRef: HTMLAudioElement;
 		if (props.isClip) {
-			audioRef = new Audio(
+			localAudioRef = new Audio(
 				`https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name!)}`
 			);
 		} else {
-			audioRef = new Audio(
-				`https://dev.patrykstyla.com/audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month
-				}/${encodeURIComponent(params.file_name!)}.ogg${props.isSilence ? "?silence=true" : ""}`
-			);
+			if (!value || audioRef!) {
+				// TODO: If we have a audio will silence dont re-load the silence free version
+				localAudioRef = new Audio(
+					`https://dev.patrykstyla.com/audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month
+					}/${encodeURIComponent(params.file_name!)}.ogg ${props.isSilence ? "?silence=true" : ""}`
+				);
+			}
 		}
 
-		audioRef!.addEventListener('canplaythrough', (e) => {
+		localAudioRef!.addEventListener('canplaythrough', (e) => {
 			console.log('canplaythrough');
 			setReadyToPlay(true);
-			setAudioRef(audioRef);
+			setAudioRef(localAudioRef);
 			if (props.isSilence) {
-				// dispatch(setHasSilence(true))
+				dispatch(setHasSilence(true))
 			}
 		});
 
-		audioRef.onerror = (ev) => {
+		localAudioRef!.onerror = (ev) => {
 			console.log('Audio Ref error', ev);
 			setError(true);
 			if (props.isSilence) {
@@ -60,11 +62,11 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 		console.log('mount Audio Interface');
 
 		return function cleanup() {
-			audioRef?.pause();
+			localAudioRef?.pause();
 			//   setAudioRef(null);
-			setReadyToPlay(false);
-			setError(false);
-			dispatch(setHasSilence(false))
+			// setReadyToPlay(false);
+			// setError(false);
+			// dispatch(setHasSilence(false))
 		};
 	}, [params.file_name, value]);
 

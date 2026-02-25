@@ -1,24 +1,21 @@
-import {
-	Container,
-	CssBaseline,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogContentText,
-	Menu,
-	MenuItem,
-	TextField,
-	ThemeProvider,
-	createTheme,
-} from '@mui/material';
+import { ThemeProvider, createTheme } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Grid from '@mui/material/Unstable_Grid2'; // Grid version 2
-import React, { useEffect, useState } from 'react';
+import Container from '@mui/material/Container';
+import CssBaseline from '@mui/material/CssBaseline';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import Grid from '@mui/material/Grid';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import React, { JSX, useEffect, useState } from 'react';
 import { BrowserRouter, Outlet, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { AudioInterface } from './AudioInterface';
 import { AudioParams, IndividualFileArray, Months, UserGuilds } from './Constants';
-import { ItemsEl } from './LeftNavMenu/yearSelection';
+import { AllYears, ItemsEl } from './LeftNavMenu/yearSelection';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import Clips from './clips';
 import CustomizedTreeView from './components/TreeView';
@@ -123,7 +120,7 @@ const ProtectedLayout = (props: {
 
 	const guilds = props.userGuilds?.map((value, index) => {
 		return (
-			<Grid xs={1} key={index}>
+			<Grid size={{ xs: 1 }} key={index}>
 				<div onClick={() => handleGuildSelect(index)}>{value.name}</div>
 			</Grid>
 		);
@@ -245,8 +242,8 @@ function App() {
 		});
 	};
 
-	const disp = useAppDispatch();
-	const sel = useAppSelector((state) => state.token.value);
+	// const disp = useAppDispatch();
+	// const sel = useAppSelector((state) => state.token.value);
 	useEffect(() => {
 		console.log('laa');
 		// disp(setToken('alalaal'));

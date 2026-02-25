@@ -1,10 +1,13 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import Button from '@mui/material/Button/Button';
-
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -17,7 +20,7 @@ function SimpleAccordion(props: { data: Clips[] }) {
 	const [expanded, setExpanded] = useState<string | false>(false);
 
 	const handleClickAccordion = (guild_id: string, clip_name: string) => {
-		console.log('here');
+		console.log('here', `${PATH_PREFIX_FOR_LOGGED_USERS}/clips/${guild_id}/${encodeURIComponent(clip_name)}`);
 		if (
 			location.pathname === `${PATH_PREFIX_FOR_LOGGED_USERS}/clips/${guild_id}/${encodeURIComponent(clip_name)}`
 		) {
