@@ -1,9 +1,8 @@
-import TreeItem, { TreeItemProps, treeItemClasses } from '@mui/lab/TreeItem';
-import TreeView from '@mui/lab/TreeView';
 import Collapse from '@mui/material/Collapse';
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
 import { alpha, styled } from '@mui/material/styles';
 import { TransitionProps } from '@mui/material/transitions';
+import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { animated, useSpring } from '@react-spring/web';
 import * as React from 'react';
 import { useState } from 'react';
@@ -16,14 +15,15 @@ import {
 	useParams,
 } from 'react-router-dom';
 
+import { TreeItem, treeItemClasses, TreeItemProps } from '@mui/x-tree-view';
 import {
 	Channels,
 	Dirs,
 	IndividualFile,
 	IndividualFileArray,
+	months,
 	PATH_PREFIX_FOR_LOGGED_USERS,
 	UserGuilds,
-	months,
 } from '../Constants';
 import { transform_to_months } from '../data';
 
@@ -74,18 +74,18 @@ function TransitionComponent(props: TransitionProps) {
 }
 
 const StyledTreeItem = styled((props: TreeItemProps) => (
-	<TreeItem {...props} TransitionComponent={TransitionComponent} />
+	<TreeItem {...props} slots={{ groupTransition: TransitionComponent }} />
 ))(({ theme }) => ({
 	[`& .${treeItemClasses.iconContainer}`]: {
 		'& .close': {
 			opacity: 0.3,
 		},
 	},
-	[`& .${treeItemClasses.group}`]: {
-		marginLeft: 5,
-		paddingLeft: 8,
-		borderLeft: `1px dashed ${alpha(theme.palette.text.primary, 0.4)}`,
-	},
+	// [`& .${treeItemClasses.group}`]: {
+	// 	marginLeft: 5,
+	// 	paddingLeft: 8,
+	// 	borderLeft: `1px dashed ${alpha(theme.palette.text.primary, 0.4)}`,
+	// },
 }));
 
 export default function CustomizedTreeView(props: { guildSelected: UserGuilds | null }) {
@@ -119,16 +119,16 @@ export default function CustomizedTreeView(props: { guildSelected: UserGuilds | 
 
 		console.log(years)
 		return (
-			<TreeView
+			<SimpleTreeView
 				aria-label="customized"
-				defaultExpanded={['2024', month]}
-				defaultCollapseIcon={<MinusSquare />}
-				defaultExpandIcon={<PlusSquare />}
-				defaultEndIcon={<CloseSquare />}
+				defaultExpandedItems={['2026', month]}
+				// defaultCollapseIcon={<MinusSquare />}
+				// defaultExpandIcon={<PlusSquare />}
+				// defaultEndIcon={<CloseSquare />}
 				className="flex-initial w-1/5 p-5"
 			>
 				{years}
-			</TreeView>
+			</SimpleTreeView>
 		);
 	} else {
 		return <div className="flex-initial w-1/5 p-5">Loading</div>;
@@ -150,7 +150,7 @@ function TreeViewYears(props: { el: Dirs; index: number }) {
 		<StyledTreeItem
 			className="bg-green-500 overflow-hidden"
 			label={props.el.year}
-			nodeId={`${props.el.year}`}
+			itemId={`${props.el.year}`}
 		// className={
 		// 	'accordion ' +
 		// 	(props.active ? 'bg-green-800' : 'bg-green-500') +
@@ -227,7 +227,7 @@ function TreeViewMonths(props: { files: IndividualFileArray; month_name: months;
 			}}
 			className="bg-blue-700"
 			label={props.month_name}
-			nodeId={`${props.month_name}`}
+			itemId={`${props.month_name}`}
 		>
 			<div key={props.index} className="bg-green-500 overflow-hidden">
 				{days}
@@ -255,7 +255,7 @@ function TreeViewDays(props: {
 				}}
 				className="bg-pink-700"
 				label={props.day}
-				nodeId={`${props.month_name + props.day}`}
+				itemId={`${props.month_name + props.day}`}
 			>
 				<div
 					key={props.index}
@@ -314,7 +314,7 @@ export function ItemsEl(props: { file: IndividualFile; year: number; month_name:
 
 	return (
 		// <Tooltip title={props.file.comment ? props.file.comment : ''}>
-		<div
+		<div id={`${props.file.file}`}
 			className={`${props.file.comment !== null ? 'bg-orange-600' : 'bg-violet-600'} `}
 			onClick={(e) =>
 				handleClickOnFile(e, navigate, location, props.year, props.month_name, props.file.channel_id!, params)
