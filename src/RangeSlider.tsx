@@ -40,9 +40,19 @@ export function RangeSlider(props: {
 	isClip: boolean;
 	userGuilds: UserGuilds[] | null;
 	isSilence: boolean;
+	trueDuration?: number | null;
 }) {
+	const [actualDuration, setActualDuration] = useState(props.trueDuration && isFinite(props.trueDuration) ? props.trueDuration : (isFinite(props.audioRef.duration) ? props.audioRef.duration : 0));
+
+	useEffect(() => {
+		if (props.trueDuration && isFinite(props.trueDuration)) {
+			setActualDuration(props.trueDuration);
+			setStartEnd((prev) => [prev[0], Math.max(prev[1], props.trueDuration as number)]);
+		}
+	}, [props.trueDuration]);
+
 	const [playing, setPlaying] = useState(false);
-	const [startEnd, setStartEnd] = React.useState<number[]>([0, props.audioRef.duration]);
+	const [startEnd, setStartEnd] = React.useState<number[]>([0, actualDuration]);
 	const [zoomInStartEnd, setZoomInStartEnd] = React.useState<number>(0);
 	const [isSliderClicked, setIsSliderClicked] = React.useState(false);
 	const [ArrowKeySkip, CtrlArrowKeySKip] = [5, 30];

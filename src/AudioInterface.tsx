@@ -46,6 +46,8 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 		};
 	}, [params.file_name, props.isClip, props.isSilence, params.guild_id, params.channel_id, params.year, params.month, dispatch]);
 
+	const [trueDuration, setTrueDuration] = useState<number | null>(null);
+
 	useEffect(() => {
 		// If this is the silence player, but silence hasn't been found/generated, don't load anything yet
 		if (props.isSilence && !value) {
@@ -60,26 +62,33 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 		);
 		setReadyToPlay(false);
 		setError(false);
+		setTrueDuration(null);
 
 		let localAudioRef: HTMLAudioElement;
-		if (props.isClip) {
-			localAudioRef = new Audio(
-				`https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name!)}`
-			);
-		} else {
-			localAudioRef = new Audio(
-				`https://dev.patrykstyla.com/audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month
-				}/${encodeURIComponent(params.file_name!)}.ogg${props.isSilence ? "?silence=true" : ""}`
-			);
-		}
+		const audioUrl = props.isClip
+			? `https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name!)}`
+			: `https://dev.patrykstyla.com/audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${encodeURIComponent(params.file_name!)}.ogg${props.isSilence ? "?silence=true" : ""}`;
 
+		localAudioRef = new Audio(audioUrl);
 		let isActive = true;
+
+		// Update duration safely as the file buffers/plays
+		localAudioRef.addEventListener("durationchange", () => {
+			if (!isActive) return;
+			if (localAudioRef.duration !== Infinity && isFinite(localAudioRef.duration)) {
+				setTrueDuration(localAudioRef.duration);
+			}
+		});
 
 		localAudioRef!.addEventListener('canplaythrough', (e) => {
 			if (!isActive) return;
 			console.log('canplaythrough');
 			setReadyToPlay(true);
 			setAudioRef(localAudioRef);
+
+			if (localAudioRef.duration !== Infinity && isFinite(localAudioRef.duration)) {
+				setTrueDuration(localAudioRef.duration);
+			}
 		});
 
 		localAudioRef!.onerror = (ev) => {
@@ -94,7 +103,7 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 			localAudioRef?.pause();
 			localAudioRef.src = '';
 		};
-	}, [params.file_name, props.isClip, props.isSilence, value]);
+	}, [params.file_name, props.isClip, props.isSilence, value, params.guild_id, params.channel_id, params.year, params.month]);
 
 	// If it's the silence player and it's not active yet, return nothing instead of "Downloading"
 	if (props.isSilence && !value) {
@@ -119,6 +128,7 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 						isClip={props.isClip}
 						userGuilds={props.userGuilds}
 						isSilence={props.isSilence}
+						trueDuration={trueDuration}
 					/>
 				) : (
 					'Downloading'
