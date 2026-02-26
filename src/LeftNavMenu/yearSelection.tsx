@@ -8,7 +8,7 @@ import {
 	useParams,
 } from 'react-router-dom';
 
-import { Favorites } from '../App';
+import { Favorites } from '../components/Favorites';
 import {
 	Channels,
 	Dirs,
