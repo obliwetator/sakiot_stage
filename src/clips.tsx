@@ -1,19 +1,21 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { AudioInterface } from './AudioInterface';
-import { BASE_URL, PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from './Constants';
+import { BASE_URL, PATH_PREFIX_FOR_LOGGED_USERS } from './Constants';
+import { useGetAuthDetailsQuery } from './app/apiSlice';
+import { useAppSelector } from './app/hooks';
 
 function SimpleAccordion(props: { data: Clips[] }) {
 	const navigate = useNavigate();
@@ -128,29 +130,36 @@ interface Clips {
 	id: string;
 }
 
-export default function Clips(props: { guildSelected: UserGuilds | null; userGuilds: UserGuilds[] | null }) {
+export default function Clips() {
 	const params = useParams();
+	const location = useLocation();
 	const [data, setData] = useState<Clips[] | null>(null);
 
+	const guildSelected = useAppSelector((state) => state.app.guildSelected);
+	const { data: authData } = useGetAuthDetailsQuery(undefined, { skip: !localStorage.getItem('token') });
+	const userGuilds = authData?.guilds || null;
+
 	useEffect(() => {
-		fetch(`https://dev.patrykstyla.com/audio/clips/${props.guildSelected?.id}`, { credentials: 'include' }).then(
-			(response) => {
-				if (!response.ok) {
-					console.log('cannot get clip data');
-				} else {
-					response.json().then((result: Clips[]) => {
-						setData(result);
-					});
+		if (guildSelected?.id) {
+			fetch(`https://dev.patrykstyla.com/audio/clips/${guildSelected.id}`, { credentials: 'include' }).then(
+				(response) => {
+					if (!response.ok) {
+						console.log('cannot get clip data');
+					} else {
+						response.json().then((result: Clips[]) => {
+							setData(result);
+						});
+					}
 				}
-			}
-		);
-	}, [props.guildSelected]);
+			);
+		}
+	}, [guildSelected]);
 
 	if (data) {
 		return (
 			<div className="flex">
 				<SimpleAccordion data={data} />
-				{params.file_name && <AudioInterface isClip={true} userGuilds={props.userGuilds} isSilence={false} />}
+				{params.file_name && <AudioInterface key={location.pathname} isClip={true} userGuilds={userGuilds} isSilence={false} />}
 			</div>
 		);
 	} else {

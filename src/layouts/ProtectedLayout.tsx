@@ -1,36 +1,45 @@
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import { AudioParams, UserGuilds } from '../Constants';
+import { useGetAuthDetailsQuery } from '../app/apiSlice';
+import { useAppSelector } from '../app/hooks';
+import { AudioParams } from '../Constants';
+import { setGuildSelected } from '../reducers/appSlice';
 
-export const ProtectedLayout = (props: {
-	isLoggedIn: boolean;
-	guildSelected: UserGuilds | null;
-	setGuildSelected: React.Dispatch<React.SetStateAction<UserGuilds | null>>;
-	userGuilds: UserGuilds[] | null;
-}) => {
+export const ProtectedLayout = () => {
 	const navigate = useNavigate();
 	const params = useParams<AudioParams>();
+	const dispatch = useDispatch();
+
+	const guildSelected = useAppSelector((state) => state.app.guildSelected);
+	const { data: authData } = useGetAuthDetailsQuery(undefined, { skip: !localStorage.getItem('token') });
+
+	const userGuilds = authData?.guilds || null;
 
 	const handleGuildSelect = (index: number) => {
-		const value = props.userGuilds![index];
-		props.setGuildSelected(value);
-		navigate(value.id);
+		if (userGuilds) {
+			const value = userGuilds[index];
+			dispatch(setGuildSelected(value));
+			navigate(value.id);
+		}
 	};
 
 	useEffect(() => {
-		if (params.guild_id) {
-			const guild = props.userGuilds!.find((element) => element.id === params.guild_id!)!;
-			props.setGuildSelected(guild);
+		if (params.guild_id && userGuilds) {
+			const guild = userGuilds.find((element) => element.id === params.guild_id);
+			if (guild) {
+				dispatch(setGuildSelected(guild));
+			}
 		}
-	});
+	}, [params.guild_id, userGuilds, dispatch]);
 
-	if (!props.userGuilds) {
+	if (!userGuilds) {
 		return <>No guilds</>;
 	}
 
-	const guilds = props.userGuilds?.map((value, index) => {
+	const guilds = userGuilds.map((value, index) => {
 		return (
 			<Grid size={{ xs: 1 }} key={index}>
 				<div onClick={() => handleGuildSelect(index)} className="cursor-pointer">{value.name}</div>
@@ -38,7 +47,7 @@ export const ProtectedLayout = (props: {
 		);
 	});
 
-	if (!props.guildSelected) {
+	if (!guildSelected) {
 		return (
 			<Box sx={{ flexGrow: 1 }}>
 				SELECT A SERVER

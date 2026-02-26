@@ -747,6 +747,7 @@ function SilenceButton(props: { params: Readonly<Params<AudioParams>>; isSilence
 			console.error(res);
 		}
 
+
 		const req2 = fetch(`https://dev.patrykstyla.com/api/remove_silence/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
 			credentials: 'include',
 			headers: {
@@ -857,14 +858,16 @@ function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: nu
 
 
 function formatDuration(value: number) {
+	console.log("value", value);
+	if (!isFinite(value) || isNaN(value)) return "0:00";
 	const minute = Math.floor(value / 60);
 	const secondLeft = Math.floor(value - minute * 60);
 	return `${minute}:${secondLeft < 10 ? `0${secondLeft}` : secondLeft}`;
 }
 
 function formatDurationV2(value: number) {
-	// if (typeof value === "number"  ) return 0;
-
+	console.log("value", value);
+	if (!isFinite(value) || isNaN(value)) return "00:00:00";
 	return new Date(value * 1000).toISOString().slice(11, 19);
 }
 

@@ -5,7 +5,6 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { UserGuilds } from './Constants';
 import Clips from './clips';
 
 // Extracted Components
@@ -15,84 +14,48 @@ import { YearSelection } from './components/YearSelection';
 import { LayoutsWithNavbar } from './layouts/LayoutsWithNavbar';
 import { ProtectedLayout } from './layouts/ProtectedLayout';
 
+// RTK Query & Redux
+import { useDispatch } from 'react-redux';
+import { useGetAuthDetailsQuery } from './app/apiSlice';
+import { setGuildSelected } from './reducers/appSlice';
+
 const darkTheme = createTheme({
 	palette: {
 		mode: 'dark',
 	},
 });
 
-interface User {
-	guild_id: string;
-	permissions: number;
-	icon: number;
-	name: string;
-}
-
 function App() {
-	const [isLoggedIn, setIsLoggedIn] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
-	const [user, setUser] = useState<User | null>(null);
-	const [userGuilds, setUserGuilds] = useState<UserGuilds[] | null>(null);
-	const [guildSelected, setGuildSelected] = useState<UserGuilds | null>(null);
+	const dispatch = useDispatch();
 
-	const getUserDetails = () => {
-		const users = fetch('https://dev.patrykstyla.com/api/users/@me', {
-			credentials: 'include',
-		});
+	const {
+		data: authData,
+		isLoading,
+		isError,
+		refetch
+	} = useGetAuthDetailsQuery(undefined, {
+		// Only run the query if a token exists in local storage
+		skip: !localStorage.getItem('token')
+	});
 
-		const guilds = fetch('https://dev.patrykstyla.com/api/users/@me/guilds', {
-			credentials: 'include',
-		});
+	const isLoggedIn = !!authData?.user && !isError;
 
-		const token = fetch('https://dev.patrykstyla.com/api/token', {
-			credentials: 'include',
-		});
-
-		Promise.all([users, guilds, token]).then(async (values) => {
-			if (!(values[0].status >= 200) || !(values[0].status < 300)) {
-				setIsLoading(false);
-				return;
-			}
-
-			if (!(values[1].status >= 200) || !(values[1].status < 300)) {
-				setIsLoading(false);
-				return;
-			}
-
-			if (!(values[2].status >= 200) || !(values[2].status < 300)) {
-				setIsLoading(false);
-				return;
-			}
-
-			const guildsData = (await values[1].json()) as UserGuilds[];
-
-			setUser((await values[0].json()) as User);
-			setUserGuilds(guildsData);
-
+	// Set initial guild selection if we have a guild in the URL and the query completes
+	useEffect(() => {
+		if (authData?.guilds) {
 			const url = window.location.href;
 			const split = url.split('/');
 			const res = split[5];
 			if (res) {
-				console.log('here');
-				const guild = guildsData.find(({ id }) => id === res) as UserGuilds | null;
-				setGuildSelected(guild);
+				const guild = authData.guilds.find(({ id }) => id === res) || null;
+				dispatch(setGuildSelected(guild));
 			}
 
-			localStorage.setItem('token', (await values[2].json()).token as any);
-			setIsLoggedIn(true);
-			setIsLoading(false);
-		});
-	};
-
-	useEffect(() => {
-		console.log('laa');
-		if (localStorage.getItem('token')) {
-			getUserDetails();
-		} else {
-			// do nothing. User is not authenticated
-			setIsLoading(false);
+			if (authData.token) {
+				localStorage.setItem('token', authData.token);
+			}
 		}
-	}, []);
+	}, [authData, dispatch]);
 
 	const [contextMenu, setContextMenu] = useState<{
 		mouseX: number;
@@ -100,24 +63,26 @@ function App() {
 		file: string | null;
 	} | null>(null);
 
+	// Discord oauth success handler
 	useEffect(() => {
 		window.onmessage = (e) => {
-			if (e.origin !== 'https://dev.patrykstyla.com') {
-				return;
-			}
+			if (e.origin !== 'https://dev.patrykstyla.com') return;
 
 			console.log('message', e);
-
 			if (e.data.success === 1) {
 				console.log('Succ');
+				// Setting a dummy token to trigger the query if it was skipped
+				if (!localStorage.getItem('token')) {
+					localStorage.setItem('token', 'pending');
+				}
 				setTimeout(() => {
-					getUserDetails();
+					refetch();
 				}, 100);
 			} else {
 				console.error('something failed when authenticating');
 			}
 		};
-	}, []);
+	}, [refetch]);
 
 	const [menuItems, setMenuItems] = useState<{ name: string; cb: () => void }[] | null>(null);
 	const [isFormOpen, setIsFormOpen] = useState(false);
@@ -158,15 +123,9 @@ function App() {
 		return (
 			<ThemeProvider theme={darkTheme}>
 				<BrowserRouter>
-					<LayoutsWithNavbar
-						isLoggedIn={isLoggedIn}
-						setIsLoggedIn={setIsLoggedIn}
-						guildSelected={guildSelected}
-						setGuildSelected={setGuildSelected}
-						userGuilds={userGuilds}
-					/>
+					<LayoutsWithNavbar />
 					<Box p={2}>
-						{!isLoggedIn
+						{!isLoggedIn && !isLoading
 							? "You are not logged in or you are not authorized to view this content"
 							: "Loading..."}
 					</Box>
@@ -180,42 +139,11 @@ function App() {
 			<CssBaseline />
 			<BrowserRouter>
 				<Routes>
-					<Route
-						path="/"
-						element={
-							<LayoutsWithNavbar
-								isLoggedIn={isLoggedIn}
-								setIsLoggedIn={setIsLoggedIn}
-								guildSelected={guildSelected}
-								setGuildSelected={setGuildSelected}
-								userGuilds={userGuilds}
-							/>
-						}
-					>
-						<Route
-							path="/"
-							element={
-								<ProtectedLayout
-									isLoggedIn={isLoggedIn}
-									guildSelected={guildSelected}
-									setGuildSelected={setGuildSelected}
-									userGuilds={userGuilds}
-								/>
-							}
-						/>
+					<Route path="/" element={<LayoutsWithNavbar />}>
+						<Route path="/" element={<ProtectedLayout />} />
 						<Route path=":guild_id" element={<Box p={2}>select from top navbar</Box>} />
 
-						<Route
-							path="/dashboard"
-							element={
-								<ProtectedLayout
-									isLoggedIn={isLoggedIn}
-									guildSelected={guildSelected}
-									setGuildSelected={setGuildSelected}
-									userGuilds={userGuilds}
-								/>
-							}
-						>
+						<Route path="/dashboard" element={<ProtectedLayout />}>
 							<Route path=":guild_id">
 								<Route path="" element={<Box p={2}>select from top navbar</Box>} />
 								<Route path="audio">
@@ -226,8 +154,6 @@ function App() {
 												setContextMenu={setContextMenu}
 												setMenuItems={setMenuItems}
 												setFormOpen={setIsFormOpen}
-												guildSelected={guildSelected}
-												userGuilds={userGuilds}
 											/>
 										}
 									/>
@@ -238,8 +164,6 @@ function App() {
 												setContextMenu={setContextMenu}
 												setMenuItems={setMenuItems}
 												setFormOpen={setIsFormOpen}
-												guildSelected={guildSelected}
-												userGuilds={userGuilds}
 											/>
 										}
 									/>
@@ -254,8 +178,6 @@ function App() {
 											setContextMenu={setContextMenu}
 											setMenuItems={setMenuItems}
 											setFormOpen={setIsFormOpen}
-											guildSelected={guildSelected}
-											userGuilds={userGuilds}
 										/>
 									}
 								/>
@@ -266,21 +188,13 @@ function App() {
 											setContextMenu={setContextMenu}
 											setMenuItems={setMenuItems}
 											setFormOpen={setIsFormOpen}
-											guildSelected={guildSelected}
-											userGuilds={userGuilds}
 										/>
 									}
 								/>
 							</Route>
 							<Route path="clips">
-								<Route
-									path=":guild_id"
-									element={<Clips guildSelected={guildSelected} userGuilds={userGuilds} />}
-								/>
-								<Route
-									path=":guild_id/:file_name"
-									element={<Clips guildSelected={guildSelected} userGuilds={userGuilds} />}
-								/>
+								<Route path=":guild_id" element={<Clips />} />
+								<Route path=":guild_id/:file_name" element={<Clips />} />
 							</Route>
 						</Route>
 					</Route>

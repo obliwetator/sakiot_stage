@@ -1,9 +1,11 @@
 import Container from '@mui/material/Container';
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { AudioInterface } from '../AudioInterface';
 import CustomizedTreeView from '../components/TreeView';
-import { UserGuilds } from '../Constants';
+
+import { useGetAuthDetailsQuery } from '../app/apiSlice';
+import { useAppSelector } from '../app/hooks';
 
 export function YearSelection(props: {
 	setContextMenu: React.Dispatch<
@@ -23,17 +25,20 @@ export function YearSelection(props: {
 		>
 	>;
 	setFormOpen: React.Dispatch<React.SetStateAction<boolean>>;
-	guildSelected: UserGuilds | null;
-	userGuilds: UserGuilds[] | null;
 }) {
 	const params = useParams();
+	const location = useLocation();
+
+	const guildSelected = useAppSelector((state) => state.app.guildSelected);
+	const { data: authData } = useGetAuthDetailsQuery(undefined, { skip: !localStorage.getItem('token') });
+	const userGuilds = authData?.guilds || null;
 
 	return (
 		<div className="flex">
-			<CustomizedTreeView guildSelected={props.guildSelected} />
+			<CustomizedTreeView guildSelected={guildSelected} />
 			<Container maxWidth={false} style={{ minWidth: 0 }}>
-				{params.year && <AudioInterface isClip={false} userGuilds={props.userGuilds} isSilence={false} />}
-				<AudioInterface isClip={false} userGuilds={props.userGuilds} isSilence={true} />
+				{params.year && <AudioInterface key={`${location.pathname}-nosilence`} isClip={false} userGuilds={userGuilds} isSilence={false} />}
+				<AudioInterface key={`${location.pathname}-silence`} isClip={false} userGuilds={userGuilds} isSilence={true} />
 			</Container>
 		</div>
 	);

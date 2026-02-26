@@ -20,8 +20,14 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 	const dispatch = useDispatch();
 	let value = useAppSelector(state => state.hasSilence.value)
 
+	// Dispatch clean up on unmount or file change so the global hasSilence resets properly
 	useEffect(() => {
-		// if (value) return;
+		return () => {
+			dispatch(setHasSilence(false));
+		};
+	}, [params.file_name, dispatch]);
+
+	useEffect(() => {
 		console.log("useffect")
 		console.log(
 			`https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name!)}`
@@ -33,13 +39,11 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 				`https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name!)}`
 			);
 		} else {
-			if (!value || audioRef!) {
-				// TODO: If we have a audio will silence dont re-load the silence free version
-				localAudioRef = new Audio(
-					`https://dev.patrykstyla.com/audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month
-					}/${encodeURIComponent(params.file_name!)}.ogg ${props.isSilence ? "?silence=true" : ""}`
-				);
-			}
+			// Always load what's explicitly requested by isSilence prop
+			localAudioRef = new Audio(
+				`https://dev.patrykstyla.com/audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month
+				}/${encodeURIComponent(params.file_name!)}.ogg${props.isSilence ? "?silence=true" : ""}`
+			);
 		}
 
 		localAudioRef!.addEventListener('canplaythrough', (e) => {
@@ -54,28 +58,20 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 		localAudioRef!.onerror = (ev) => {
 			console.log('Audio Ref error', ev);
 			setError(true);
-			if (props.isSilence) {
-				// dispatch(setHasSilence(false))
-			}
-
 		};
 		console.log('mount Audio Interface');
 
 		return function cleanup() {
 			localAudioRef?.pause();
-			//   setAudioRef(null);
-			// setReadyToPlay(false);
-			// setError(false);
-			// dispatch(setHasSilence(false))
+			localAudioRef.src = '';
 		};
-	}, [params.file_name, value]);
+	}, [params.file_name]); // Removed `value` from dependency array so it doesn't remount on Redux state change
 
 	if (error) {
-
-		if (value) {
-			return <div className="flex-initial w-4/5">An error occured. Try refreshing</div>;
-		} else {
+		if (props.isSilence) {
 			return <div className="flex-initial w-4/5">Audio file doesn't have silence free vesion</div>;
+		} else {
+			return <div className="flex-initial w-4/5">An error occured fetching the normal audio file. Try refreshing</div>;
 		}
 	}
 
