@@ -38,7 +38,7 @@ export function YearSelection(props: {
 			<CustomizedTreeView guildSelected={guildSelected} />
 			<Container maxWidth={false} style={{ minWidth: 0 }}>
 				{params.year && <AudioInterface key={`${location.pathname}-nosilence`} isClip={false} userGuilds={userGuilds} isSilence={false} />}
-				<AudioInterface key={`${location.pathname}-silence`} isClip={false} userGuilds={userGuilds} isSilence={true} />
+				{params.year && <AudioInterface key={`${location.pathname}-silence`} isClip={false} userGuilds={userGuilds} isSilence={true} />}
 			</Container>
 		</div>
 	);

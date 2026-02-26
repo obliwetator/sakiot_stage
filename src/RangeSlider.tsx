@@ -732,71 +732,68 @@ function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 
 
 function SilenceButton(props: { params: Readonly<Params<AudioParams>>; isSilence: boolean }) {
+	const [isLoading, setIsLoading] = useState(false);
+
 	const handleOnClick = async () => {
-		const req = fetch(`https://dev.patrykstyla.com/api/remove_silence/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
-			credentials: 'include',
-			headers: {
-				Accept: 'application/json',
-				'Content-Type': 'application/json',
-				'Idempotency-Key': store.getState().token.value
-			},
-		})
+		setIsLoading(true);
+		try {
+			// First request to initiate silence removal
+			const res = await fetch(`https://dev.patrykstyla.com/api/remove_silence/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
+				credentials: 'include',
+				headers: {
+					Accept: 'application/json',
+					'Content-Type': 'application/json',
+					'Idempotency-Key': store.getState().token.value
+				},
+			});
 
-		const res = await req;
-		if (!res.ok) {
-			console.error(res);
+			if (!res.ok) {
+				console.error("Initial request failed", res);
+				setIsLoading(false);
+				return;
+			}
+
+			const json = await res.json();
+
+			if (json.message === "Success" || json.message === " Accepted") {
+				// Send second request and wait for the final result
+				const res2 = await fetch(`https://dev.patrykstyla.com/api/remove_silence/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
+					credentials: 'include',
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/json',
+						'Idempotency-Key': store.getState().token.value
+					},
+				});
+
+				if (!res2.ok) {
+					console.error("Second request failed", res2);
+					setIsLoading(false);
+					return;
+				}
+
+				const json2 = await res2.json();
+				if (json2.message === "Success") {
+					console.log("Silence removed", json2.url);
+					store.dispatch(setHasSilence(true));
+				}
+			}
+		} catch (error) {
+			console.error("Error removing silence:", error);
+		} finally {
+			setIsLoading(false);
 		}
+	};
 
-
-		const req2 = fetch(`https://dev.patrykstyla.com/api/remove_silence/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
-			credentials: 'include',
-			headers: {
-				Accept: 'application/json',
-				'Content-Type': 'application/json',
-				'Idempotency-Key': store.getState().token.value
-			},
-		})
-
-		const res2 = await req2;
-		if (!res2.ok) {
-			console.error(res);
-		}
-
-		console.log("Silence removed")
-		store.dispatch(setHasSilence(true));
-
-		// const json = await res.json();
-
-		return ""
-	}
-
-	const handleOnClickTEST = async () => {
-		const req = fetch(`https://dev.patrykstyla.com/api/find/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
-			credentials: 'include',
-			headers: {
-				Accept: 'application/json',
-				'Content-Type': 'application/json',
-			},
-		})
-
-		const res = await req;
-		if (!res.ok) {
-			console.error(res);
-		}
-
-		// const json = await res.json();
-
-		return ""
-	}
 	return (
 		<>
-			{!store.getState().hasSilence.value && <Button variant="contained" onClick={handleOnClick}>
-				Remove Silence
-			</Button>}
-			<Button variant="contained" onClick={handleOnClickTEST}>
-				TEST
-			</Button>
-		</>)
+			{!store.getState().hasSilence.value && !props.isSilence && (
+				<Button variant="contained" onClick={handleOnClick} disabled={isLoading}>
+					{isLoading ? "Removing..." : "Remove Silence"}
+				</Button>
+			)}
+		</>
+	);
 }
 
 function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: number[]; disabled: boolean }) {
