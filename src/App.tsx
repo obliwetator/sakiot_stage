@@ -27,6 +27,7 @@ const darkTheme = createTheme({
 
 function App() {
 	const dispatch = useDispatch();
+	const [hasToken, setHasToken] = useState(!!localStorage.getItem('token'));
 
 	const {
 		data: authData,
@@ -34,8 +35,8 @@ function App() {
 		isError,
 		refetch
 	} = useGetAuthDetailsQuery(undefined, {
-		// Only run the query if a token exists in local storage
-		skip: !localStorage.getItem('token')
+		// Only run the query if a token is marked as existing
+		skip: !hasToken
 	});
 
 	const isLoggedIn = !!authData?.user && !isError;
@@ -71,18 +72,27 @@ function App() {
 			console.log('message', e);
 			if (e.data.success === 1) {
 				console.log('Succ');
-				// Setting a dummy token to trigger the query if it was skipped
+
+				// Setting a dummy token and setting hasToken to true
 				if (!localStorage.getItem('token')) {
 					localStorage.setItem('token', 'pending');
 				}
-				setTimeout(() => {
-					refetch();
-				}, 100);
+
+				// Changing this state triggers React to un-skip the RTK query
+				// so it automatically fetches without needing a refetch() or timeout!
+				setHasToken(true);
+
+				// Close the popup window slightly later so cookies and state can settle
+				if (e.source && (e.source as Window).close) {
+					setTimeout(() => {
+						(e.source as Window).close();
+					}, 200);
+				}
 			} else {
 				console.error('something failed when authenticating');
 			}
 		};
-	}, [refetch]);
+	}, [setHasToken]);
 
 	const [menuItems, setMenuItems] = useState<{ name: string; cb: () => void }[] | null>(null);
 	const [isFormOpen, setIsFormOpen] = useState(false);
