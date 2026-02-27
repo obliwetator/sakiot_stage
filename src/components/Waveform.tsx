@@ -1,49 +1,38 @@
-import { useEffect, useRef, useState } from "react";
+import { useWavesurfer } from "@wavesurfer/react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Params } from "react-router-dom";
-import WaveSurfer from "wavesurfer.js";
 // @ts-ignore
 import Button from '@mui/material/Button';
-import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
+import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline.js";
 import { AudioParams } from "../Constants";
 
 function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd?: number[] }) {
 	const containerRef = useRef<HTMLDivElement>(null);
-	const wavesurferRef = useRef<WaveSurfer | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [zoomLevel, setZoomLevel] = useState(1);
 	const [minPxPerSec, setMinPxPerSec] = useState(1); // default minimum px per second
 
-	useEffect(() => {
-		if (containerRef.current && !wavesurferRef.current) {
-			wavesurferRef.current = WaveSurfer.create({
-				container: containerRef.current,
-				waveColor: "#ff00ff", // magenta
-				progressColor: "#cc00cc", // darker magenta for progress
-				barWidth: 2,
-				barGap: 1,
-				barRadius: 2,
-				interact: false,
-				plugins: [
-					TimelinePlugin.create({
-						// Not providing a container renders it inside the main wavesurfer wrapper
-						height: 20,
-						timeInterval: 60,
-						primaryLabelInterval: 600,
-						style: {
-							fontSize: '12px',
-							color: '#6a6a6a',
-						}
-					}),
-				],
-			});
-		}
-		return () => {
-			if (wavesurferRef.current) {
-				wavesurferRef.current.destroy();
-				wavesurferRef.current = null;
-			}
-		};
-	}, []);
+	const { wavesurfer, isReady } = useWavesurfer({
+		container: containerRef,
+		waveColor: "#ff00ff", // magenta
+		progressColor: "#cc00cc", // darker magenta for progress
+		barWidth: 2,
+		barGap: 1,
+		barRadius: 2,
+		interact: false,
+		plugins: useMemo(() => [
+			TimelinePlugin.create({
+				// Not providing a container renders it inside the main wavesurfer wrapper
+				height: 20,
+				timeInterval: 60,
+				primaryLabelInterval: 600,
+				style: {
+					fontSize: '12px',
+					color: '#6a6a6a',
+				}
+			}),
+		], []),
+	});
 
 	const [progress, setProgress] = useState<number | null>(null);
 
@@ -115,8 +104,8 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd
 
 				const duration = (length * samplesPerPixel) / sampleRate;
 
-				if (wavesurferRef.current) {
-					wavesurferRef.current.load("", [peaks], duration);
+				if (wavesurfer) {
+					wavesurfer.load("", [peaks], duration);
 				}
 			} catch (err) {
 				console.error("Error processing complete event:", err);
@@ -139,31 +128,29 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd
 
 	// Update waveform position based on startEnd
 	useEffect(() => {
-		if (wavesurferRef.current && props.startEnd && props.startEnd.length > 0) {
-			const duration = wavesurferRef.current.getDuration();
+		if (wavesurfer && props.startEnd && props.startEnd.length > 0) {
+			const duration = wavesurfer.getDuration();
 			if (duration > 0) {
 				const time = props.startEnd[0];
-				wavesurferRef.current.setTime(time);
+				wavesurfer.setTime(time);
 			}
 		}
-	}, [props.startEnd]);
+	}, [props.startEnd, wavesurfer]);
 
 	const handleZoom = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const newZoomLevel = Number(e.target.value);
 		setZoomLevel(newZoomLevel);
-		if (wavesurferRef.current) {
-			wavesurferRef.current.zoom(newZoomLevel);
+		if (wavesurfer) {
+			wavesurfer.zoom(newZoomLevel);
 		}
 	};
 
 	// Reset zoom level to initial on waveform ready
 	useEffect(() => {
-		if (wavesurferRef.current) {
-			wavesurferRef.current.on('ready', () => {
-				setZoomLevel(0); // 0 or minimum possible value usually auto-fits the screen
-			});
+		if (isReady) {
+			setZoomLevel(0); // 0 or minimum possible value usually auto-fits the screen
 		}
-	}, [wavesurferRef.current]);
+	}, [isReady]);
 
 	return (
 		<div style={{ width: "100%", maxWidth: "100%", marginBottom: "20px" }}>
