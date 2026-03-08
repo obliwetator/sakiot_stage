@@ -46,7 +46,7 @@ function App() {
 		if (authData?.guilds) {
 			const url = window.location.href;
 			const split = url.split('/');
-			const res = split[5];
+			const res = split[4];
 			if (res) {
 				const guild = authData.guilds.find(({ id }) => id === res) || null;
 				dispatch(setGuildSelected(guild));
@@ -153,6 +153,8 @@ function App() {
 						<Route path="/" element={<ProtectedLayout />} />
 						<Route path=":guild_id" element={<Box p={2}>select from top navbar</Box>} />
 
+						<Route path="/metrics" element={<Dashboard />} />
+
 						<Route path="/dashboard" element={<ProtectedLayout />}>
 							<Route path=":guild_id">
 								<Route path="" element={<Box p={2}>select from top navbar</Box>} />
@@ -178,33 +180,10 @@ function App() {
 										}
 									/>
 								</Route>
-								<Route path="clips" />
-							</Route>
-							<Route path="audio">
-								<Route
-									path=":guild_id/:channel_id/:year/:month/:file_name"
-									element={
-										<YearSelection
-											setContextMenu={setContextMenu}
-											setMenuItems={setMenuItems}
-											setFormOpen={setIsFormOpen}
-										/>
-									}
-								/>
-								<Route
-									path=":guild_id"
-									element={
-										<YearSelection
-											setContextMenu={setContextMenu}
-											setMenuItems={setMenuItems}
-											setFormOpen={setIsFormOpen}
-										/>
-									}
-								/>
-							</Route>
-							<Route path="clips">
-								<Route path=":guild_id" element={<Clips />} />
-								<Route path=":guild_id/:file_name" element={<Clips />} />
+								<Route path="clips">
+									<Route path="" element={<Clips />} />
+									<Route path=":file_name" element={<Clips />} />
+								</Route>
 							</Route>
 						</Route>
 					</Route>

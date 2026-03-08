@@ -20,7 +20,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from './Constants';
 import Login from './login/login';
 
-const pages = ['Audio', 'Clips', 'DashBoard'];
+const pages = ['Audio', 'Clips', 'Metrics'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function ResponsiveAppBar(props: {
@@ -44,7 +44,7 @@ function ResponsiveAppBar(props: {
 	const handleCloseMenuNav = (name: string) => {
 		setAnchorElNav(null);
 
-		if (!props.guildSelected) {
+		if (!props.guildSelected && name !== 'Metrics') {
 			console.log('a');
 			navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}`);
 			return;
@@ -52,16 +52,15 @@ function ResponsiveAppBar(props: {
 		switch (name) {
 			case 'Audio':
 				// TODO: Dynamic need auth
-				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${props.guildSelected.id}`);
+				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${props.guildSelected?.id}/audio`);
 				break;
 
 			case 'Clips':
 				// TODO: Dynamic need auth
-				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/clips/${props.guildSelected.id}`);
+				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${props.guildSelected?.id}/clips`);
 				break;
-			case 'DashBoard':
-				// TODO: Dynamic need auth
-				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}`);
+			case 'Metrics':
+				navigate(`/metrics`);
 				break;
 		}
 	};
