@@ -21,7 +21,7 @@ import { PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from './Constants';
 import Login from './login/login';
 
 const pages = ['Audio', 'Clips', 'Metrics'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+const settings = ['Profile', 'Account', 'Metrics', 'Logout'];
 
 function ResponsiveAppBar(props: {
 	isLoggedIn: boolean;

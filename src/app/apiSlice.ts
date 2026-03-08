@@ -1,5 +1,6 @@
 import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
-import { UserGuilds } from '../Constants';
+import { Mutex } from 'async-mutex';
+import { Channels, UserGuilds } from '../Constants';
 
 export interface User {
 	guild_id: string;
@@ -14,6 +15,9 @@ export interface AuthDetails {
 	token: string | null;
 }
 
+// Create a new mutex
+const mutex = new Mutex();
+
 // Create our base query separately so we can wrap it
 const baseQuery = fetchBaseQuery({
 	baseUrl: 'https://dev.patrykstyla.com/api/',
@@ -21,82 +25,111 @@ const baseQuery = fetchBaseQuery({
 	fetchFn: (input, init) => fetch(input, { ...init, credentials: 'include' })
 });
 
-// A mutex to prevent multiple parallel refresh calls
-let isRefreshing = false;
-let refreshSubscribers: ((isRefreshed: boolean) => void)[] = [];
-
-const subscribeTokenRefresh = (cb: (isRefreshed: boolean) => void) => {
-	refreshSubscribers.push(cb);
-};
-
-const onRefreshed = (isRefreshed: boolean) => {
-	refreshSubscribers.forEach((cb) => cb(isRefreshed));
-	refreshSubscribers = [];
-};
-
 // Wrap the base query with reauthentication logic
 const baseQueryWithReauth: BaseQueryFn<
 	string | FetchArgs,
 	unknown,
 	FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-	// Wait until the mutex is available
-	if (isRefreshing) {
-		await new Promise<boolean>((resolve) => {
-			subscribeTokenRefresh((isRefreshed) => {
-				resolve(isRefreshed);
-			});
-		});
-	}
-
+	// wait until the mutex is available without locking it
+	await mutex.waitForUnlock();
 	let result = await baseQuery(args, api, extraOptions);
 
+	console.log('[baseQueryWithReauth] Result:', result);
+
 	if (result.error && result.error.status === 401) {
-		if (!isRefreshing) {
-			isRefreshing = true;
+		console.log('[baseQueryWithReauth] Hit 401. Attempting to refresh token...');
+		// checking whether the mutex is locked
+		if (!mutex.isLocked()) {
+			const release = await mutex.acquire();
 			try {
-				// Try to get a new token
 				const refreshResult = await baseQuery(
-					{ url: 'refresh', method: 'GET' }, // Adjust method to POST if your backend expects it
+					{ url: 'refresh', method: 'GET' },
 					api,
 					extraOptions
 				);
-
 				if (refreshResult.data) {
-					// Token refresh successful, notify subscribers
-					onRefreshed(true);
-					// Retry the original query
+					// retry the initial query
 					result = await baseQuery(args, api, extraOptions);
 				} else {
-					// Refresh failed (e.g. refresh token expired)
-					onRefreshed(false);
-					// Optional: Dispatch a logout action or clear tokens here
-					// api.dispatch(loggedOutAction());
+					// Optionally dispatch logout or clear tokens
 				}
 			} finally {
-				isRefreshing = false;
+				// release must be called once the mutex should be released again.
+				release();
 			}
 		} else {
-			// Another request already triggered a refresh. Wait for it to finish.
-			const isRefreshed = await new Promise<boolean>((resolve) => {
-				subscribeTokenRefresh((success) => {
-					resolve(success);
-				});
-			});
-
-			if (isRefreshed) {
-				// Retry original query
-				result = await baseQuery(args, api, extraOptions);
-			}
+			// wait until the mutex is available without locking it
+			await mutex.waitForUnlock();
+			result = await baseQuery(args, api, extraOptions);
 		}
 	}
 	return result;
 };
 
+export interface ClipData {
+	user_id: string;
+	clip_name: string;
+	file_name: string;
+	clip_start: number;
+	clip_end: number;
+	guild_id: string;
+	id: string;
+}
+
 export const apiSlice = createApi({
 	reducerPath: 'api',
 	baseQuery: baseQueryWithReauth,
 	endpoints: (builder) => ({
+		jamIt: builder.mutation<any, { guild_id: string, clip_name: string }>({
+			query: (body) => ({
+				url: `https://dev.patrykstyla.com/jamit`,
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Content-Type': 'application/json',
+				},
+				body,
+			}),
+		}),
+		removeSilence: builder.mutation<any, { guild_id: string, channel_id: string, year: string, month: string, file_name: string, idempotency_key: string }>({
+			query: ({ guild_id, channel_id, year, month, file_name, idempotency_key }) => ({
+				url: `remove_silence/${guild_id}/${channel_id}/${year}/${month}/${file_name}`,
+				method: 'GET',
+				headers: {
+					Accept: 'application/json',
+					'Content-Type': 'application/json',
+					'Idempotency-Key': idempotency_key
+				},
+			}),
+		}),
+		refresh: builder.mutation<void, void>({
+			query: () => 'refresh'
+		}),
+		getCurrentGuildDirs: builder.query<Channels[], string>({
+			query: (guild_id) => `current/${guild_id}`
+		}),
+		getClips: builder.query<ClipData[], string>({
+			query: (guild_id) => ({
+				url: `https://dev.patrykstyla.com/audio/clips/${guild_id}`
+			}),
+		}),
+		deleteClip: builder.mutation<void, { guild_id: string, file_name: string }>({
+			query: ({ guild_id, file_name }) => ({
+				url: `audio/clips/delete/${guild_id}`,
+				method: 'POST',
+				headers: {
+					'Content-Type': 'text/plain',
+				},
+				body: file_name,
+			})
+		}),
+		checkSilenceFile: builder.query<any, { guild_id: string, channel_id: string, year: string, month: string, file_name: string }>({
+			query: ({ guild_id, channel_id, year, month, file_name }) => ({
+				url: `https://dev.patrykstyla.com/audio/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}.ogg?silence=true`,
+				method: 'HEAD',
+			}),
+		}),
 		// Combine all 3 requests into a single query to emulate the existing Promise.all behavior
 		getAuthDetails: builder.query<AuthDetails, void>({
 			async queryFn(_arg, _queryApi, _extraOptions, fetchWithBQ) {
@@ -122,4 +155,4 @@ export const apiSlice = createApi({
 	}),
 });
 
-export const { useGetAuthDetailsQuery } = apiSlice;
+export const { useGetAuthDetailsQuery, useGetCurrentGuildDirsQuery, useGetClipsQuery, useDeleteClipMutation, useJamItMutation, useRemoveSilenceMutation, useCheckSilenceFileQuery, useRefreshMutation } = apiSlice;

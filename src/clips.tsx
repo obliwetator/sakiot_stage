@@ -14,10 +14,10 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { AudioInterface } from './AudioInterface';
 import { BASE_URL, PATH_PREFIX_FOR_LOGGED_USERS } from './Constants';
-import { useGetAuthDetailsQuery } from './app/apiSlice';
+import { ClipData, useDeleteClipMutation, useGetAuthDetailsQuery, useGetClipsQuery } from './app/apiSlice';
 import { useAppSelector } from './app/hooks';
 
-function SimpleAccordion(props: { data: Clips[] }) {
+function SimpleAccordion(props: { data: ClipData[] }) {
 	const navigate = useNavigate();
 	const [expanded, setExpanded] = useState<string | false>(false);
 
@@ -77,15 +77,13 @@ function AlertDialog(props: { name: string }) {
 	};
 	const params = useParams();
 
-	const handleYes = () => {
-		fetch(`${BASE_URL + 'api/audio/clips/delete/' + params.guild_id}`, {
-			credentials: 'include',
-			method: 'POST',
-			headers: {
-				'Content-Type': 'text/plain',
-			},
-			body: props.name,
-		});
+	const [deleteClip] = useDeleteClipMutation();
+
+	const handleYes = async () => {
+		if (params.guild_id) {
+			await deleteClip({ guild_id: params.guild_id, file_name: props.name }).unwrap();
+			// Optionally trigger refetch or cache invalidation for clips here
+		}
 		setOpen(false);
 	};
 
@@ -117,45 +115,23 @@ function AlertDialog(props: { name: string }) {
 	);
 }
 
-interface Clips {
-	// big int
-	user_id: string;
-	clip_name: string;
-	file_name: string;
-	clip_start: number;
-	clip_end: number;
-	// big int
-	guild_id: string;
-	// big int
-	id: string;
-}
-
 export default function Clips() {
 	const params = useParams();
 	const location = useLocation();
-	const [data, setData] = useState<Clips[] | null>(null);
 
 	const guildSelected = useAppSelector((state) => state.app.guildSelected);
 	const { data: authData } = useGetAuthDetailsQuery(undefined, { skip: !localStorage.getItem('token') });
 	const userGuilds = authData?.guilds || null;
 
-	useEffect(() => {
-		if (guildSelected?.id) {
-			fetch(`https://dev.patrykstyla.com/audio/clips/${guildSelected.id}`, { credentials: 'include' }).then(
-				(response) => {
-					if (!response.ok) {
-						console.log('cannot get clip data');
-					} else {
-						response.json().then((result: Clips[]) => {
-							setData(result);
-						});
-					}
-				}
-			);
-		}
-	}, [guildSelected]);
+	const { data, isError, isSuccess } = useGetClipsQuery(guildSelected?.id || '', {
+		skip: !guildSelected?.id,
+	});
 
-	if (data) {
+	if (isError) {
+		console.log('cannot get clip data');
+	}
+
+	if (isSuccess && data) {
 		return (
 			<div className="flex">
 				<SimpleAccordion data={data} />

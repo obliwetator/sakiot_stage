@@ -4,9 +4,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Params, useLocation, useParams } from 'react-router-dom';
 import { AudioParams, UserGuilds, valuetext } from './Constants';
 import { RangeSlider } from './RangeSlider';
+import { useCheckSilenceFileQuery } from './app/apiSlice';
 import { useAppSelector } from './app/hooks';
 import { setHasSilence } from './reducers/silence';
-
 
 
 export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[] | null; isSilence: boolean }) {
@@ -20,23 +20,22 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 	const dispatch = useDispatch();
 	let value = useAppSelector(state => state.hasSilence.value)
 
-	// Dispatch clean up on unmount or file change so the global hasSilence resets properly
-	// Only run the file check on the "original" player (isSilence === false)
+	const shouldCheckSilence = !props.isClip && !props.isSilence && !!params.file_name;
+	const { isSuccess, isError } = useCheckSilenceFileQuery({
+		guild_id: params.guild_id!,
+		channel_id: params.channel_id!,
+		year: params.year!,
+		month: params.month!,
+		file_name: params.file_name!,
+	}, { skip: !shouldCheckSilence });
+
 	useEffect(() => {
-		if (!props.isClip && !props.isSilence && params.file_name) {
-			const silenceUrl = `https://dev.patrykstyla.com/audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${encodeURIComponent(params.file_name)}.ogg?silence=true`;
-			fetch(silenceUrl)
-				.then(res => {
-					if (res.ok) {
-						dispatch(setHasSilence(true));
-					} else {
-						dispatch(setHasSilence(false));
-					}
-				})
-				.catch(err => {
-					console.error("Failed to check for silence file", err);
-					dispatch(setHasSilence(false));
-				});
+		if (shouldCheckSilence) {
+			if (isSuccess) {
+				dispatch(setHasSilence(true));
+			} else if (isError) {
+				dispatch(setHasSilence(false));
+			}
 		}
 
 		return () => {
@@ -44,7 +43,7 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 				dispatch(setHasSilence(false));
 			}
 		};
-	}, [params.file_name, props.isClip, props.isSilence, params.guild_id, params.channel_id, params.year, params.month, dispatch]);
+	}, [shouldCheckSilence, isSuccess, isError, dispatch, props.isSilence]);
 
 	const [trueDuration, setTrueDuration] = useState<number | null>(null);
 
