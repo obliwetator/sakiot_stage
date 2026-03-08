@@ -22,13 +22,13 @@ function SimpleAccordion(props: { data: Clips[] }) {
 	const [expanded, setExpanded] = useState<string | false>(false);
 
 	const handleClickAccordion = (guild_id: string, clip_name: string) => {
-		console.log('here', `${PATH_PREFIX_FOR_LOGGED_USERS}/clips/${guild_id}/${encodeURIComponent(clip_name)}`);
+		console.log('here', `${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_name)}`);
 		if (
-			location.pathname === `${PATH_PREFIX_FOR_LOGGED_USERS}/clips/${guild_id}/${encodeURIComponent(clip_name)}`
+			location.pathname === `${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_name)}`
 		) {
 			// do nothing
 		} else {
-			navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/clips/${guild_id}/${encodeURIComponent(clip_name)}`);
+			navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_name)}`);
 		}
 	};
 

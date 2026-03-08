@@ -360,14 +360,14 @@ function handleClickOnFile(
 	e.preventDefault();
 	if (
 		location.pathname ===
-		`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${params.guild_id
-		}/${channel_id}/${year}/${month_name}${e.currentTarget.innerHTML.slice(0, -4)}`
+		`${PATH_PREFIX_FOR_LOGGED_USERS}/${params.guild_id
+		}/audio/${channel_id}/${year}/${month_name}${e.currentTarget.innerHTML.slice(0, -4)}`
 	) {
-		// same location dont do anything
+		// do nothing
 	} else {
 		navigate(
-			`${PATH_PREFIX_FOR_LOGGED_USERS}/audio/${params.guild_id
-			}/${channel_id}/${year}/${month_name}/${e.currentTarget.innerHTML.slice(0, -4)}` + location.search
+			`${PATH_PREFIX_FOR_LOGGED_USERS}/${params.guild_id
+			}/audio/${channel_id}/${year}/${month_name}/${e.currentTarget.innerHTML.slice(0, -4)}` + location.search
 		);
 	}
 }
