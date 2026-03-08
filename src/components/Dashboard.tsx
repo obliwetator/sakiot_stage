@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useGetAuthDetailsQuery } from '../app/apiSlice';
+import { useGetAuthDetailsQuery, useRefreshMutation } from '../app/apiSlice';
 import { useAppSelector } from '../app/hooks';
 import { setGuildSelected } from '../reducers/appSlice';
 
@@ -55,11 +55,13 @@ export function Dashboard() {
 
 	const [metrics, setMetrics] = useState<Metrics | null>(null);
 	const [localUptime, setLocalUptime] = useState<number>(0);
+	const [refreshCounter, setRefreshCounter] = useState(0);
 
 	const hasToken = !!localStorage.getItem('token');
 	const { data: authData } = useGetAuthDetailsQuery(undefined, {
 		skip: !hasToken
 	});
+	const [refreshToken] = useRefreshMutation();
 
 	// TODO: Check against database if user is admin
 	// For now we mock it as true, later use authData?.user?.id
@@ -95,8 +97,17 @@ export function Dashboard() {
 			console.error('WebSocket Error:', error);
 		};
 
-		ws.onclose = () => {
-			console.log('Disconnected from metrics WebSocket');
+		ws.onclose = async (event) => {
+			console.log('Disconnected from metrics WebSocket', event.code);
+			if (event.code === 4001) {
+				console.log('Unauthorized WebSocket connection, refreshing token...');
+				try {
+					await refreshToken().unwrap();
+					setRefreshCounter(prev => prev + 1);
+				} catch (err) {
+					console.error('Failed to refresh token after WebSocket 4001', err);
+				}
+			}
 		};
 
 		return () => {
@@ -105,7 +116,7 @@ export function Dashboard() {
 			}
 			ws.close();
 		};
-	}, [isAdmin]);
+	}, [isAdmin, refreshCounter]);
 
 	useEffect(() => {
 		if (localUptime > 0) {
@@ -154,13 +165,25 @@ export function Dashboard() {
 			}
 		};
 
+		ws.onclose = async (event) => {
+			if (event.code === 4001) {
+				console.log('Unauthorized WebSocket connection (guild voice), refreshing token...');
+				try {
+					await refreshToken().unwrap();
+					setRefreshCounter(prev => prev + 1);
+				} catch (err) {
+					console.error('Failed to refresh token after WebSocket 4001', err);
+				}
+			}
+		};
+
 		return () => {
 			if (ws.readyState === WebSocket.OPEN) {
 				ws.send(JSON.stringify({ action: "unsubscribe", topic: `guild_voice:${selectedGuild.id}` }));
 			}
 			ws.close();
 		};
-	}, [isAdmin, selectedGuild]);
+	}, [isAdmin, selectedGuild, refreshCounter]);
 
 	if (!isAdmin) {
 		return (

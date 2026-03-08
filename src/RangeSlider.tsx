@@ -15,6 +15,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from "react";
 import { Params, useLocation, useParams } from "react-router-dom";
+import { useJamItMutation, useRemoveSilenceMutation } from './app/apiSlice';
 import WaveFormButton from './components/Waveform';
 import { AudioParams, UserGuilds, valuetext } from "./Constants";
 import { setHasSilence } from "./reducers/silence";
@@ -651,38 +652,25 @@ function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 	const location = useLocation();
 	const params = useParams();
 
+	const [jamIt] = useJamItMutation();
 	const handleJamIt = async () => {
-		const req = fetch('https://dev.patrykstyla.com/jamit', {
-			body: JSON.stringify({
+		try {
+			const res = await jamIt({
 				guild_id: params.guild_id as string,
 				clip_name: params.file_name as string,
-			}),
+			}).unwrap();
 
-			credentials: 'include',
+			console.log(res);
 
-			headers: {
-				Accept: 'application/json',
-				'Content-Type': 'application/json',
-			},
-			method: 'POST',
-		});
-
-		const res = await req;
-		if (!res.ok) {
+			if (res.code) {
+				setIsError({ type: RespStatus.CONNECTED, code: res.code as number });
+				setOpen(true);
+			} else {
+				// prob success or unhandled
+			}
+		} catch (err) {
 			setIsError({ type: RespStatus.NOT_CONNECTED, code: 0 });
 			setOpen(true);
-
-			return;
-		}
-		const c = await res.json();
-
-		console.log(c);
-
-		if (c.code) {
-			setIsError({ type: RespStatus.CONNECTED, code: c.code as number });
-			setOpen(true);
-		} else {
-			// prob success or unhandled
 		}
 	};
 
@@ -744,47 +732,34 @@ function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 function SilenceButton(props: { params: Readonly<Params<AudioParams>>; isSilence: boolean }) {
 	const [isLoading, setIsLoading] = useState(false);
 
+	const [removeSilence] = useRemoveSilenceMutation();
+
 	const handleOnClick = async () => {
 		setIsLoading(true);
 		try {
 			// First request to initiate silence removal
-			const res = await fetch(`https://dev.patrykstyla.com/api/remove_silence/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
-				credentials: 'include',
-				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json',
-					'Idempotency-Key': store.getState().token.value
-				},
-			});
+			const res = await removeSilence({
+				guild_id: props.params.guild_id!,
+				channel_id: props.params.channel_id!,
+				year: props.params.year!,
+				month: props.params.month!,
+				file_name: props.params.file_name!,
+				idempotency_key: store.getState().token.value as string
+			}).unwrap();
 
-			if (!res.ok) {
-				console.error("Initial request failed", res);
-				setIsLoading(false);
-				return;
-			}
-
-			const json = await res.json();
-
-			if (json.message === "Success" || json.message === " Accepted") {
+			if (res.message === "Success" || res.message === " Accepted") {
 				// Send second request and wait for the final result
-				const res2 = await fetch(`https://dev.patrykstyla.com/api/remove_silence/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
-					credentials: 'include',
-					headers: {
-						Accept: 'application/json',
-						'Content-Type': 'application/json',
-						'Idempotency-Key': store.getState().token.value
-					},
-				});
+				const res2 = await removeSilence({
+					guild_id: props.params.guild_id!,
+					channel_id: props.params.channel_id!,
+					year: props.params.year!,
+					month: props.params.month!,
+					file_name: props.params.file_name!,
+					idempotency_key: store.getState().token.value as string
+				}).unwrap();
 
-				if (!res2.ok) {
-					console.error("Second request failed", res2);
-					setIsLoading(false);
-					return;
-				}
-
-				const json2 = await res2.json();
-				if (json2.message === "Success") {
-					console.log("Silence removed", json2.url);
+				if (res2.message === "Success") {
+					console.log("Silence removed", res2.url);
 					store.dispatch(setHasSilence(true));
 				}
 			}

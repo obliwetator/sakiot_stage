@@ -8,6 +8,7 @@ import {
 	useParams,
 } from 'react-router-dom';
 
+import { useGetCurrentGuildDirsQuery } from '../app/apiSlice';
 import { Favorites } from '../components/Favorites';
 import {
 	Channels,
@@ -70,26 +71,20 @@ export function AllYears(props: {
 	const [data, setData] = useState<Dirs[] | null>(null);
 	const [favorites, setFavorites] = useState<IndividualFileArray | null>(null);
 	const params = useParams();
+	const { data: channelsData, isSuccess, isError } = useGetCurrentGuildDirsQuery(params.guild_id!, {
+		skip: !params.guild_id,
+	});
 
 	useEffect(() => {
-		fetch(`https://dev.patrykstyla.com/api/current/${params.guild_id}`, {
-			method: 'GET',
-			credentials: 'include',
-		}).then((response) => {
-			if (!response.ok) {
-				console.log('cannot get guild_iddirectory data');
-			} else {
-				console.log('got directory data');
-				response.json().then((result: Channels[]) => {
-					const res = transform_to_months(result);
-					// let { newData, newFavorites } = addCommentsToData(res);
-					// TODO: change to function data
-					setData(res);
-					// setFavorites(newFavorites);
-				});
-			}
-		});
-	}, [props.guildSelected]);
+		if (isSuccess && channelsData) {
+			console.log('got directory data');
+			const res = transform_to_months(channelsData);
+			setData(res);
+		} else if (isError) {
+			console.log('cannot get guild_iddirectory data');
+		}
+	}, [channelsData, isSuccess, isError, props.guildSelected]);
+
 	const [clicked, setClicked] = useState(-1);
 
 	// state to keep one accordion open

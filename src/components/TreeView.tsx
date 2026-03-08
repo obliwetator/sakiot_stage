@@ -25,6 +25,7 @@ import {
 	PATH_PREFIX_FOR_LOGGED_USERS,
 	UserGuilds,
 } from '../Constants';
+import { useGetCurrentGuildDirsQuery } from '../app/apiSlice';
 import { transform_to_months } from '../data';
 
 function MinusSquare(props: SvgIconProps) {
@@ -91,26 +92,20 @@ const StyledTreeItem = styled((props: TreeItemProps) => (
 export default function CustomizedTreeView(props: { guildSelected: UserGuilds | null }) {
 	const [data, setData] = useState<Dirs[] | null>(null);
 	const params = useParams();
+	const { data: channelsData, isError, isSuccess } = useGetCurrentGuildDirsQuery(params.guild_id!, {
+		skip: !params.guild_id,
+	});
 
 	React.useEffect(() => {
-		fetch(`https://dev.patrykstyla.com/api/current/${params.guild_id}`, {
-			method: 'GET',
-			credentials: 'include',
-		}).then((response) => {
-			if (!response.ok) {
-				console.log('cannot get guild_iddirectory data');
-			} else {
-				console.log('got directory data');
-				response.json().then((result: Channels[]) => {
-					const res = transform_to_months(result);
-					// let { newData, newFavorites } = addCommentsToData(res);
-					// TODO: change to function data
-					setData(res);
-					// setFavorites(newFavorites);
-				});
-			}
-		});
-	}, [props.guildSelected]);
+		if (isSuccess && channelsData) {
+			console.log('got directory data');
+			const res = transform_to_months(channelsData);
+			setData(res);
+		} else if (isError) {
+			console.log('cannot get guild_iddirectory data');
+		}
+	}, [channelsData, isSuccess, isError, props.guildSelected]);
+
 	if (data) {
 		const years = data.map((el, index) => {
 			return <TreeViewYears el={el} index={index} key={index} />;
