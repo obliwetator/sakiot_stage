@@ -49,7 +49,7 @@ function formatUptime(seconds: number) {
 	return dDisplay + hDisplay + mDisplay + sDisplay;
 }
 
-export function Dashboard() {
+export function Metrics() {
 	const dispatch = useDispatch();
 	const selectedGuild = useAppSelector((state) => state.app.guildSelected);
 

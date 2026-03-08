@@ -3,16 +3,16 @@ import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Clips from './clips';
-
-// Extracted Components
-import { Dashboard } from './components/Dashboard';
 import { FormDialog } from './components/FormDialog';
 import { YearSelection } from './components/YearSelection';
 import { LayoutsWithNavbar } from './layouts/LayoutsWithNavbar';
 import { ProtectedLayout } from './layouts/ProtectedLayout';
+
+// Extracted Components
+const Metrics = React.lazy(() => import('./components/Metrics').then(m => ({ default: m.Metrics })));
 
 // RTK Query & Redux
 import { useDispatch } from 'react-redux';
@@ -153,7 +153,14 @@ function App() {
 						<Route path="/" element={<ProtectedLayout />} />
 						<Route path=":guild_id" element={<Box p={2}>select from top navbar</Box>} />
 
-						<Route path="/metrics" element={<Dashboard />} />
+						<Route
+							path="/metrics"
+							element={
+								<Suspense fallback={<Box p={2}>Loading...</Box>}>
+									<Metrics />
+								</Suspense>
+							}
+						/>
 
 						<Route path="/dashboard" element={<ProtectedLayout />}>
 							<Route path=":guild_id">
