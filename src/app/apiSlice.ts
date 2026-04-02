@@ -69,12 +69,13 @@ const baseQueryWithReauth: BaseQueryFn<
 
 export interface ClipData {
 	user_id: string;
-	clip_name: string;
-	file_name: string;
-	clip_start: number;
-	clip_end: number;
+	name: string;
+	original_file_name: string;
+	saved_file_name: string;
+	length: number;
+	size: number;
 	guild_id: string;
-	id: string;
+	channel_id: string;
 }
 
 export const apiSlice = createApi({
@@ -124,6 +125,18 @@ export const apiSlice = createApi({
 				body: file_name,
 			})
 		}),
+		createClip: builder.mutation<any, { guild_id: string, channel_id: string, year: string, month: string, file_name: string, start: number, end: number, name?: string }>({
+			query: ({ guild_id, channel_id, year, month, file_name, start, end, name }) => ({
+				// Note: using adio/clips/create because of the typo in the rust backend
+				url: `adio/clips/create/${guild_id}/${channel_id}/${year}/${month}/${file_name}`,
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Content-Type': 'application/json',
+				},
+				body: { start, end, name }
+			}),
+		}),
 		checkSilenceFile: builder.query<any, { guild_id: string, channel_id: string, year: string, month: string, file_name: string }>({
 			query: ({ guild_id, channel_id, year, month, file_name }) => ({
 				url: `https://dev.patrykstyla.com/audio/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}.ogg?silence=true`,
@@ -155,4 +168,4 @@ export const apiSlice = createApi({
 	}),
 });
 
-export const { useGetAuthDetailsQuery, useGetCurrentGuildDirsQuery, useGetClipsQuery, useDeleteClipMutation, useJamItMutation, useRemoveSilenceMutation, useCheckSilenceFileQuery, useRefreshMutation } = apiSlice;
+export const { useGetAuthDetailsQuery, useGetCurrentGuildDirsQuery, useGetClipsQuery, useDeleteClipMutation, useJamItMutation, useRemoveSilenceMutation, useCheckSilenceFileQuery, useRefreshMutation, useCreateClipMutation } = apiSlice;

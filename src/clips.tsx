@@ -21,14 +21,14 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 	const navigate = useNavigate();
 	const [expanded, setExpanded] = useState<string | false>(false);
 
-	const handleClickAccordion = (guild_id: string, clip_name: string) => {
-		console.log('here', `${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_name)}`);
+	const handleClickAccordion = (guild_id: string, name: string) => {
+		console.log('here', `${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(name)}`);
 		if (
-			location.pathname === `${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_name)}`
+			location.pathname === `${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(name)}`
 		) {
 			// do nothing
 		} else {
-			navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_name)}`);
+			navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(name)}`);
 		}
 	};
 
@@ -41,22 +41,22 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 			<Accordion
 				key={index}
 				onClick={() => {
-					handleClickAccordion(el.guild_id, el.clip_name);
+					handleClickAccordion(el.guild_id, el.name);
 				}}
 				onChange={handleChange(`panel${index}`)}
 				expanded={expanded === `panel${index}`}
 			>
 				<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-					<Typography>CLIP_NAME: {el.clip_name}</Typography>
+					<Typography>CLIP_NAME: {el.name}</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
 					<Typography>SOME BS</Typography>
 					<Typography>BY(not working): {el.user_id}</Typography>
-					<Typography>start: {el.clip_start}</Typography>
-					<Typography>end: {el.clip_end}</Typography>
-					<Typography>OG file: {el.file_name}</Typography>
+					<Typography>length: {el.length.toFixed(2)}</Typography>
+					<Typography>size: {el.size}</Typography>
+					<Typography>OG file: {el.original_file_name}</Typography>
 					<div>
-						<AlertDialog name={el.file_name} />
+						<AlertDialog name={el.name} />
 					</div>
 				</AccordionDetails>
 			</Accordion>
@@ -125,6 +125,7 @@ export default function Clips() {
 
 	const { data, isError, isSuccess } = useGetClipsQuery(guildSelected?.id || '', {
 		skip: !guildSelected?.id,
+		refetchOnMountOrArgChange: true,
 	});
 
 	if (isError) {

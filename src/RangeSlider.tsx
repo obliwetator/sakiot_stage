@@ -15,7 +15,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from "react";
 import { Params, useLocation, useParams } from "react-router-dom";
-import { useJamItMutation, useRemoveSilenceMutation } from './app/apiSlice';
+import { useCreateClipMutation, useJamItMutation, useRemoveSilenceMutation } from './app/apiSlice';
 import WaveFormButton from './components/Waveform';
 import { AudioParams, UserGuilds, valuetext } from "./Constants";
 import { setHasSilence } from "./reducers/silence";
@@ -714,7 +714,7 @@ function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 								<br />
 								TODO: proper messages
 								<br />
-								number 0 = I probably broke something
+								number 0 = Success
 								<br />
 								number 1 = bot is not in voice channel
 								<br />
@@ -784,6 +784,7 @@ function SilenceButton(props: { params: Readonly<Params<AudioParams>>; isSilence
 function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: number[]; disabled: boolean }) {
 	const [open, setOpen] = useState(false);
 	const [text, setText] = useState('');
+	const [createClip, { isLoading }] = useCreateClipMutation();
 
 	const handleClickOpen = () => {
 		setOpen(true);
@@ -792,6 +793,29 @@ function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: nu
 
 	const handleClose = () => {
 		setOpen(false);
+	};
+
+	const handleClip = async () => {
+		try {
+			await createClip({
+				guild_id: props.params.guild_id!,
+				channel_id: props.params.channel_id!,
+				year: props.params.year!,
+				month: props.params.month!,
+				file_name: props.params.file_name!,
+				start: props.startEnd[0],
+				end: props.startEnd[1],
+				name: text.length > 0 ? text : undefined
+			}).unwrap();
+
+			// Trigger download after successful creation
+			const clipName = text.length > 0 ? text : props.params.file_name!;
+			window.location.href = `https://dev.patrykstyla.com/audio/clips/${props.params.guild_id}/${clipName}`;
+
+			setOpen(false);
+		} catch (error) {
+			console.error("Failed to create clip:", error);
+		}
 	};
 
 	return (
@@ -818,19 +842,14 @@ function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: nu
 						fullWidth
 						variant="standard"
 						autoComplete="off"
+						disabled={isLoading}
 					/>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={handleClose}>Cancel</Button>
+					<Button onClick={handleClose} disabled={isLoading}>Cancel</Button>
 
-					<Button onClick={handleClose}>
-						<a
-							href={`https://dev.patrykstyla.com/download/${props.params.guild_id}/${props.params.channel_id
-								}/${props.params.year}/${props.params.month}/${props.params.file_name}?start=${props.startEnd[0]
-								}&end=${props.startEnd[1] - props.startEnd[0]}${text.length > 0 ? `&name=${text}` : ''}`}
-						>
-							Clip
-						</a>
+					<Button onClick={handleClip} disabled={isLoading}>
+						{isLoading ? 'Creating...' : 'Clip'}
 					</Button>
 				</DialogActions>
 			</Dialog>
