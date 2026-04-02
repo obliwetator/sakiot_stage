@@ -73,6 +73,7 @@ export function AllYears(props: {
 	const params = useParams();
 	const { data: channelsData, isSuccess, isError } = useGetCurrentGuildDirsQuery(params.guild_id!, {
 		skip: !params.guild_id,
+		refetchOnMountOrArgChange: true,
 	});
 
 	useEffect(() => {

@@ -94,6 +94,7 @@ export default function CustomizedTreeView(props: { guildSelected: UserGuilds | 
 	const params = useParams();
 	const { data: channelsData, isError, isSuccess } = useGetCurrentGuildDirsQuery(params.guild_id!, {
 		skip: !params.guild_id,
+		refetchOnMountOrArgChange: true,
 	});
 
 	React.useEffect(() => {
