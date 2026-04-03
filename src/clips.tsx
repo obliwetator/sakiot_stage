@@ -21,14 +21,14 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 	const navigate = useNavigate();
 	const [expanded, setExpanded] = useState<string | false>(false);
 
-	const handleClickAccordion = (guild_id: string, name: string) => {
-		console.log('here', `${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(name)}`);
+	const handleClickAccordion = (guild_id: string, clip_id: string) => {
+		console.log('here', `${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_id)}`);
 		if (
-			location.pathname === `${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(name)}`
+			location.pathname === `${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_id)}`
 		) {
 			// do nothing
 		} else {
-			navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(name)}`);
+			navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_id)}`);
 		}
 	};
 
@@ -41,7 +41,7 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 			<Accordion
 				key={index}
 				onClick={() => {
-					handleClickAccordion(el.guild_id, el.name);
+					handleClickAccordion(el.guild_id, el.clip_id);
 				}}
 				onChange={handleChange(`panel${index}`)}
 				expanded={expanded === `panel${index}`}
@@ -56,7 +56,7 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 					<Typography>size: {el.size}</Typography>
 					<Typography>OG file: {el.original_file_name}</Typography>
 					<div>
-						<AlertDialog name={el.name} />
+						<AlertDialog clip_id={el.clip_id} />
 					</div>
 				</AccordionDetails>
 			</Accordion>
@@ -65,7 +65,7 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 	return <div>{elements}</div>;
 }
 
-function AlertDialog(props: { name: string }) {
+function AlertDialog(props: { clip_id: string }) {
 	const [open, setOpen] = useState(false);
 
 	const handleClickOpen = () => {
@@ -81,10 +81,17 @@ function AlertDialog(props: { name: string }) {
 
 	const handleYes = async () => {
 		if (params.guild_id) {
-			await deleteClip({ guild_id: params.guild_id, file_name: props.name }).unwrap();
-			// Optionally trigger refetch or cache invalidation for clips here
+			try {
+				await deleteClip({ guild_id: params.guild_id, file_name: props.clip_id }).unwrap();
+				setOpen(false);
+			} catch (error) {
+				console.error("Failed to delete clip:", error);
+				alert("Failed to delete the clip.");
+				setOpen(false);
+			}
+		} else {
+			setOpen(false);
 		}
-		setOpen(false);
 	};
 
 	return (
@@ -98,7 +105,7 @@ function AlertDialog(props: { name: string }) {
 				aria-labelledby="alert-dialog-title"
 				aria-describedby="alert-dialog-description"
 			>
-				<DialogTitle id="alert-dialog-title">{"Use Google's location service?"}</DialogTitle>
+				<DialogTitle id="alert-dialog-title">{"Confirm deletion?"}</DialogTitle>
 				<DialogContent>
 					<DialogContentText id="alert-dialog-description">
 						Are you sure you want to delete the clip?

@@ -68,6 +68,7 @@ const baseQueryWithReauth: BaseQueryFn<
 };
 
 export interface ClipData {
+	clip_id: string;
 	user_id: string;
 	name: string;
 	original_file_name: string;
@@ -81,6 +82,7 @@ export interface ClipData {
 export const apiSlice = createApi({
 	reducerPath: 'api',
 	baseQuery: baseQueryWithReauth,
+	tagTypes: ['Clips'],
 	endpoints: (builder) => ({
 		jamIt: builder.mutation<any, { guild_id: string, clip_name: string }>({
 			query: (body) => ({
@@ -114,6 +116,7 @@ export const apiSlice = createApi({
 			query: (guild_id) => ({
 				url: `audio/clips/${guild_id}`
 			}),
+			providesTags: ['Clips'],
 		}),
 		deleteClip: builder.mutation<void, { guild_id: string, file_name: string }>({
 			query: ({ guild_id, file_name }) => ({
@@ -123,7 +126,8 @@ export const apiSlice = createApi({
 					'Content-Type': 'text/plain',
 				},
 				body: file_name,
-			})
+			}),
+			invalidatesTags: ['Clips'],
 		}),
 		createClip: builder.mutation<any, { guild_id: string, channel_id: string, year: string, month: number, file_name: string, start: number, end: number, name?: string }>({
 			query: ({ guild_id, channel_id, year, month, file_name, start, end, name }) => ({

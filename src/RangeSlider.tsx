@@ -818,11 +818,11 @@ function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: nu
 
 			// Trigger download after successful creation
 			if (response && response.status === "success") {
-				const blob = await downloadFile(`audio/clips/${props.params.guild_id}/${response.file}`).unwrap();
+				const blob = await downloadFile(`audio/clips/${props.params.guild_id}/${response.id}`).unwrap();
 				const objectUrl = URL.createObjectURL(blob);
 				const a = document.createElement('a');
 				a.href = objectUrl;
-				a.download = response.file;
+				a.download = response.name ? `${response.name}.ogg` : `${response.id}.ogg`;
 				a.click();
 				URL.revokeObjectURL(objectUrl);
 			}
@@ -874,7 +874,6 @@ function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: nu
 
 
 function formatDuration(value: number) {
-	console.log("value", value);
 	if (!isFinite(value) || isNaN(value)) return "0:00";
 	const minute = Math.floor(value / 60);
 	const secondLeft = Math.floor(value - minute * 60);
@@ -882,7 +881,6 @@ function formatDuration(value: number) {
 }
 
 function formatDurationV2(value: number) {
-	console.log("value", value);
 	if (!isFinite(value) || isNaN(value)) return "00:00:00";
 	return new Date(value * 1000).toISOString().slice(11, 19);
 }

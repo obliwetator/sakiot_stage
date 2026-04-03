@@ -12,7 +12,13 @@ export const store = configureStore({
 		hasSilence: hasSilenceReducer
 	},
 	middleware: (getDefaultMiddleware) =>
-		getDefaultMiddleware().concat(apiSlice.middleware),
+		getDefaultMiddleware({
+			serializableCheck: {
+				ignoredActions: ['api/executeQuery/fulfilled', 'api/executeMutation/fulfilled', 'api/executeQuery/rejected', 'api/executeMutation/rejected'],
+				ignoredActionPaths: ['meta.arg', 'payload', 'meta.baseQueryMeta.request', 'meta.baseQueryMeta.response'],
+				ignoredPaths: ['api.queries', 'api.mutations'],
+			},
+		}).concat(apiSlice.middleware),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
