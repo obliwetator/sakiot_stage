@@ -93,7 +93,7 @@ export const apiSlice = createApi({
 				body,
 			}),
 		}),
-		removeSilence: builder.mutation<any, { guild_id: string, channel_id: string, year: string, month: string, file_name: string, idempotency_key: string }>({
+		removeSilence: builder.mutation<any, { guild_id: string, channel_id: string, year: string, month: number, file_name: string, idempotency_key: string }>({
 			query: ({ guild_id, channel_id, year, month, file_name, idempotency_key }) => ({
 				url: `remove_silence/${guild_id}/${channel_id}/${year}/${month}/${file_name}`,
 				method: 'GET',
@@ -112,7 +112,7 @@ export const apiSlice = createApi({
 		}),
 		getClips: builder.query<ClipData[], string>({
 			query: (guild_id) => ({
-				url: `https://dev.patrykstyla.com/audio/clips/${guild_id}`
+				url: `audio/clips/${guild_id}`
 			}),
 		}),
 		deleteClip: builder.mutation<void, { guild_id: string, file_name: string }>({
@@ -125,10 +125,9 @@ export const apiSlice = createApi({
 				body: file_name,
 			})
 		}),
-		createClip: builder.mutation<any, { guild_id: string, channel_id: string, year: string, month: string, file_name: string, start: number, end: number, name?: string }>({
+		createClip: builder.mutation<any, { guild_id: string, channel_id: string, year: string, month: number, file_name: string, start: number, end: number, name?: string }>({
 			query: ({ guild_id, channel_id, year, month, file_name, start, end, name }) => ({
-				// Note: using adio/clips/create because of the typo in the rust backend
-				url: `adio/clips/create/${guild_id}/${channel_id}/${year}/${month}/${file_name}`,
+				url: `audio/clips/create/${guild_id}/${channel_id}/${year}/${month}/${file_name}`,
 				method: 'POST',
 				headers: {
 					Accept: 'application/json',
@@ -137,10 +136,22 @@ export const apiSlice = createApi({
 				body: { start, end, name }
 			}),
 		}),
-		checkSilenceFile: builder.query<any, { guild_id: string, channel_id: string, year: string, month: string, file_name: string }>({
+		checkSilenceFile: builder.query<any, { guild_id: string, channel_id: string, year: string, month: number, file_name: string }>({
 			query: ({ guild_id, channel_id, year, month, file_name }) => ({
 				url: `https://dev.patrykstyla.com/audio/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}.ogg?silence=true`,
 				method: 'HEAD',
+			}),
+		}),
+		getAudioFile: builder.query<Blob, string>({
+			query: (url) => ({
+				url,
+				responseHandler: (response) => response.blob(),
+			}),
+		}),
+		downloadFile: builder.mutation<Blob, string>({
+			query: (url) => ({
+				url,
+				responseHandler: (response) => response.blob(),
 			}),
 		}),
 		// Combine all 3 requests into a single query to emulate the existing Promise.all behavior
@@ -168,4 +179,4 @@ export const apiSlice = createApi({
 	}),
 });
 
-export const { useGetAuthDetailsQuery, useGetCurrentGuildDirsQuery, useGetClipsQuery, useDeleteClipMutation, useJamItMutation, useRemoveSilenceMutation, useCheckSilenceFileQuery, useRefreshMutation, useCreateClipMutation } = apiSlice;
+export const { useGetAuthDetailsQuery, useGetCurrentGuildDirsQuery, useGetClipsQuery, useDeleteClipMutation, useJamItMutation, useRemoveSilenceMutation, useCheckSilenceFileQuery, useRefreshMutation, useCreateClipMutation, useGetAudioFileQuery, useDownloadFileMutation } = apiSlice;

@@ -1,18 +1,4 @@
-import { Channels, Dirs, IndividualFile, IndividualFileArray } from './Constants';
-
-type months =
-	| 'January'
-	| 'February'
-	| 'March'
-	| 'April'
-	| 'May'
-	| 'June'
-	| 'July'
-	| 'August'
-	| 'September'
-	| 'October'
-	| 'November'
-	| 'December';
+import { Channels, Dirs, IndividualFile, IndividualFileArray, months } from './Constants';
 
 interface Super {
 	channel_id: string;
@@ -35,12 +21,15 @@ export function transform_to_months(data: Channels[]) {
 			const months_obj = Object.keys(dirs.months);
 			// Loops over the months in the year of the channel
 			months_obj.map((month_name) => {
-				const month = month_name as months;
-				const files = dirs.months[month];
+				const month = parseInt(month_name) as months;
+				// In JavaScript, object keys are strings. Using month_name works reliably.
+				const files = (dirs.months as any)[month_name];
+
+				if (!files) return;
 
 				const all_file: IndividualFileArray = [];
 
-				files!.forEach((file) => {
+				files.forEach((file: any) => {
 					const indi: IndividualFile = {
 						channel_id: channel.channel_id,
 						comment: file.comment,

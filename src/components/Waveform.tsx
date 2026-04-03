@@ -40,7 +40,7 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd
 		setError(null);
 		setProgress(0);
 
-		const eventSource = new EventSource(`https://dev.patrykstyla.com/audio/waveform/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${props.params.month}/${props.params.file_name}`, {
+		const eventSource = new EventSource(`https://dev.patrykstyla.com/audio/waveform/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${Number(props.params.month)}/${props.params.file_name}`, {
 			withCredentials: true,
 		});
 

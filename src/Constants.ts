@@ -16,47 +16,39 @@ export type AudioParams2 = {
 	guild_id?: string;
 	channel_id?: string;
 	file_name?: string;
-	month?: string;
+	month?: number;
 	year?: string;
 };
 export type AudioParams = 'guild_id' | 'channel_id' | 'file_name' | 'month' | 'year';
 
 export interface Dirs {
 	year: number;
-	months: Partial<Record<months, IndividualFileArray>>;
+	months: Partial<Record<number, IndividualFileArray>>;
 }
 
 export type IndividualFileArray = IndividualFile[];
 export type IndividualFile = { channel_id?: string; file: string; comment: string | null };
 
-export enum Months {
-	'January' = 0,
-	'February',
-	'March',
-	'April',
-	'May',
-	'June',
-	'July',
-	'August',
-	'September',
-	'October',
-	'November',
-	'December',
+export function getMonthName(monthNumber: number): string {
+	const months = [
+		'Unknown',
+		'January',
+		'February',
+		'March',
+		'April',
+		'May',
+		'June',
+		'July',
+		'August',
+		'September',
+		'October',
+		'November',
+		'December',
+	];
+	return months[monthNumber] || 'Unknown';
 }
 
-export type months =
-	| 'January'
-	| 'February'
-	| 'March'
-	| 'April'
-	| 'May'
-	| 'June'
-	| 'July'
-	| 'August'
-	| 'September'
-	| 'October'
-	| 'November'
-	| 'December';
+export type months = number;
 
 export interface UserGuilds {
 	id: string;

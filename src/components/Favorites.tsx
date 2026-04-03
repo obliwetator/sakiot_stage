@@ -1,5 +1,5 @@
 import React, { JSX } from 'react';
-import { IndividualFileArray, Months } from '../Constants';
+import { IndividualFileArray } from '../Constants';
 import { ItemsEl } from '../LeftNavMenu/yearSelection';
 
 export function Favorites(props: {
@@ -38,7 +38,7 @@ export function Favorites(props: {
 				<ItemsEl
 					key={index}
 					file={el}
-					month_name={Months[date.getMonth()] as any as string}
+					month_name={date.getMonth() + 1}
 					year={date.getFullYear()}
 					setContextMenu={props.setContextMenu}
 					setMenuItems={props.setMenuItems}

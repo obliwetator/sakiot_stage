@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Params, useLocation, useParams } from 'react-router-dom';
 import { AudioParams, UserGuilds, valuetext } from './Constants';
 import { RangeSlider } from './RangeSlider';
-import { useCheckSilenceFileQuery } from './app/apiSlice';
+import { useCheckSilenceFileQuery, useGetAudioFileQuery } from './app/apiSlice';
 import { useAppSelector } from './app/hooks';
 import { setHasSilence } from './reducers/silence';
 
@@ -25,7 +25,7 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 		guild_id: params.guild_id!,
 		channel_id: params.channel_id!,
 		year: params.year!,
-		month: params.month!,
+		month: Number(params.month!),
 		file_name: params.file_name!,
 	}, { skip: !shouldCheckSilence });
 
@@ -47,28 +47,33 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 
 	const [trueDuration, setTrueDuration] = useState<number | null>(null);
 
+	const audioUrl = props.isClip
+		? `audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name!)}`
+		: `audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${encodeURIComponent(params.file_name!)}.ogg${props.isSilence ? "?silence=true" : ""}`;
+
+	const shouldFetchAudio = !(props.isSilence && !value) && !!params.file_name;
+	const { data: audioBlob, isError: audioFetchError } = useGetAudioFileQuery(audioUrl, { skip: !shouldFetchAudio });
+
 	useEffect(() => {
-		// If this is the silence player, but silence hasn't been found/generated, don't load anything yet
-		if (props.isSilence && !value) {
+		if (audioFetchError) {
+			setError(true);
+		}
+	}, [audioFetchError]);
+
+	useEffect(() => {
+		if (!audioBlob) {
 			setReadyToPlay(false);
 			setAudioRef(null);
 			return;
 		}
 
-		console.log("useffect")
-		console.log(
-			`https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name!)}`
-		);
+		console.log("useffect for blob");
 		setReadyToPlay(false);
 		setError(false);
 		setTrueDuration(null);
 
-		let localAudioRef: HTMLAudioElement;
-		const audioUrl = props.isClip
-			? `https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name!)}`
-			: `https://dev.patrykstyla.com/audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${encodeURIComponent(params.file_name!)}.ogg${props.isSilence ? "?silence=true" : ""}`;
-
-		localAudioRef = new Audio(audioUrl);
+		const objectUrl = URL.createObjectURL(audioBlob);
+		let localAudioRef: HTMLAudioElement = new Audio(objectUrl);
 		let isActive = true;
 
 		// Update duration safely as the file buffers/plays
@@ -101,8 +106,9 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 			isActive = false;
 			localAudioRef?.pause();
 			localAudioRef.src = '';
+			URL.revokeObjectURL(objectUrl);
 		};
-	}, [params.file_name, props.isClip, props.isSilence, value, params.guild_id, params.channel_id, params.year, params.month]);
+	}, [audioBlob]);
 
 	// If it's the silence player and it's not active yet, return nothing instead of "Downloading"
 	if (props.isSilence && !value) {

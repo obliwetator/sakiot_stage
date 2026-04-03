@@ -15,7 +15,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from "react";
 import { Params, useLocation, useParams } from "react-router-dom";
-import { useCreateClipMutation, useJamItMutation, useRemoveSilenceMutation } from './app/apiSlice';
+import { useCreateClipMutation, useDownloadFileMutation, useJamItMutation, useRemoveSilenceMutation } from './app/apiSlice';
 import WaveFormButton from './components/Waveform';
 import { AudioParams, UserGuilds, valuetext } from "./Constants";
 import { setHasSilence } from "./reducers/silence";
@@ -59,7 +59,24 @@ export function RangeSlider(props: {
 	const [ArrowKeySkip, CtrlArrowKeySKip] = [5, 30];
 	const [switchAudio, setSwitchAduio] = React.useState(false);
 
+	const [downloadFile] = useDownloadFileMutation();
 
+	const handleDownload = async () => {
+		const url = props.isClip
+			? `audio/clips/${params.guild_id}/${params.file_name}`
+			: `download/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${params.file_name}.ogg${props.isSilence ? "?silence=true" : ""}`;
+		try {
+			const blob = await downloadFile(url).unwrap();
+			const objectUrl = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = objectUrl;
+			a.download = params.file_name!;
+			a.click();
+			URL.revokeObjectURL(objectUrl);
+		} catch (e) {
+			console.error("Download failed", e);
+		}
+	};
 
 	useEffect(() => {
 		const handleKeyPress = (event: KeyboardEvent) => {
@@ -235,18 +252,8 @@ export function RangeSlider(props: {
 			<br></br>
 			<br></br>
 			<br></br>
-			<Button variant="contained">
-				{props.isClip ? (
-					<a href={`https://dev.patrykstyla.com/audio/clips/${params.guild_id}/${params.file_name}`}>
-						Download
-					</a>
-				) : (
-					<a
-						href={`https://dev.patrykstyla.com/download/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${params.file_name}.ogg${props.isSilence ? "?silence=true" : ""} `}
-					>
-						Download
-					</a>
-				)}
+			<Button variant="contained" onClick={handleDownload}>
+				Download
 			</Button>
 			<ClipDialog params={params} startEnd={startEnd} disabled={props.isClip} />
 			<SilenceButton params={params} isSilence={props.isSilence} />
@@ -742,7 +749,7 @@ function SilenceButton(props: { params: Readonly<Params<AudioParams>>; isSilence
 				guild_id: props.params.guild_id!,
 				channel_id: props.params.channel_id!,
 				year: props.params.year!,
-				month: props.params.month!,
+				month: Number(props.params.month!),
 				file_name: props.params.file_name!,
 				idempotency_key: store.getState().token.value as string
 			}).unwrap();
@@ -753,7 +760,7 @@ function SilenceButton(props: { params: Readonly<Params<AudioParams>>; isSilence
 					guild_id: props.params.guild_id!,
 					channel_id: props.params.channel_id!,
 					year: props.params.year!,
-					month: props.params.month!,
+					month: Number(props.params.month!),
 					file_name: props.params.file_name!,
 					idempotency_key: store.getState().token.value as string
 				}).unwrap();
@@ -785,6 +792,7 @@ function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: nu
 	const [open, setOpen] = useState(false);
 	const [text, setText] = useState('');
 	const [createClip, { isLoading }] = useCreateClipMutation();
+	const [downloadFile] = useDownloadFileMutation();
 
 	const handleClickOpen = () => {
 		setOpen(true);
@@ -797,11 +805,11 @@ function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: nu
 
 	const handleClip = async () => {
 		try {
-			await createClip({
+			const response = await createClip({
 				guild_id: props.params.guild_id!,
 				channel_id: props.params.channel_id!,
 				year: props.params.year!,
-				month: props.params.month!,
+				month: Number(props.params.month!),
 				file_name: props.params.file_name!,
 				start: props.startEnd[0],
 				end: props.startEnd[1],
@@ -809,8 +817,15 @@ function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: nu
 			}).unwrap();
 
 			// Trigger download after successful creation
-			const clipName = text.length > 0 ? text : props.params.file_name!;
-			window.location.href = `https://dev.patrykstyla.com/audio/clips/${props.params.guild_id}/${clipName}`;
+			if (response && response.status === "success") {
+				const blob = await downloadFile(`audio/clips/${props.params.guild_id}/${response.file}`).unwrap();
+				const objectUrl = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = objectUrl;
+				a.download = response.file;
+				a.click();
+				URL.revokeObjectURL(objectUrl);
+			}
 
 			setOpen(false);
 		} catch (error) {

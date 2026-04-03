@@ -17,7 +17,8 @@ import {
 	IndividualFileArray,
 	PATH_PREFIX_FOR_LOGGED_USERS,
 	UserGuilds,
-	months,
+	getMonthName,
+	months
 } from '../Constants';
 import { transform_to_months } from '../data';
 
@@ -174,7 +175,7 @@ export function YearsEl(props: {
 
 	const months_obj = Object.keys(props.el.months);
 	const result = months_obj.map((month_name, index) => {
-		const month = month_name as months;
+		const month = parseInt(month_name) as months;
 		const files = props.el.months[month]!;
 		return (
 			<MonthsEl
@@ -228,7 +229,7 @@ export function YearsEl(props: {
 				{props.el.year}
 			</div>
 			<div
-				key={props.index}
+				key={`year-${props.el.year}-${props.index}`}
 				className="bg-green-500 overflow-hidden"
 				ref={contentEl}
 				style={props.active ? { display: 'block' } : { display: 'none' }}
@@ -241,8 +242,8 @@ export function YearsEl(props: {
 
 // TODO: extra day element
 export function MonthsEl(props: {
-	files: IndividualFileArray;
-	month_name: months;
+	files: IndividualFileArray | null;
+	month_name: number;
 	year: number;
 	index: number;
 	onToggle: (index: number) => void;
@@ -279,13 +280,16 @@ export function MonthsEl(props: {
 		setClicked(index);
 	};
 
-	// sort the array
-	props.files.sort((a, b) => a.file.localeCompare(b.file));
+	// sort the array if not null
+	if (props.files) {
+		props.files.sort((a, b) => a.file.localeCompare(b.file));
+	}
+	const safeFiles = props.files || [];
 	// keep the day index
 	let prevDay = 0;
 
 	let file_names: IndividualFileArray = [];
-	const days = props.files.map((el, index) => {
+	const days = safeFiles.map((el, index) => {
 		// get the timestamp from the file
 		const timestamp = parseInt(el.file.slice(0, 13));
 		const date = new Date(timestamp);
@@ -332,10 +336,10 @@ export function MonthsEl(props: {
 				}}
 				className="bg-blue-700"
 			>
-				{props.month_name}
+				{getMonthName(props.month_name)}
 			</div>
 			<div
-				key={props.index}
+				key={`${props.year}-${props.month_name}-${props.index}`}
 				className="bg-green-500 overflow-hidden"
 				ref={contentEl}
 				style={props.active ? { display: 'block' } : { display: 'none' }}
@@ -353,7 +357,7 @@ export function DayEl(props: {
 	day: number;
 	files: IndividualFileArray;
 	year: number;
-	month_name: string;
+	month_name: number;
 	setContextMenu: React.Dispatch<
 		React.SetStateAction<{
 			mouseX: number;
@@ -407,7 +411,7 @@ export function DayEl(props: {
 				{props.day}
 			</div>
 			<div
-				key={props.index}
+				key={`${props.year}-${props.month_name}-${props.day}-${props.index}`}
 				className="bg-green-500 overflow-hidden"
 				ref={contentEl}
 				style={props.active ? { display: 'block' } : { display: 'none' }}
@@ -421,7 +425,7 @@ export function DayEl(props: {
 export function ItemsEl(props: {
 	file: IndividualFile;
 	year: number;
-	month_name: string;
+	month_name: number;
 	setContextMenu: React.Dispatch<
 		React.SetStateAction<{
 			mouseX: number;
@@ -552,7 +556,7 @@ function handleClickOnFile(
 	navigate: NavigateFunction,
 	location: ReactLocation,
 	year: number,
-	month_name: string,
+	month_name: number,
 	channel_id: string,
 	params: Readonly<Params<string>>
 ) {

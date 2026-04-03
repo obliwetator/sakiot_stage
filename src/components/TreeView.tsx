@@ -19,6 +19,7 @@ import { TreeItem, treeItemClasses, TreeItemProps } from '@mui/x-tree-view';
 import {
 	Channels,
 	Dirs,
+	getMonthName,
 	IndividualFile,
 	IndividualFileArray,
 	months,
@@ -133,8 +134,9 @@ export default function CustomizedTreeView(props: { guildSelected: UserGuilds | 
 
 function TreeViewYears(props: { el: Dirs; index: number }) {
 	const months_obj = Object.keys(props.el.months);
-	// Sort the months. true = reverse order
-	const safe_months = sortByMonthName(months_obj, true);
+	// Sort the months by number. true = reverse order
+	const safe_months = months_obj.map(Number).sort((a, b) => b - a);
+	console.log(safe_months);
 	const result = safe_months.map((month_name, index) => {
 		const month = month_name as months;
 		const files = props.el.months[month]!;
@@ -179,14 +181,17 @@ function TreeViewYears(props: { el: Dirs; index: number }) {
 	);
 }
 
-function TreeViewMonths(props: { files: IndividualFileArray; month_name: months; year: number; index: number }) {
-	// sort the array
-	props.files.sort((a, b) => a.file.localeCompare(b.file));
+function TreeViewMonths(props: { files: IndividualFileArray | null; month_name: number; year: number; index: number }) {
+	// sort the array if not null
+	if (props.files) {
+		props.files.sort((a, b) => a.file.localeCompare(b.file));
+	}
+	const safeFiles = props.files || [];
 	// keep the day index
 	let prevDay = 0;
 
 	let file_names: IndividualFileArray = [];
-	const days = props.files.map((el, index) => {
+	const days = safeFiles.map((el, index) => {
 		// get the timestamp from the file
 		const timestamp = parseInt(el.file.slice(0, 13));
 		const date = new Date(timestamp);
@@ -222,8 +227,8 @@ function TreeViewMonths(props: { files: IndividualFileArray; month_name: months;
 				console.log(`${props.month_name}`);
 			}}
 			className="bg-blue-700"
-			label={props.month_name}
-			itemId={`${props.month_name}`}
+			label={getMonthName(props.month_name)}
+			itemId={`${props.year}-${props.month_name}`}
 		>
 			<div key={props.index} className="bg-green-500 overflow-hidden">
 				{days}
@@ -237,7 +242,7 @@ function TreeViewDays(props: {
 	day: number;
 	files: IndividualFileArray;
 	year: number;
-	month_name: string;
+	month_name: number;
 }) {
 	const itemsEl = props.files.map((el, index) => {
 		return <ItemsEl file={el} month_name={props.month_name} year={props.year} key={index} />;
@@ -251,7 +256,7 @@ function TreeViewDays(props: {
 				}}
 				className="bg-pink-700"
 				label={props.day}
-				itemId={`${props.month_name + props.day}`}
+				itemId={`${props.year}-${props.month_name}-${props.day}`}
 			>
 				<div
 					key={props.index}
@@ -266,7 +271,7 @@ function TreeViewDays(props: {
 	);
 }
 
-export function ItemsEl(props: { file: IndividualFile; year: number; month_name: string }) {
+export function ItemsEl(props: { file: IndividualFile; year: number; month_name: number }) {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const params = useParams();
@@ -348,7 +353,7 @@ function handleClickOnFile(
 	navigate: NavigateFunction,
 	location: ReactLocation,
 	year: number,
-	month_name: string,
+	month_name: number,
 	channel_id: string,
 	params: Readonly<Params<string>>
 ) {
