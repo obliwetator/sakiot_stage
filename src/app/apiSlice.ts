@@ -86,7 +86,7 @@ export const apiSlice = createApi({
 	endpoints: (builder) => ({
 		jamIt: builder.mutation<any, { guild_id: string, clip_name: string }>({
 			query: (body) => ({
-				url: `https://dev.patrykstyla.com/jamit`,
+				url: 'jamit',
 				method: 'POST',
 				headers: {
 					Accept: 'application/json',
