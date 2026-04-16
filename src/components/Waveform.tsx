@@ -5,10 +5,12 @@ import { Params } from "react-router-dom";
 import Button from '@mui/material/Button';
 import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline.js";
 import { AudioParams } from "../Constants";
+import { useGetWaveformQuery } from "../app/apiSlice";
 
 function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd?: number[] }) {
 	const containerRef = useRef<HTMLDivElement>(null);
-	const [error, setError] = useState<string | null>(null);
+	const [shouldGenerate, setShouldGenerate] = useState(false);
+	const [timestamp, setTimestamp] = useState<number | undefined>(undefined);
 	const [zoomLevel, setZoomLevel] = useState(1);
 	const [minPxPerSec, setMinPxPerSec] = useState(1); // default minimum px per second
 
@@ -34,45 +36,38 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd
 		], []),
 	});
 
-	const [progress, setProgress] = useState<number | null>(null);
+	const { data: waveformData, error: queryError } = useGetWaveformQuery(
+		{
+			guild_id: props.params.guild_id!,
+			channel_id: props.params.channel_id!,
+			year: props.params.year!,
+			month: Number(props.params.month),
+			file_name: props.params.file_name!,
+			timestamp
+		},
+		{
+			skip: !shouldGenerate,
+			// Poll every 1 second while generating
+			pollingInterval: shouldGenerate ? 1000 : 0
+		}
+	);
+
+	useEffect(() => {
+		// Stop generating (polling) if we hit 100% or an error
+		if (waveformData?.progress === 100 || waveformData?.error || queryError) {
+			setShouldGenerate(false);
+		}
+	}, [waveformData, queryError]);
 
 	const handleClick = () => {
-		setError(null);
-		setProgress(0);
+		setTimestamp(Date.now());
+		setShouldGenerate(true);
+	};
 
-		const eventSource = new EventSource(`https://dev.patrykstyla.com/audio/waveform/${props.params.guild_id}/${props.params.channel_id}/${props.params.year}/${Number(props.params.month)}/${props.params.file_name}`, {
-			withCredentials: true,
-		});
-
-		// Listen for custom 'progress' event or default 'message' event
-		const handleProgress = (event: MessageEvent) => {
+	useEffect(() => {
+		if (waveformData?.data && wavesurfer) {
 			try {
-				let currentProgress: number;
-				try {
-					const data = JSON.parse(event.data);
-					currentProgress = data.progress !== undefined ? data.progress : Number(event.data);
-				} catch (e) {
-					currentProgress = Number(event.data);
-				}
-
-				if (!isNaN(currentProgress)) {
-					setProgress(currentProgress);
-				}
-			} catch (err) {
-				console.error("Error processing SSE progress message:", err);
-			}
-		};
-
-		eventSource.addEventListener('progress', handleProgress);
-		eventSource.onmessage = handleProgress;
-
-		eventSource.addEventListener('complete', (event) => {
-			try {
-				// We received the base64 payload in the complete event
-				setProgress(null);
-				eventSource.close();
-
-				const base64Data = event.data;
+				const base64Data = waveformData.data;
 				const binaryString = atob(base64Data);
 				const len = binaryString.length;
 				const bytes = new Uint8Array(len);
@@ -82,7 +77,6 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd
 				const buffer = bytes.buffer;
 
 				const view = new DataView(buffer);
-				// const version = view.getUint32(0, true);
 				const flags = view.getUint32(4, true);
 				const sampleRate = view.getUint32(8, true);
 				const samplesPerPixel = view.getUint32(12, true);
@@ -103,28 +97,24 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd
 				}
 
 				const duration = (length * samplesPerPixel) / sampleRate;
-
-				if (wavesurfer) {
-					wavesurfer.load("", [peaks], duration);
-				}
+				wavesurfer.load("", [peaks], duration);
 			} catch (err) {
 				console.error("Error processing complete event:", err);
-				setError("Error generating waveform.");
-				setProgress(null);
-				eventSource.close();
 			}
-		});
+		}
+	}, [waveformData?.data, wavesurfer]);
 
-		eventSource.onerror = (error) => {
-			console.error("SSE error:", error);
-			// We only error out if we haven't reached 100% or if it's completely dead
-			if (eventSource.readyState === EventSource.CLOSED) {
-				setError("Connection to waveform generation failed.");
-				setProgress(null);
-			}
-			eventSource.close();
-		};
+	let progress: number | null = null;
+	if (shouldGenerate) {
+		if (!waveformData) {
+			progress = 0;
+		} else if (waveformData.progress < 100) {
+			progress = waveformData.progress;
+		}
 	}
+
+	const error = queryError ? "Connection to waveform generation failed." : (waveformData?.error || null);
+
 
 	// Update waveform position based on startEnd
 	useEffect(() => {

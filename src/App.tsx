@@ -13,6 +13,7 @@ import { ProtectedLayout } from './layouts/ProtectedLayout';
 
 // Extracted Components
 const Metrics = React.lazy(() => import('./components/Metrics').then(m => ({ default: m.Metrics })));
+const Stamps = React.lazy(() => import('./components/Stamps').then(m => ({ default: m.Stamps })));
 
 // RTK Query & Redux
 import { useDispatch } from 'react-redux';
@@ -66,33 +67,32 @@ function App() {
 
 	// Discord oauth success handler
 	useEffect(() => {
-		window.onmessage = (e) => {
+		const handler = (e: MessageEvent) => {
+			console.log('[oauth] message received', e.origin, e.data);
 			if (e.origin !== 'https://dev.patrykstyla.com') return;
 
-			console.log('message', e);
-			if (e.data.success === 1) {
-				console.log('Succ');
-
-				// Setting a dummy token and setting hasToken to true
-				if (!localStorage.getItem('token')) {
-					localStorage.setItem('token', 'pending');
-				}
-
-				// Changing this state triggers React to un-skip the RTK query
-				// so it automatically fetches without needing a refetch() or timeout!
-				setHasToken(true);
-
-				// Close the popup window slightly later so cookies and state can settle
-				if (e.source && (e.source as Window).close) {
-					setTimeout(() => {
-						(e.source as Window).close();
-					}, 200);
-				}
-			} else {
+			if (e.data.success !== 1) {
 				console.error('something failed when authenticating');
+				return;
+			}
+
+			// Seed flag so query unskips AND survives reload
+			if (!localStorage.getItem('token')) {
+				localStorage.setItem('token', 'logged-in');
+			}
+			setHasToken(true);
+			// If query was already active (e.g. stale flag + 401 error), force retry.
+			refetch();
+
+			if (e.source && (e.source as Window).close) {
+				setTimeout(() => {
+					(e.source as Window).close();
+				}, 200);
 			}
 		};
-	}, [setHasToken]);
+		window.addEventListener('message', handler);
+		return () => window.removeEventListener('message', handler);
+	}, []);
 
 	const [menuItems, setMenuItems] = useState<{ name: string; cb: () => void }[] | null>(null);
 	const [isFormOpen, setIsFormOpen] = useState(false);
@@ -158,6 +158,15 @@ function App() {
 							element={
 								<Suspense fallback={<Box p={2}>Loading...</Box>}>
 									<Metrics />
+								</Suspense>
+							}
+						/>
+
+						<Route
+							path="/stamps"
+							element={
+								<Suspense fallback={<Box p={2}>Loading...</Box>}>
+									<Stamps />
 								</Suspense>
 							}
 						/>

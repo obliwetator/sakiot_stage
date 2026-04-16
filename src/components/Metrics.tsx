@@ -27,6 +27,7 @@ interface Metrics {
 	ffmpeg_process_crashes: number;
 	audio_packets_received: number;
 	audio_packets_dropped: number;
+	last_voice_packet_time?: number;
 	// Discord gateway health
 	gateway_reconnects: number;
 	driver_reconnects: number;
@@ -48,6 +49,7 @@ interface RecordingMetrics {
 	ffmpeg_process_crashes: number;
 	audio_packets_received: number;
 	audio_packets_dropped: number;
+	last_voice_packet_time?: number;
 }
 
 interface VoiceState {
@@ -77,6 +79,12 @@ function formatUptime(seconds: number) {
 function formatBytes(bytes: number): string {
 	if (bytes >= 1024 * 1024 * 1024) return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
 	return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function formatTimeSince(timestampMs: number | undefined, currentUnixSecs: number): string {
+	if (!timestampMs) return 'Never';
+	const seconds = Math.max(0, currentUnixSecs - Math.floor(timestampMs / 1000));
+	return formatUptime(seconds) + ' ago';
 }
 
 // ─── Small metric tile used inside group panels ───────────────────────────────
@@ -251,11 +259,11 @@ export function Metrics() {
 			{/* ── Overview ───────────────────────────────────────────────────── */}
 			<Typography variant="overline" color="text.secondary" fontWeight={700}>Overview</Typography>
 			<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 1, mb: 3 }}>
-				<StatCard label="Total Guilds"             value={m ? m.total_guilds : L} />
+				<StatCard label="Total Guilds" value={m ? m.total_guilds : L} />
 				<StatCard label="Active Voice Connections" value={m ? m.active_voice_connections : L} />
-				<StatCard label="Commands Executed"        value={m ? m.commands_executed : L} />
-				<StatCard label="Messages Received"        value={m ? m.messages_received.toLocaleString() : L} />
-				<StatCard label="Uptime"                   value={m ? formatUptime(localUptime) : L} />
+				<StatCard label="Commands Executed" value={m ? m.commands_executed : L} />
+				<StatCard label="Messages Received" value={m ? m.messages_received.toLocaleString() : L} />
+				<StatCard label="Uptime" value={m ? formatUptime(localUptime) : L} />
 			</Box>
 
 			<Divider sx={{ mb: 3 }} />
@@ -266,11 +274,12 @@ export function Metrics() {
 				{/* Left: Voice Recording Pipeline */}
 				<Box sx={{ flex: '1 1 340px' }}>
 					<GroupPanel title="Voice Recording Pipeline">
-						<Tile label="Active Recordings"     value={m ? m.active_recordings : L} />
-						<Tile label="Packets Received"      value={m ? m.audio_packets_received.toLocaleString() : L} />
-						<Tile label="Packets Dropped"       value={m ? m.audio_packets_dropped.toLocaleString() : L} warn={!!m && m.audio_packets_dropped > 0} />
+						<Tile label="Active Recordings" value={m ? m.active_recordings : L} />
+						<Tile label="Packets Received" value={m ? m.audio_packets_received.toLocaleString() : L} />
+						<Tile label="Packets Dropped" value={m ? m.audio_packets_dropped.toLocaleString() : L} warn={!!m && m.audio_packets_dropped > 0} />
 						<Tile label="FFmpeg Spawn Failures" value={m ? m.ffmpeg_spawn_failures : L} warn={!!m && m.ffmpeg_spawn_failures > 0} />
-						<Tile label="FFmpeg Crashes"        value={m ? m.ffmpeg_process_crashes : L} warn={!!m && m.ffmpeg_process_crashes > 0} />
+						<Tile label="FFmpeg Crashes" value={m ? m.ffmpeg_process_crashes : L} warn={!!m && m.ffmpeg_process_crashes > 0} />
+						<Tile label="Last Voice Packet" value={m ? formatTimeSince(m.last_voice_packet_time, currentTime) : L} />
 					</GroupPanel>
 				</Box>
 
@@ -279,20 +288,20 @@ export function Metrics() {
 
 					<GroupPanel title="Discord Gateway">
 						<Tile label="Voice State Updates" value={m ? m.voice_state_updates_received.toLocaleString() : L} />
-						<Tile label="Gateway Reconnects"  value={m ? m.gateway_reconnects : L} warn={!!m && m.gateway_reconnects > 0} />
-						<Tile label="Driver Reconnects"   value={m ? m.driver_reconnects : L}  warn={!!m && m.driver_reconnects > 0} />
+						<Tile label="Gateway Reconnects" value={m ? m.gateway_reconnects : L} warn={!!m && m.gateway_reconnects > 0} />
+						<Tile label="Driver Reconnects" value={m ? m.driver_reconnects : L} warn={!!m && m.driver_reconnects > 0} />
 					</GroupPanel>
 
 					<GroupPanel title="Database & gRPC">
-						<Tile label="DB Query Errors"   value={m ? m.db_query_errors : L}   warn={!!m && m.db_query_errors > 0} />
+						<Tile label="DB Query Errors" value={m ? m.db_query_errors : L} warn={!!m && m.db_query_errors > 0} />
 						<Tile label="DB Insert Failures" value={m ? m.db_insert_failures : L} warn={!!m && m.db_insert_failures > 0} />
 						<Tile label="Active gRPC Streams" value={m ? m.grpc_active_streams : L} />
 					</GroupPanel>
 
 					<GroupPanel title="Process">
-						<Tile label="Memory (RSS)"    value={m ? formatBytes(m.process_rss_bytes) : L} />
-						<Tile label="Open FDs"        value={m ? m.process_open_fds : L} />
-						<Tile label="Tokio Tasks"     value={m ? m.tokio_active_tasks : L} />
+						<Tile label="Memory (RSS)" value={m ? formatBytes(m.process_rss_bytes) : L} />
+						<Tile label="Open FDs" value={m ? m.process_open_fds : L} />
+						<Tile label="Tokio Tasks" value={m ? m.tokio_active_tasks : L} />
 					</GroupPanel>
 
 				</Box>
@@ -311,11 +320,12 @@ export function Metrics() {
 					{guildRecordingMetrics && (
 						<Box sx={{ mb: 2 }}>
 							<GroupPanel title="Guild Recording Metrics">
-								<Tile label="Active Recordings"     value={guildRecordingMetrics.active_recordings} />
-								<Tile label="Packets Received"      value={guildRecordingMetrics.audio_packets_received.toLocaleString()} />
-								<Tile label="Packets Dropped"       value={guildRecordingMetrics.audio_packets_dropped.toLocaleString()} warn={guildRecordingMetrics.audio_packets_dropped > 0} />
+								<Tile label="Active Recordings" value={guildRecordingMetrics.active_recordings} />
+								<Tile label="Packets Received" value={guildRecordingMetrics.audio_packets_received.toLocaleString()} />
+								<Tile label="Packets Dropped" value={guildRecordingMetrics.audio_packets_dropped.toLocaleString()} warn={guildRecordingMetrics.audio_packets_dropped > 0} />
 								<Tile label="FFmpeg Spawn Failures" value={guildRecordingMetrics.ffmpeg_spawn_failures} warn={guildRecordingMetrics.ffmpeg_spawn_failures > 0} />
-								<Tile label="FFmpeg Crashes"        value={guildRecordingMetrics.ffmpeg_process_crashes} warn={guildRecordingMetrics.ffmpeg_process_crashes > 0} />
+								<Tile label="FFmpeg Crashes" value={guildRecordingMetrics.ffmpeg_process_crashes} warn={guildRecordingMetrics.ffmpeg_process_crashes > 0} />
+								<Tile label="Last Voice Packet" value={formatTimeSince(guildRecordingMetrics.last_voice_packet_time, currentTime)} />
 							</GroupPanel>
 						</Box>
 					)}
@@ -340,8 +350,8 @@ export function Metrics() {
 												</Typography>
 											)}
 											<Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
-												{user.mute      && <Typography variant="caption" sx={{ bgcolor: 'warning.dark', px: 0.75, py: 0.25, borderRadius: 0.5 }}>Server Muted</Typography>}
-												{user.deaf      && <Typography variant="caption" sx={{ bgcolor: 'warning.dark', px: 0.75, py: 0.25, borderRadius: 0.5 }}>Server Deafened</Typography>}
+												{user.mute && <Typography variant="caption" sx={{ bgcolor: 'warning.dark', px: 0.75, py: 0.25, borderRadius: 0.5 }}>Server Muted</Typography>}
+												{user.deaf && <Typography variant="caption" sx={{ bgcolor: 'warning.dark', px: 0.75, py: 0.25, borderRadius: 0.5 }}>Server Deafened</Typography>}
 												{user.self_mute && <Typography variant="caption" sx={{ bgcolor: 'action.selected', px: 0.75, py: 0.25, borderRadius: 0.5 }}>Muted</Typography>}
 												{user.self_deaf && <Typography variant="caption" sx={{ bgcolor: 'action.selected', px: 0.75, py: 0.25, borderRadius: 0.5 }}>Deafened</Typography>}
 												{user.self_stream && <Typography variant="caption" sx={{ bgcolor: 'info.dark', px: 0.75, py: 0.25, borderRadius: 0.5 }}>Streaming</Typography>}
