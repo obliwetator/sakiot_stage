@@ -12,10 +12,11 @@ import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
-import { AudioInterface } from './AudioInterface';
-import { BASE_URL, PATH_PREFIX_FOR_LOGGED_USERS } from './Constants';
 import { ClipData, useDeleteClipMutation, useGetAuthDetailsQuery, useGetClipsQuery } from './app/apiSlice';
 import { useAppSelector } from './app/hooks';
+import { AudioInterface } from './AudioInterface';
+import { BASE_URL, PATH_PREFIX_FOR_LOGGED_USERS } from './Constants';
+import { formatDuration } from './RangeSlider';
 
 function SimpleAccordion(props: { data: ClipData[] }) {
 	const navigate = useNavigate();
@@ -50,6 +51,7 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 					<Typography>CLIP_NAME: {el.name}</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
+					<Typography>Start time: {formatDuration(el.start_time)}</Typography>
 					<Typography>SOME BS</Typography>
 					<Typography>BY(not working): {el.user_id}</Typography>
 					<Typography>length: {el.length.toFixed(2)}</Typography>

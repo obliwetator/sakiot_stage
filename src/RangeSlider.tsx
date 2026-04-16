@@ -159,7 +159,7 @@ export function RangeSlider(props: {
 	// useEffect(() => {}, [props.audioRef]);
 
 	const handleChange = (event: Event, newValue: number | number[], activeThumb: number) => {
-		const minDistance = 10;
+		const minDistance = 1;
 		if (!Array.isArray(newValue)) {
 			setIsSliderClicked(true);
 			if (startEnd[0] + newValue < 0) {
@@ -187,9 +187,13 @@ export function RangeSlider(props: {
 
 		if (activeThumb === 0) {
 			props.audioRef.currentTime = newValue[0];
-			setStartEnd([Math.min(newValue[0], startEnd[1] - minDistance), startEnd[1]]);
+			let newStart = newValue[0];
+			newStart = Math.min(newStart, startEnd[1] - minDistance);
+			setStartEnd([newStart, startEnd[1]]);
 		} else {
-			setStartEnd([startEnd[0], Math.max(newValue[1], startEnd[0] + minDistance)]);
+			let newEnd = newValue[1];
+			newEnd = Math.max(newEnd, startEnd[0] + minDistance);
+			setStartEnd([startEnd[0], newEnd]);
 		}
 		// Reset the zoom in slider to 0
 		setZoomInStartEnd(0);
@@ -307,7 +311,7 @@ function DoubleSlider(props: {
 				value={props.startEnd}
 				onChange={props.handleChange}
 				valueLabelDisplay="auto"
-				valueLabelFormat={value => <div>{formatDurationV2(value)}</div>}
+				valueLabelFormat={value => <div>{formatDuration(value)}</div>}
 				getAriaValueText={valuetext}
 				disableSwap
 			/>
@@ -319,8 +323,8 @@ function DoubleSlider(props: {
 					mt: -2,
 				}}
 			>
-				<TinyText>{formatDurationV2(props.startEnd[0])} </TinyText>
-				<TinyText>{formatDurationV2(Math.round(props.audioRef.duration))}</TinyText>
+				<TinyText>{formatDuration(props.startEnd[0])} </TinyText>
+				<TinyText>{formatDuration(Math.round(props.audioRef.duration))}</TinyText>
 			</Box>
 			<Box>
 				{/* Sub-Slider */}
@@ -364,7 +368,15 @@ function BasicTextFields(props: {
 
 
 	function SetStartEndWithTime(start: number, end: number) {
-		props.setStartEnd([start, end]);
+		const minDistance = 1;
+		let validEnd = end;
+		if (validEnd - start < minDistance) validEnd = start + minDistance;
+		if (validEnd > props.audioRef.duration) {
+			validEnd = props.audioRef.duration;
+			if (validEnd - start < minDistance) start = Math.max(0, validEnd - minDistance);
+		}
+
+		props.setStartEnd([start, validEnd]);
 		props.audioRef.currentTime = start;
 	}
 
@@ -791,12 +803,14 @@ function SilenceButton(props: { params: Readonly<Params<AudioParams>>; isSilence
 function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: number[]; disabled: boolean }) {
 	const [open, setOpen] = useState(false);
 	const [text, setText] = useState('');
+	const [errorMsg, setErrorMsg] = useState('');
 	const [createClip, { isLoading }] = useCreateClipMutation();
 	const [downloadFile] = useDownloadFileMutation();
 
 	const handleClickOpen = () => {
 		setOpen(true);
 		setText('');
+		setErrorMsg('');
 	};
 
 	const handleClose = () => {
@@ -804,6 +818,11 @@ function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: nu
 	};
 
 	const handleClip = async () => {
+		if (props.startEnd[1] - props.startEnd[0] > 20) {
+			setErrorMsg("Clip duration cannot exceed 20 seconds.");
+			return;
+		}
+
 		try {
 			const response = await createClip({
 				guild_id: props.params.guild_id!,
@@ -859,6 +878,7 @@ function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: nu
 						autoComplete="off"
 						disabled={isLoading}
 					/>
+					{errorMsg && <Typography color="error" sx={{ mt: 1 }}>{errorMsg}</Typography>}
 				</DialogContent>
 				<DialogActions>
 					<Button onClick={handleClose} disabled={isLoading}>Cancel</Button>
@@ -873,14 +893,7 @@ function ClipDialog(props: { params: Readonly<Params<AudioParams>>; startEnd: nu
 }
 
 
-function formatDuration(value: number) {
-	if (!isFinite(value) || isNaN(value)) return "0:00";
-	const minute = Math.floor(value / 60);
-	const secondLeft = Math.floor(value - minute * 60);
-	return `${minute}:${secondLeft < 10 ? `0${secondLeft}` : secondLeft}`;
-}
-
-function formatDurationV2(value: number) {
+export function formatDuration(value: number) {
 	if (!isFinite(value) || isNaN(value)) return "00:00:00";
 	return new Date(value * 1000).toISOString().slice(11, 19);
 }

@@ -18,9 +18,11 @@ export interface AuthDetails {
 // Create a new mutex
 const mutex = new Mutex();
 
+const BASE_API_URL = 'https://dev.patrykstyla.com/api/';
+
 // Create our base query separately so we can wrap it
 const baseQuery = fetchBaseQuery({
-	baseUrl: 'https://dev.patrykstyla.com/api/',
+	baseUrl: BASE_API_URL,
 	// Ensure cookies are sent for authentication
 	fetchFn: (input, init) => fetch(input, { ...init, credentials: 'include' })
 });
@@ -77,6 +79,29 @@ export interface ClipData {
 	size: number;
 	guild_id: string;
 	channel_id: string;
+	start_time: number;
+}
+
+export interface WaveformResponse {
+	progress: number;
+	data?: string;
+	error?: string;
+}
+
+export interface StampData {
+	id: number;
+	guild_id: string;
+	channel_id: string;
+	target_user_id: string;
+	stamper_user_id: string;
+	stamp_ts: number;
+	offset_ms: number;
+	audio_file_id: number | null;
+	note: string | null;
+	created_at: string;
+	target_name: string | null;
+	stamper_name: string | null;
+	channel_name: string | null;
 }
 
 export const apiSlice = createApi({
@@ -109,6 +134,9 @@ export const apiSlice = createApi({
 		refresh: builder.mutation<void, void>({
 			query: () => 'refresh'
 		}),
+		logout: builder.mutation<void, void>({
+			query: () => ({ url: 'logout', method: 'GET' })
+		}),
 		getCurrentGuildDirs: builder.query<Channels[], string>({
 			query: (guild_id) => `current/${guild_id}`
 		}),
@@ -117,6 +145,11 @@ export const apiSlice = createApi({
 				url: `audio/clips/${guild_id}`
 			}),
 			providesTags: ['Clips'],
+		}),
+		getStamps: builder.query<StampData[], string>({
+			query: (guild_id) => ({
+				url: `stamps/${guild_id}`
+			}),
 		}),
 		deleteClip: builder.mutation<void, { guild_id: string, file_name: string }>({
 			query: ({ guild_id, file_name }) => ({
@@ -152,6 +185,11 @@ export const apiSlice = createApi({
 				responseHandler: (response) => response.blob(),
 			}),
 		}),
+		getWaveform: builder.query<WaveformResponse, { guild_id: string, channel_id: string, year: string, month: number, file_name: string, timestamp?: number }>({
+			query: ({ guild_id, channel_id, year, month, file_name, timestamp }) => ({
+				url: `audio/waveform/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}${timestamp ? `?t=${timestamp}` : ''}`,
+			}),
+		}),
 		downloadFile: builder.mutation<Blob, string>({
 			query: (url) => ({
 				url,
@@ -183,4 +221,4 @@ export const apiSlice = createApi({
 	}),
 });
 
-export const { useGetAuthDetailsQuery, useGetCurrentGuildDirsQuery, useGetClipsQuery, useDeleteClipMutation, useJamItMutation, useRemoveSilenceMutation, useCheckSilenceFileQuery, useRefreshMutation, useCreateClipMutation, useGetAudioFileQuery, useDownloadFileMutation } = apiSlice;
+export const { useGetAuthDetailsQuery, useGetCurrentGuildDirsQuery, useGetClipsQuery, useDeleteClipMutation, useJamItMutation, useRemoveSilenceMutation, useCheckSilenceFileQuery, useRefreshMutation, useLogoutMutation, useCreateClipMutation, useGetAudioFileQuery, useDownloadFileMutation, useGetWaveformQuery, useLazyGetWaveformQuery, useGetStampsQuery } = apiSlice;

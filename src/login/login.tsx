@@ -1,9 +1,12 @@
 import Button from '@mui/material/Button';
 import React from 'react';
+import { useLogoutMutation } from '../app/apiSlice';
 export default function Login(props: {
 	isLoggedIn: boolean;
 	setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+	const [logout] = useLogoutMutation();
+
 	const handleLogin = () => {
 		window.open(
 			'https://discord.com/oauth2/authorize?client_id=877617434029350972&redirect_uri=https%3A%2F%2Fdev.patrykstyla.com%2Fapi%2Fdiscord_login&response_type=code&scope=email%20identify%20guilds',
@@ -12,9 +15,13 @@ export default function Login(props: {
 		)!;
 	};
 
-	const handleLogout = () => {
+	const handleLogout = async () => {
+		try {
+			await logout().unwrap();
+		} catch (err) {
+			console.error('logout request failed', err);
+		}
 		localStorage.removeItem('token');
-
 		props.setIsLoggedIn(false);
 	};
 

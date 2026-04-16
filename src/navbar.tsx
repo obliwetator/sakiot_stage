@@ -20,7 +20,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from './Constants';
 import Login from './login/login';
 
-const pages = ['Audio', 'Clips', 'Metrics'];
+const pages = ['Audio', 'Clips', 'Metrics', 'Stamps'];
 const settings = ['Profile', 'Account', 'Metrics', 'Logout'];
 
 function ResponsiveAppBar(props: {
@@ -44,7 +44,7 @@ function ResponsiveAppBar(props: {
 	const handleCloseMenuNav = (name: string) => {
 		setAnchorElNav(null);
 
-		if (!props.guildSelected && name !== 'Metrics') {
+		if (!props.guildSelected && name !== 'Metrics' && name !== 'Stamps') {
 			console.log('a');
 			navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}`);
 			return;
@@ -61,6 +61,9 @@ function ResponsiveAppBar(props: {
 				break;
 			case 'Metrics':
 				navigate(`/metrics`);
+				break;
+			case 'Stamps':
+				navigate(`/stamps`);
 				break;
 		}
 	};
