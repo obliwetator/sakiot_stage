@@ -1,4 +1,5 @@
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -8,7 +9,9 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { useGetStampsQuery } from '../app/apiSlice';
+import { formatDuration } from '../RangeSlider';
 import { RootState } from '../store';
 
 function formatTimestamp(ms: number): string {
@@ -16,6 +19,7 @@ function formatTimestamp(ms: number): string {
 }
 
 export function Stamps() {
+	const navigate = useNavigate();
 	const guild = useSelector((s: RootState) => s.app.guildSelected);
 	const guildId = guild?.id ?? '';
 
@@ -46,6 +50,7 @@ export function Stamps() {
 	}
 
 	const rows = data ?? [];
+	console.log('Stamps data', data);
 
 	return (
 		<Box sx={{ p: 3, maxWidth: 1400 }}>
@@ -64,7 +69,8 @@ export function Stamps() {
 						<TableHead>
 							<TableRow>
 								<TableCell>ID</TableCell>
-								<TableCell>Time</TableCell>
+								<TableCell>Absolute Time</TableCell>
+								<TableCell>Relative Time</TableCell>
 								<TableCell>Target</TableCell>
 								<TableCell>Stamper</TableCell>
 								<TableCell>Channel</TableCell>
@@ -76,9 +82,29 @@ export function Stamps() {
 						</TableHead>
 						<TableBody>
 							{rows.map((s) => (
+
 								<TableRow key={s.id} hover>
 									<TableCell>{s.id}</TableCell>
 									<TableCell>{formatTimestamp(s.stamp_ts)}</TableCell>
+									<TableCell>
+										{s.start_ts != null ? (
+											<Button
+												size="small"
+												onClick={() => {
+													if (s.file_name && s.year && s.month) {
+														console.log('S', s);
+														const relSecs = (s.stamp_ts - s.start_ts! + s.offset_ms) / 1000;
+														navigate(`/dashboard/${guildId}/audio/${s.channel_id}/${s.year}/${s.month}/${s.file_name}?t=${relSecs}`);
+													}
+												}}
+												disabled={!s.file_name}
+											>
+												{formatDuration((s.stamp_ts - s.start_ts + s.offset_ms) / 1000)}
+											</Button>
+										) : (
+											<span style={{ opacity: 0.5 }}>—</span>
+										)}
+									</TableCell>
 									<TableCell>
 										<div>{s.target_name ?? s.target_user_id}</div>
 										{s.target_name && (
