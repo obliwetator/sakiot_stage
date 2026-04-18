@@ -53,7 +53,7 @@ export function Stamps() {
 	console.log('Stamps data', data);
 
 	return (
-		<Box sx={{ p: 3, maxWidth: 1400 }}>
+		<Box sx={{ p: { xs: 1.5, md: 3 }, maxWidth: 1400 }}>
 			<Typography variant="h4" fontWeight={700} gutterBottom>
 				Stamps {guild ? `— ${guild.name}` : ''}
 			</Typography>

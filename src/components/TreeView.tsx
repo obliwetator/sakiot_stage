@@ -122,13 +122,13 @@ export default function CustomizedTreeView(props: { guildSelected: UserGuilds | 
 				// defaultCollapseIcon={<MinusSquare />}
 				// defaultExpandIcon={<PlusSquare />}
 				// defaultEndIcon={<CloseSquare />}
-				className="flex-initial w-1/5 p-5"
+				className="w-full p-3"
 			>
 				{years}
 			</SimpleTreeView>
 		);
 	} else {
-		return <div className="flex-initial w-1/5 p-5">Loading</div>;
+		return <div className="w-full p-3">Loading</div>;
 	}
 }
 
@@ -271,10 +271,29 @@ function TreeViewDays(props: {
 	);
 }
 
+function parseFileName(file: string): { time: string; userId: string; username: string } {
+	const base = file.replace(/\.ogg$/, '');
+	const parts = base.split('-');
+	const ts = parseInt(parts[0] ?? '', 10);
+	const userId = parts[1] ?? '';
+	const username = parts.slice(2).join('-');
+	let time = base;
+	if (Number.isFinite(ts)) {
+		const d = new Date(ts);
+		const pad = (n: number) => n.toString().padStart(2, '0');
+		time = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+	}
+	return { time, userId, username };
+}
+
 export function ItemsEl(props: { file: IndividualFile; year: number; month_name: number }) {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const params = useParams();
+
+	const fileId = props.file.file.slice(0, -4);
+	const targetPath = `${PATH_PREFIX_FOR_LOGGED_USERS}/${params.guild_id}/audio/${props.file.channel_id}/${props.year}/${props.month_name}/${fileId}`;
+	const isActive = location.pathname === targetPath;
 
 	// TODO: DB
 	const handleFavorite = () => {
@@ -313,14 +332,19 @@ export function ItemsEl(props: { file: IndividualFile; year: number; month_name:
 		// }
 	};
 
+	const baseColor = props.file.comment !== null ? 'bg-orange-600' : 'bg-violet-600';
+	const hoverColor = props.file.comment !== null ? 'hover:bg-orange-500' : 'hover:bg-violet-500';
+	const activeRing = isActive ? 'ring-2 ring-white' : '';
+
 	return (
 		// <Tooltip title={props.file.comment ? props.file.comment : ''}>
 		<div id={`${props.file.file}`}
-			className={`${props.file.comment !== null ? 'bg-orange-600' : 'bg-violet-600'} `}
-			onClick={(e) =>
-				handleClickOnFile(e, navigate, location, props.year, props.month_name, props.file.channel_id!, params)
-			}
-			style={{ cursor: 'context-menu' }}
+			className={`${baseColor} ${hoverColor} ${activeRing} px-2 py-1 mb-0.5 rounded border-b border-violet-900 cursor-pointer select-none text-sm`}
+			onClick={(e) => {
+				e.preventDefault();
+				if (!isActive) navigate(targetPath + location.search);
+			}}
+			title={props.file.file}
 		// onContextMenu={(e) => {
 		// 	handleContextMenu(e, props.setContextMenu, props.file.file);
 		// 	props.file.comment !== null
@@ -342,7 +366,18 @@ export function ItemsEl(props: { file: IndividualFile; year: number; month_name:
 		// 		  ]);
 		// }}
 		>
-			{props.file.file}
+			{(() => {
+				const { time, username } = parseFileName(props.file.file);
+				return (
+					<>
+						<span className="font-mono">{time}</span>
+						{username && <span className="ml-2">{username}</span>}
+					</>
+				);
+			})()}
+			{props.file.comment && (
+				<span className="ml-2 text-xs opacity-75">— {props.file.comment}</span>
+			)}
 		</div>
 		// </Tooltip>
 	);

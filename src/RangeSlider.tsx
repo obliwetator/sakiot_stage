@@ -202,7 +202,7 @@ export function RangeSlider(props: {
 	const params = useParams<AudioParams>();
 
 	return (
-		<Box className="m-16">
+		<Box sx={{ m: { xs: 1, md: 8 } }}>
 			{/* <button
 				onClick={() =>
 					setSwitchAduio((prev) => {
@@ -239,17 +239,30 @@ export function RangeSlider(props: {
 				zoomInStartEnd={zoomInStartEnd}
 				setIsSliderClicked={setIsSliderClicked}
 			/>
-			<Stack spacing={40} direction="row" alignItems="center" justifyContent="space-around">
+			<Stack
+				spacing={{ xs: 2, md: 8 }}
+				direction={{ xs: 'column', md: 'row' }}
+				alignItems={{ xs: 'stretch', md: 'center' }}
+				justifyContent="space-around"
+				sx={{ my: 2 }}
+			>
 				<VolumeSlider audioRef={props.audioRef} />
 				<PlaybackSpeedSlider audioRef={props.audioRef} />
 			</Stack>
-			<div className="flex">
-				<div className="flex-1 w-32">value 1: {formatDuration(Math.round(startEnd[0]))}</div>
-				<div className="flex-1 w-32">Recorded in channel: {params.channel_id}</div>
-				<div>
+			<Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 1 }}>
+				<Box sx={{ flex: 1, minWidth: 0 }}>value 1: {formatDuration(Math.round(startEnd[0]))}</Box>
+				<Box sx={{ flex: 1, minWidth: 0 }}>
+					Recorded in channel: {params.channel_id}
+					{(() => {
+						const parts = (params.file_name ?? '').split('-');
+						const userId = parts[1];
+						return userId ? <Box sx={{ fontSize: 12, opacity: 0.75 }}>User ID: {userId}</Box> : null;
+					})()}
+				</Box>
+				<Box>
 					<BasicTextFields startEnd={startEnd} setStartEnd={setStartEnd} audioRef={props.audioRef} />
-				</div>
-			</div>
+				</Box>
+			</Box>
 			<br />
 			value 2: {formatDuration(startEnd[1])}
 			<br></br>
@@ -597,7 +610,7 @@ function VolumeSlider(props: { audioRef: HTMLAudioElement }) {
 	const [muted, setMuted] = useState(false);
 
 	return (
-		<Stack spacing={2} direction="row" sx={{ mb: 1, width: 200 }} alignItems="center">
+		<Stack spacing={2} direction="row" sx={{ mb: 1, width: { xs: '100%', md: 200 } }} alignItems="center">
 			{muted ? (
 				<VolumeMute
 					onClick={() => {
@@ -641,7 +654,7 @@ function PlaybackSpeedSlider(props: { audioRef: HTMLAudioElement }) {
 	};
 	const [playbackSpeed, setPlaybackSpeed] = useState(1);
 	return (
-		<Stack spacing={2} direction="row" sx={{ mb: 1, width: 200 }} alignItems="center">
+		<Stack spacing={2} direction="row" sx={{ mb: 1, width: { xs: '100%', md: 200 } }} alignItems="center">
 			<Slider
 				sx={{
 					'& .MuiSlider-thumb': {
@@ -707,7 +720,8 @@ function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 		top: '50%',
 		left: '50%',
 		transform: 'translate(-50%, -50%)',
-		width: 400,
+		width: { xs: '90vw', sm: 400 },
+		maxWidth: 400,
 		bgcolor: 'background.paper',
 		border: '2px solid #000',
 		boxShadow: 24,

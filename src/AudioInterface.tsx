@@ -120,20 +120,20 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 
 	// If it's the silence player and it's not active yet, return nothing instead of "Downloading"
 	if (props.isSilence && !value) {
-		return <div className="flex-initial w-4/5 mt-4 text-gray-400">Audio file doesn't have a silence free version. You can generate one using the 'Remove Silence' button above.</div>;
+		return <div className="w-full mt-4 text-gray-400">Audio file doesn't have a silence free version. You can generate one using the 'Remove Silence' button above.</div>;
 	}
 
 	if (error) {
 		if (props.isSilence) {
-			return <div className="flex-initial w-4/5">Audio file doesn't have silence free vesion</div>;
+			return <div className="w-full">Audio file doesn't have silence free vesion</div>;
 		} else {
-			return <div className="flex-initial w-4/5">An error occured fetching the normal audio file. Try refreshing</div>;
+			return <div className="w-full">An error occured fetching the normal audio file. Try refreshing</div>;
 		}
 	}
 
 	return (
 		<>
-			<div className="flex-initial w-4/5">
+			<div className="w-full">
 				{readyToPlay ? (
 					<RangeSlider
 						audioRef={audioRef!}

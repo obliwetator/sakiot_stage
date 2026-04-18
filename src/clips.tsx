@@ -1,21 +1,26 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import MovieIcon from '@mui/icons-material/Movie';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Drawer from '@mui/material/Drawer';
 import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { ClipData, useDeleteClipMutation, useGetAuthDetailsQuery, useGetClipsQuery } from './app/apiSlice';
 import { useAppSelector } from './app/hooks';
 import { AudioInterface } from './AudioInterface';
-import { BASE_URL, PATH_PREFIX_FOR_LOGGED_USERS } from './Constants';
+import { BASE_URL, PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from './Constants';
 import { formatDuration } from './RangeSlider';
 
 function SimpleAccordion(props: { data: ClipData[] }) {
@@ -142,13 +147,69 @@ export default function Clips() {
 	}
 
 	if (isSuccess && data) {
-		return (
-			<div className="flex">
-				<SimpleAccordion data={data} />
-				{params.file_name && <AudioInterface key={location.pathname} isClip={true} userGuilds={userGuilds} isSilence={false} />}
-			</div>
-		);
+		return <ClipsLayout data={data} params={params} location={location} userGuilds={userGuilds} />;
 	} else {
 		return <div>No clip data</div>;
 	}
+}
+
+function ClipsLayout(props: {
+	data: ClipData[];
+	params: { file_name?: string };
+	location: ReturnType<typeof useLocation>;
+	userGuilds: UserGuilds[] | null;
+}) {
+	const theme = useTheme();
+	const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+	const [drawerOpen, setDrawerOpen] = useState(false);
+
+	useEffect(() => {
+		if (!isDesktop) setDrawerOpen(false);
+	}, [props.location.pathname, isDesktop]);
+
+	const list = <SimpleAccordion data={props.data} />;
+
+	const selectedClipId = props.params.file_name ? decodeURIComponent(props.params.file_name) : null;
+	const selectedClip = selectedClipId ? props.data.find((c) => c.clip_id === selectedClipId) : null;
+
+	return (
+		<Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, width: '100%', gap: 1 }}>
+			{isDesktop ? (
+				<Box sx={{ flex: '0 0 40%', maxWidth: 480, width: '100%', overflow: 'auto' }}>
+					{list}
+				</Box>
+			) : (
+				<Box sx={{ p: 1 }}>
+					<Button
+						variant="outlined"
+						fullWidth
+						startIcon={<MovieIcon />}
+						onClick={() => setDrawerOpen(true)}
+					>
+						Browse clips
+					</Button>
+					<Typography
+						variant="body2"
+						color="text.secondary"
+						sx={{ mt: 1, px: 0.5, wordBreak: 'break-word' }}
+					>
+						{selectedClip ? `Current: ${selectedClip.name}` : 'No clip selected'}
+					</Typography>
+					<Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+						<Box sx={{ width: 320 }}>{list}</Box>
+					</Drawer>
+				</Box>
+			)}
+			<Box sx={{ flex: 1, minWidth: 0 }}>
+				{props.params.file_name && (
+					<AudioInterface
+						key={props.location.pathname}
+						isClip={true}
+						userGuilds={props.userGuilds}
+						isSilence={false}
+					/>
+				)}
+			</Box>
+		</Box>
+	);
 }
