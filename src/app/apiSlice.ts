@@ -15,6 +15,12 @@ export interface AuthDetails {
 	token: string | null;
 }
 
+export interface UserOverride {
+	user_id: number;
+	cooldown_seconds: number;
+	updated_at: string;
+}
+
 // Create a new mutex
 const mutex = new Mutex();
 
@@ -111,7 +117,7 @@ export interface StampData {
 export const apiSlice = createApi({
 	reducerPath: 'api',
 	baseQuery: baseQueryWithReauth,
-	tagTypes: ['Clips'],
+	tagTypes: ['Clips', 'GuildCooldown', 'UserOverrides'],
 	endpoints: (builder) => ({
 		jamIt: builder.mutation<any, { guild_id: string, clip_name: string }>({
 			query: (body) => ({
@@ -200,6 +206,39 @@ export const apiSlice = createApi({
 				responseHandler: (response) => response.blob(),
 			}),
 		}),
+		getGuildCooldown: builder.query<{ cooldown_seconds: number }, string>({
+			query: (guild_id) => `admin/guilds/${guild_id}/cooldown`,
+			providesTags: (_r, _e, id) => [{ type: 'GuildCooldown', id }],
+		}),
+		setGuildCooldown: builder.mutation<void, { guild_id: string, cooldown_seconds: number }>({
+			query: ({ guild_id, cooldown_seconds }) => ({
+				url: `admin/guilds/${guild_id}/cooldown`,
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: { cooldown_seconds },
+			}),
+			invalidatesTags: (_r, _e, { guild_id }) => [{ type: 'GuildCooldown', id: guild_id }],
+		}),
+		listUserOverrides: builder.query<UserOverride[], string>({
+			query: (guild_id) => `admin/guilds/${guild_id}/cooldown/overrides`,
+			providesTags: (_r, _e, id) => [{ type: 'UserOverrides', id }],
+		}),
+		setUserOverride: builder.mutation<void, { guild_id: string, user_id: string, cooldown_seconds: number }>({
+			query: ({ guild_id, user_id, cooldown_seconds }) => ({
+				url: `admin/guilds/${guild_id}/cooldown/overrides/${user_id}`,
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: { cooldown_seconds },
+			}),
+			invalidatesTags: (_r, _e, { guild_id }) => [{ type: 'UserOverrides', id: guild_id }],
+		}),
+		deleteUserOverride: builder.mutation<void, { guild_id: string, user_id: string }>({
+			query: ({ guild_id, user_id }) => ({
+				url: `admin/guilds/${guild_id}/cooldown/overrides/${user_id}`,
+				method: 'DELETE',
+			}),
+			invalidatesTags: (_r, _e, { guild_id }) => [{ type: 'UserOverrides', id: guild_id }],
+		}),
 		// Combine all 3 requests into a single query to emulate the existing Promise.all behavior
 		getAuthDetails: builder.query<AuthDetails, void>({
 			async queryFn(_arg, _queryApi, _extraOptions, fetchWithBQ) {
@@ -225,4 +264,4 @@ export const apiSlice = createApi({
 	}),
 });
 
-export const { useGetAuthDetailsQuery, useGetCurrentGuildDirsQuery, useGetClipsQuery, useDeleteClipMutation, useJamItMutation, useRemoveSilenceMutation, useCheckSilenceFileQuery, useRefreshMutation, useLogoutMutation, useCreateClipMutation, useGetAudioFileQuery, useDownloadFileMutation, useGetWaveformQuery, useLazyGetWaveformQuery, useGetStampsQuery } = apiSlice;
+export const { useGetAuthDetailsQuery, useGetCurrentGuildDirsQuery, useGetClipsQuery, useDeleteClipMutation, useJamItMutation, useRemoveSilenceMutation, useCheckSilenceFileQuery, useRefreshMutation, useLogoutMutation, useCreateClipMutation, useGetAudioFileQuery, useDownloadFileMutation, useGetWaveformQuery, useLazyGetWaveformQuery, useGetStampsQuery, useGetGuildCooldownQuery, useSetGuildCooldownMutation, useListUserOverridesQuery, useSetUserOverrideMutation, useDeleteUserOverrideMutation } = apiSlice;
