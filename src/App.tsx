@@ -41,6 +41,7 @@ function App() {
 		skip: !hasToken
 	});
 
+	console.log('Auth details', authData, isLoading, isError);
 	const isLoggedIn = !!authData?.user && !isError;
 
 	// Set initial guild selection if we have a guild in the URL and the query completes
@@ -249,6 +250,24 @@ function App() {
 				setContextMenu={setContextMenu}
 				contextMenu={contextMenu}
 			/>
+			{authData?.user?.is_dev && (
+				<Box
+					sx={{
+						position: 'fixed',
+						bottom: 16,
+						right: 16,
+						backgroundColor: 'error.main',
+						color: 'error.contrastText',
+						padding: '4px 8px',
+						borderRadius: 1,
+						fontWeight: 'bold',
+						zIndex: 9999,
+						pointerEvents: 'none',
+					}}
+				>
+					DEV ACCOUNT
+				</Box>
+			)}
 		</ThemeProvider>
 	);
 }

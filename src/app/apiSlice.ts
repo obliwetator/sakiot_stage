@@ -7,6 +7,7 @@ export interface User {
 	permissions: number;
 	icon: number;
 	name: string;
+	is_dev?: boolean;
 }
 
 export interface AuthDetails {
@@ -24,7 +25,7 @@ export interface UserOverride {
 // Create a new mutex
 const mutex = new Mutex();
 
-const BASE_API_URL = 'https://dev.patrykstyla.com/api/';
+export const BASE_API_URL = 'https://dev.patrykstyla.com/api/';
 
 // Create our base query separately so we can wrap it
 const baseQuery = fetchBaseQuery({
