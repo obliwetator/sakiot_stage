@@ -5,7 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc && bunx vite build && sudo rm -r -f /var/www/patrykstyla.com/* && sudo cp -R ./dist/* /var/www/patrykstyla.com",
+		"build": "tsc && vite build",
+		"deploy": "bun run build && ./scripts/deploy.sh",
 		"preview": "vite preview"
 	},
 	"dependencies": {
