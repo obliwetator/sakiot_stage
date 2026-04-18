@@ -102,6 +102,10 @@ export interface StampData {
 	target_name: string | null;
 	stamper_name: string | null;
 	channel_name: string | null;
+	file_name: string | null;
+	year: number | null;
+	month: number | null;
+	start_ts: number | null;
 }
 
 export const apiSlice = createApi({

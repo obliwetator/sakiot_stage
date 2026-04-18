@@ -13,6 +13,7 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 	console.log('render Audio Interface');
 	const intervalRef = useRef<number | undefined>(undefined);
 	const params = useParams<AudioParams>();
+	const location = useLocation();
 	// const audioElementRef = React.useRef<HTMLMediaElement>(null);
 	const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
 	const [readyToPlay, setReadyToPlay] = useState(false);
@@ -87,6 +88,13 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 		localAudioRef!.addEventListener('canplaythrough', (e) => {
 			if (!isActive) return;
 			console.log('canplaythrough');
+			
+			const searchParams = new URLSearchParams(location.search);
+			const t = searchParams.get('t');
+			if (t && localAudioRef.currentTime === 0) {
+				localAudioRef.currentTime = parseFloat(t);
+			}
+
 			setReadyToPlay(true);
 			setAudioRef(localAudioRef);
 

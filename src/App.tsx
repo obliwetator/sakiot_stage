@@ -68,7 +68,7 @@ function App() {
 	// Discord oauth success handler
 	useEffect(() => {
 		const handler = (e: MessageEvent) => {
-			console.log('[oauth] message received', e.origin, e.data);
+			// TODO: This function always runs on every message
 			if (e.origin !== 'https://dev.patrykstyla.com') return;
 
 			if (e.data.success !== 1) {
@@ -161,9 +161,25 @@ function App() {
 								</Suspense>
 							}
 						/>
+						<Route
+							path="/metrics/:guild_id"
+							element={
+								<Suspense fallback={<Box p={2}>Loading...</Box>}>
+									<Metrics />
+								</Suspense>
+							}
+						/>
 
 						<Route
 							path="/stamps"
+							element={
+								<Suspense fallback={<Box p={2}>Loading...</Box>}>
+									<Stamps />
+								</Suspense>
+							}
+						/>
+						<Route
+							path="/stamps/:guild_id"
 							element={
 								<Suspense fallback={<Box p={2}>Loading...</Box>}>
 									<Stamps />

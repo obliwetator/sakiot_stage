@@ -60,10 +60,10 @@ function ResponsiveAppBar(props: {
 				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${props.guildSelected?.id}/clips`);
 				break;
 			case 'Metrics':
-				navigate(`/metrics`);
+				navigate(props.guildSelected?.id ? `/metrics/${props.guildSelected.id}` : `/metrics`);
 				break;
 			case 'Stamps':
-				navigate(`/stamps`);
+				navigate(props.guildSelected?.id ? `/stamps/${props.guildSelected.id}` : `/stamps`);
 				break;
 		}
 	};
@@ -190,19 +190,13 @@ function BasicSelect(props: {
 	const location = useLocation();
 	const handleChange = (event: SelectChangeEvent) => {
 		const index = props.userGuilds!.map((item) => item.name).indexOf(event.target.value);
-		if (!params.guild_id) {
-			props.setGuildSelected(props.userGuilds![index]);
-			// If there is no guild id param dont do navigate, just change the state and the menu
-			return;
+		const newGuild = props.userGuilds![index];
+		props.setGuildSelected(newGuild);
+
+		if (props.guildSelected && location.pathname.includes(props.guildSelected.id)) {
+			const result = location.pathname.split(props.guildSelected.id);
+			navigate(result[0] + newGuild.id);
 		}
-
-		props.setGuildSelected(props.userGuilds![index]);
-		const pathname = location.pathname;
-		// const replaced_path = pathname.replace(params.guild_id as any as string, props.userGuilds![index].id);
-
-		const result = pathname.split(params.guild_id);
-
-		navigate(result[0] + props.userGuilds![index].id);
 	};
 
 	const guilds = props.userGuilds?.map((value, index) => {

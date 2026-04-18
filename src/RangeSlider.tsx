@@ -33,6 +33,7 @@ enum RespStatus {
 	CONNECTED,
 	NOT_CONNECTED,
 	UNKOWN,
+	COOLDOWN,
 }
 
 export function RangeSlider(props: {
@@ -53,7 +54,7 @@ export function RangeSlider(props: {
 	}, [props.trueDuration]);
 
 	const [playing, setPlaying] = useState(false);
-	const [startEnd, setStartEnd] = React.useState<number[]>([0, actualDuration]);
+	const [startEnd, setStartEnd] = React.useState<number[]>([props.audioRef.currentTime || 0, actualDuration]);
 	const [zoomInStartEnd, setZoomInStartEnd] = React.useState<number>(0);
 	const [isSliderClicked, setIsSliderClicked] = React.useState(false);
 	const [ArrowKeySkip, CtrlArrowKeySKip] = [5, 30];
@@ -664,7 +665,7 @@ function PlaybackSpeedSlider(props: { audioRef: HTMLAudioElement }) {
 function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 	if (!props.disabled) return <></>;
 
-	const [isError, setIsError] = useState<{ type: RespStatus; code: number }>({
+	const [isError, setIsError] = useState<{ type: RespStatus; code: number; cooldownRemaining?: number }>({
 		type: RespStatus.UNKOWN,
 		code: 0,
 	});
@@ -687,8 +688,16 @@ function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 			} else {
 				// prob success or unhandled
 			}
-		} catch (err) {
-			setIsError({ type: RespStatus.NOT_CONNECTED, code: 0 });
+		} catch (err: any) {
+			if (err?.status === 429) {
+				setIsError({
+					type: RespStatus.COOLDOWN,
+					code: err?.data?.code ?? 3,
+					cooldownRemaining: err?.data?.cooldown_remaining_seconds,
+				});
+			} else {
+				setIsError({ type: RespStatus.NOT_CONNECTED, code: 0 });
+			}
 			setOpen(true);
 		}
 	};
@@ -716,7 +725,7 @@ function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 				Jam It
 			</Button>
 			{/* if Error show a modal explaining the error */}
-			{(isError.code > 0 || isError.type === RespStatus.NOT_CONNECTED) && (
+			{(isError.code > 0 || isError.type === RespStatus.NOT_CONNECTED || isError.type === RespStatus.COOLDOWN) && (
 				<div>
 					<Modal
 						open={open}
@@ -726,18 +735,24 @@ function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 					>
 						<Box sx={style}>
 							<Typography id="modal-modal-title" variant="h6" component="h2">
-								Error
+								{isError.type === RespStatus.COOLDOWN ? 'On cooldown' : 'Error'}
 							</Typography>
 							<Typography id="modal-modal-description" sx={{ mt: 2 }}>
-								error code: {isError.code}
-								<br />
-								TODO: proper messages
-								<br />
-								number 0 = Success
-								<br />
-								number 1 = bot is not in voice channel
-								<br />
-								number &gt;= 2 =¯\_(ツ)_/¯
+								{isError.type === RespStatus.COOLDOWN ? (
+									<>Try again in {isError.cooldownRemaining ?? '?'}s.</>
+								) : (
+									<>
+										error code: {isError.code}
+										<br />
+										TODO: proper messages
+										<br />
+										number 0 = Success
+										<br />
+										number 1 = bot is not in voice channel
+										<br />
+										number &gt;= 2 =¯\_(ツ)_/¯
+									</>
+								)}
 							</Typography>
 						</Box>
 					</Modal>
