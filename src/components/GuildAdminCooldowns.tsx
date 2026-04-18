@@ -86,7 +86,7 @@ export function GuildAdminCooldowns() {
 				{loadingGuild ? (
 					<Typography>Loading…</Typography>
 				) : (
-					<Stack direction="row" spacing={2} alignItems="center">
+					<Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
 						<TextField
 							label="Cooldown (seconds)"
 							type="number"
@@ -114,7 +114,7 @@ export function GuildAdminCooldowns() {
 			<Paper sx={{ p: 2 }}>
 				<Typography variant="h6" gutterBottom>Per-user overrides</Typography>
 
-				<Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+				<Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ mb: 2 }}>
 					<TextField
 						label="User ID"
 						value={newUserId}

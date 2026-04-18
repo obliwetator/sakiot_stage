@@ -238,12 +238,12 @@ export function Metrics() {
 	const m = metrics;
 
 	return (
-		<Box sx={{ flexGrow: 1, p: 3, maxWidth: 1400 }}>
+		<Box sx={{ flexGrow: 1, p: { xs: 1.5, md: 3 }, maxWidth: 1400 }}>
 
 			{/* ── Header row ─────────────────────────────────────────────────── */}
 			<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
 				<Typography variant="h4" fontWeight={700}>Bot Metrics Dashboard</Typography>
-				<Box sx={{ width: 280 }}>
+				<Box sx={{ width: { xs: '100%', sm: 280 } }}>
 					<Autocomplete
 						size="small"
 						options={m?.guilds || []}
