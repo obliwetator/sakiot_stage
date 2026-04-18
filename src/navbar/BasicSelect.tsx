@@ -1,0 +1,51 @@
+import Box from '@mui/material/Box';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import * as React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { UserGuilds } from '../Constants';
+
+export function BasicSelect(props: {
+	guildSelected: UserGuilds | null;
+	setGuildSelected: React.Dispatch<React.SetStateAction<UserGuilds | null>>;
+	userGuilds: UserGuilds[] | null;
+}) {
+	const navigate = useNavigate();
+	const location = useLocation();
+
+	const handleChange = (event: SelectChangeEvent) => {
+		const index = props.userGuilds!.map((item) => item.name).indexOf(event.target.value);
+		const newGuild = props.userGuilds![index];
+		props.setGuildSelected(newGuild);
+
+		if (props.guildSelected && location.pathname.includes(props.guildSelected.id)) {
+			const result = location.pathname.split(props.guildSelected.id);
+			navigate(result[0] + newGuild.id);
+		}
+	};
+
+	const guilds = props.userGuilds?.map((value, index) => (
+		<MenuItem key={index} value={value.name}>
+			{value.name}
+		</MenuItem>
+	));
+
+	return (
+		<Box sx={{ minWidth: 120 }}>
+			<FormControl fullWidth>
+				<InputLabel id="demo-simple-select-label">Server</InputLabel>
+				<Select
+					labelId="demo-simple-select-label"
+					id="demo-simple-select"
+					label="Server"
+					onChange={handleChange}
+					value={props.guildSelected ? props.guildSelected.name : ''}
+				>
+					{guilds}
+				</Select>
+			</FormControl>
+		</Box>
+	);
+}

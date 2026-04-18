@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useGetStampsQuery } from '../app/apiSlice';
-import { formatDuration } from '../RangeSlider';
+import { formatDuration } from './RangeSlider/formatDuration';
 import { RootState } from '../store';
 
 function formatTimestamp(ms: number): string {
