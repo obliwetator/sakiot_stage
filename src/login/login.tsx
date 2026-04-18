@@ -1,6 +1,7 @@
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import React from 'react';
-import { useLogoutMutation } from '../app/apiSlice';
+import { BASE_API_URL, useLogoutMutation } from '../app/apiSlice';
 export default function Login(props: {
 	isLoggedIn: boolean;
 	setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
@@ -25,6 +26,16 @@ export default function Login(props: {
 		props.setIsLoggedIn(false);
 	};
 
+	const isDevOrStaging =
+		window.location.hostname === 'localhost' ||
+		window.location.hostname === '127.0.0.1' ||
+		window.location.hostname.includes('staging') ||
+		window.location.hostname.includes('dev');
+
+	const handleDevLogin = () => {
+		window.open(`${BASE_API_URL}dev_login?t=${Date.now()}`, 'popup', 'width=500,height=800')!;
+	};
+
 	return props.isLoggedIn ? (
 		<Button
 			onClick={() => {
@@ -35,13 +46,25 @@ export default function Login(props: {
 			Log out
 		</Button>
 	) : (
-		<Button
-			onClick={() => {
-				handleLogin();
-			}}
-			sx={{ my: 2, color: 'white', display: 'block' }}
-		>
-			Login
-		</Button>
+		<Box sx={{ display: 'flex', gap: 2 }}>
+			<Button
+				onClick={() => {
+					handleLogin();
+				}}
+				sx={{ my: 2, color: 'white', display: 'block' }}
+			>
+				Login
+			</Button>
+			{isDevOrStaging && (
+				<Button
+					onClick={() => {
+						handleDevLogin();
+					}}
+					sx={{ my: 2, color: 'white', display: 'block' }}
+				>
+					Dev Login
+				</Button>
+			)}
+		</Box>
 	);
 }

@@ -128,10 +128,19 @@ function ResponsiveAppBar(props: {
 							}}
 						>
 							{visiblePages.map((page) => (
-								<MenuItem key={page} onClick={handleCloseNavMenu}>
+								<MenuItem key={page} onClick={() => handleCloseMenuNav(page)}>
 									<Typography textAlign="center">{page}</Typography>
 								</MenuItem>
 							))}
+							{props.guildSelected ? (
+								<MenuItem>
+									<BasicSelect
+										guildSelected={props.guildSelected}
+										setGuildSelected={props.setGuildSelected}
+										userGuilds={props.userGuilds}
+									/>
+								</MenuItem>
+							) : null}
 						</Menu>
 					</Box>
 
