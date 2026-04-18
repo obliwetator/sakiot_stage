@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Params, useLocation, useParams } from 'react-router-dom';
 import { AudioParams, UserGuilds, valuetext } from './Constants';
-import { RangeSlider } from './RangeSlider';
+import { RangeSlider } from './components/RangeSlider';
 import { useCheckSilenceFileQuery, useGetAudioFileQuery } from './app/apiSlice';
 import { useAppSelector } from './app/hooks';
 import { setHasSilence } from './reducers/silence';

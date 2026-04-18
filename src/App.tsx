@@ -1,135 +1,14 @@
-import { ThemeProvider, createTheme } from '@mui/material';
+import { ThemeProvider } from '@mui/material';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import React, { Suspense, useEffect, useState } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Clips from './clips';
-import { FormDialog } from './components/FormDialog';
-import { YearSelection } from './components/YearSelection';
+import { BrowserRouter } from 'react-router-dom';
+import { AppRoutes } from './app/AppRoutes';
+import { darkTheme } from './app/theme';
+import { useAuthBootstrap } from './app/useAuthBootstrap';
 import { LayoutsWithNavbar } from './layouts/LayoutsWithNavbar';
-import { ProtectedLayout } from './layouts/ProtectedLayout';
-
-// Extracted Components
-const Metrics = React.lazy(() => import('./components/Metrics').then(m => ({ default: m.Metrics })));
-const Stamps = React.lazy(() => import('./components/Stamps').then(m => ({ default: m.Stamps })));
-const GuildAdminCooldowns = React.lazy(() => import('./components/GuildAdminCooldowns').then(m => ({ default: m.GuildAdminCooldowns })));
-
-// RTK Query & Redux
-import { useDispatch } from 'react-redux';
-import { useGetAuthDetailsQuery } from './app/apiSlice';
-import { setGuildSelected } from './reducers/appSlice';
-
-const darkTheme = createTheme({
-	palette: {
-		mode: 'dark',
-	},
-});
 
 function App() {
-	const dispatch = useDispatch();
-	const [hasToken, setHasToken] = useState(!!localStorage.getItem('token'));
-
-	const {
-		data: authData,
-		isLoading,
-		isError,
-		refetch
-	} = useGetAuthDetailsQuery(undefined, {
-		// Only run the query if a token is marked as existing
-		skip: !hasToken
-	});
-
-	console.log('Auth details', authData, isLoading, isError);
-	const isLoggedIn = !!authData?.user && !isError;
-
-	// Set initial guild selection if we have a guild in the URL and the query completes
-	useEffect(() => {
-		if (authData?.guilds) {
-			const url = window.location.href;
-			const split = url.split('/');
-			const res = split[4];
-			if (res) {
-				const guild = authData.guilds.find(({ id }) => id === res) || null;
-				dispatch(setGuildSelected(guild));
-			}
-
-			if (authData.token) {
-				localStorage.setItem('token', authData.token);
-			}
-		}
-	}, [authData, dispatch]);
-
-	const [contextMenu, setContextMenu] = useState<{
-		mouseX: number;
-		mouseY: number;
-		file: string | null;
-	} | null>(null);
-
-	// Discord oauth success handler
-	useEffect(() => {
-		const handler = (e: MessageEvent) => {
-			// TODO: This function always runs on every message
-			if (e.origin !== 'https://dev.patrykstyla.com') return;
-
-			if (e.data.success !== 1) {
-				console.error('something failed when authenticating');
-				return;
-			}
-
-			// Seed flag so query unskips AND survives reload
-			if (!localStorage.getItem('token')) {
-				localStorage.setItem('token', 'logged-in');
-			}
-			setHasToken(true);
-			// If query was already active (e.g. stale flag + 401 error), force retry.
-			refetch();
-
-			if (e.source && (e.source as Window).close) {
-				setTimeout(() => {
-					(e.source as Window).close();
-				}, 200);
-			}
-		};
-		window.addEventListener('message', handler);
-		return () => window.removeEventListener('message', handler);
-	}, []);
-
-	const [menuItems, setMenuItems] = useState<{ name: string; cb: () => void }[] | null>(null);
-	const [isFormOpen, setIsFormOpen] = useState(false);
-
-	const handleClose = (e: any) => {
-		e.stopPropagation();
-		setContextMenu(null);
-	};
-
-	const menu = menuItems?.map((el, value) => {
-		return (
-			<MenuItem
-				key={value}
-				onClick={() => {
-					el.cb();
-				}}
-			>
-				{el.name}
-			</MenuItem>
-		);
-	});
-
-	const handleContextMenu = (event: React.MouseEvent) => {
-		console.log(event.target as HTMLBaseElement);
-		event.preventDefault();
-		setContextMenu(
-			contextMenu === null
-				? {
-					mouseX: event.clientX + 2,
-					mouseY: event.clientY - 6,
-					file: null,
-				}
-				: null
-		);
-	};
+	const { authData, isLoading, isLoggedIn } = useAuthBootstrap();
 
 	if (isLoading || !isLoggedIn) {
 		return (
@@ -138,8 +17,8 @@ function App() {
 					<LayoutsWithNavbar />
 					<Box p={2}>
 						{!isLoggedIn && !isLoading
-							? "You are not logged in or you are not authorized to view this content"
-							: "Loading..."}
+							? 'You are not logged in or you are not authorized to view this content'
+							: 'Loading...'}
 					</Box>
 				</BrowserRouter>
 			</ThemeProvider>
@@ -150,106 +29,8 @@ function App() {
 		<ThemeProvider theme={darkTheme}>
 			<CssBaseline />
 			<BrowserRouter>
-				<Routes>
-					<Route path="/" element={<LayoutsWithNavbar />}>
-						<Route path="/" element={<ProtectedLayout />} />
-						<Route path=":guild_id" element={<Box p={2}>select from top navbar</Box>} />
-
-						<Route
-							path="/metrics"
-							element={
-								<Suspense fallback={<Box p={2}>Loading...</Box>}>
-									<Metrics />
-								</Suspense>
-							}
-						/>
-						<Route
-							path="/metrics/:guild_id"
-							element={
-								<Suspense fallback={<Box p={2}>Loading...</Box>}>
-									<Metrics />
-								</Suspense>
-							}
-						/>
-
-						<Route
-							path="/stamps"
-							element={
-								<Suspense fallback={<Box p={2}>Loading...</Box>}>
-									<Stamps />
-								</Suspense>
-							}
-						/>
-						<Route
-							path="/stamps/:guild_id"
-							element={
-								<Suspense fallback={<Box p={2}>Loading...</Box>}>
-									<Stamps />
-								</Suspense>
-							}
-						/>
-
-						<Route path="/dashboard" element={<ProtectedLayout />}>
-							<Route path=":guild_id">
-								<Route path="" element={<Box p={2}>select from top navbar</Box>} />
-								<Route path="audio">
-									<Route
-										path=""
-										element={
-											<YearSelection
-												setContextMenu={setContextMenu}
-												setMenuItems={setMenuItems}
-												setFormOpen={setIsFormOpen}
-											/>
-										}
-									/>
-									<Route
-										path=":channel_id/:year/:month/:file_name"
-										element={
-											<YearSelection
-												setContextMenu={setContextMenu}
-												setMenuItems={setMenuItems}
-												setFormOpen={setIsFormOpen}
-											/>
-										}
-									/>
-								</Route>
-								<Route path="clips">
-									<Route path="" element={<Clips />} />
-									<Route path=":file_name" element={<Clips />} />
-								</Route>
-								<Route path="admin">
-									<Route
-										path="cooldowns"
-										element={
-											<Suspense fallback={<Box p={2}>Loading...</Box>}>
-												<GuildAdminCooldowns />
-											</Suspense>
-										}
-									/>
-								</Route>
-							</Route>
-						</Route>
-					</Route>
-				</Routes>
+				<AppRoutes />
 			</BrowserRouter>
-			<Menu
-				open={contextMenu !== null}
-				onClose={handleClose}
-				anchorReference="anchorPosition"
-				anchorPosition={
-					contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
-				}
-				onContextMenu={handleContextMenu}
-			>
-				{menu}
-			</Menu>
-			<FormDialog
-				setOpen={setIsFormOpen}
-				isOpen={isFormOpen}
-				setContextMenu={setContextMenu}
-				contextMenu={contextMenu}
-			/>
 			{authData?.user?.is_dev && (
 				<Box
 					sx={{

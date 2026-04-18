@@ -1,0 +1,81 @@
+import { styled } from '@mui/material';
+import Box from '@mui/material/Box';
+import Slider from '@mui/material/Slider';
+import Typography from '@mui/material/Typography';
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { AudioParams, valuetext } from '../../Constants';
+import WaveFormButton from '../Waveform';
+import { formatDuration } from './formatDuration';
+
+const TinyText = styled(Typography)({
+	fontSize: '0.75rem',
+	opacity: 0.38,
+	fontWeight: 500,
+	letterSpacing: 0.2,
+});
+
+export function DoubleSlider(props: {
+	startEnd: number[];
+	setStartEnd: React.Dispatch<React.SetStateAction<number[]>>;
+	handleChange: (event: Event, newValue: number | number[], activeThumb: number) => void;
+	audioRef: HTMLAudioElement;
+	zoomInStartEnd: number;
+	setIsSliderClicked: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+	const [min, max] = [-60, 60];
+	const params = useParams<AudioParams>();
+
+	return (
+		<>
+			<WaveFormButton params={params} startEnd={props.startEnd} />
+			<Slider
+				sx={{
+					'& .MuiSlider-thumb': {
+						height: 25,
+						width: 5,
+						borderRadius: '1px',
+					},
+				}}
+				max={props.audioRef.duration}
+				getAriaLabel={() => 'Minimum distance'}
+				value={props.startEnd}
+				onChange={props.handleChange}
+				valueLabelDisplay="auto"
+				valueLabelFormat={(value) => <div>{formatDuration(value)}</div>}
+				getAriaValueText={valuetext}
+				disableSwap
+			/>
+			<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: -2 }}>
+				<TinyText>{formatDuration(props.startEnd[0])} </TinyText>
+				<TinyText>{formatDuration(Math.round(props.audioRef.duration))}</TinyText>
+			</Box>
+			<Box>
+				<Slider
+					sx={{
+						'& .MuiSlider-thumb': {
+							height: 25,
+							width: 5,
+							borderRadius: '1px',
+							transition: 'none',
+						},
+						'& .MuiSlider-track': {
+							transition: 'none',
+						},
+					}}
+					min={min}
+					max={max}
+					step={0.1}
+					getAriaLabel={() => 'Minimum distance'}
+					value={props.zoomInStartEnd}
+					onChange={props.handleChange}
+					onChangeCommitted={() => props.setIsSliderClicked(false)}
+					valueLabelDisplay="auto"
+					getAriaValueText={valuetext}
+				/>
+				<TinyText>{formatDuration(props.zoomInStartEnd)} </TinyText>
+				<TinyText>{formatDuration(60)}</TinyText>
+			</Box>
+		</>
+	);
+}

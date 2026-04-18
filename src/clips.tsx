@@ -21,7 +21,7 @@ import { ClipData, useDeleteClipMutation, useGetAuthDetailsQuery, useGetClipsQue
 import { useAppSelector } from './app/hooks';
 import { AudioInterface } from './AudioInterface';
 import { BASE_URL, PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from './Constants';
-import { formatDuration } from './RangeSlider';
+import { formatDuration } from './components/RangeSlider/formatDuration';
 
 function SimpleAccordion(props: { data: ClipData[] }) {
 	const navigate = useNavigate();
