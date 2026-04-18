@@ -14,6 +14,7 @@ import { ProtectedLayout } from './layouts/ProtectedLayout';
 // Extracted Components
 const Metrics = React.lazy(() => import('./components/Metrics').then(m => ({ default: m.Metrics })));
 const Stamps = React.lazy(() => import('./components/Stamps').then(m => ({ default: m.Stamps })));
+const GuildAdminCooldowns = React.lazy(() => import('./components/GuildAdminCooldowns').then(m => ({ default: m.GuildAdminCooldowns })));
 
 // RTK Query & Redux
 import { useDispatch } from 'react-redux';
@@ -215,6 +216,16 @@ function App() {
 								<Route path="clips">
 									<Route path="" element={<Clips />} />
 									<Route path=":file_name" element={<Clips />} />
+								</Route>
+								<Route path="admin">
+									<Route
+										path="cooldowns"
+										element={
+											<Suspense fallback={<Box p={2}>Loading...</Box>}>
+												<GuildAdminCooldowns />
+											</Suspense>
+										}
+									/>
 								</Route>
 							</Route>
 						</Route>

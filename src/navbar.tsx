@@ -23,6 +23,19 @@ import Login from './login/login';
 const pages = ['Audio', 'Clips', 'Metrics', 'Stamps'];
 const settings = ['Profile', 'Account', 'Metrics', 'Logout'];
 
+const ADMIN_BIT = 0x8n;
+const MANAGE_GUILD_BIT = 0x20n;
+function isGuildAdmin(g: UserGuilds | null): boolean {
+	if (!g) return false;
+	if (g.owner) return true;
+	try {
+		const bits = BigInt(g.permissions);
+		return (bits & (ADMIN_BIT | MANAGE_GUILD_BIT)) !== 0n;
+	} catch {
+		return false;
+	}
+}
+
 function ResponsiveAppBar(props: {
 	isLoggedIn: boolean;
 	setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
@@ -50,6 +63,9 @@ function ResponsiveAppBar(props: {
 			return;
 		}
 		switch (name) {
+			case 'Admin':
+				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${props.guildSelected?.id}/admin/cooldowns`);
+				break;
 			case 'Audio':
 				// TODO: Dynamic need auth
 				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${props.guildSelected?.id}/audio`);
@@ -75,6 +91,8 @@ function ResponsiveAppBar(props: {
 	const handleCloseUserMenu = () => {
 		setAnchorElUser(null);
 	};
+
+	const visiblePages = isGuildAdmin(props.guildSelected) ? [...pages, 'Admin'] : pages;
 
 	return (
 		<AppBar position="static">
@@ -109,7 +127,7 @@ function ResponsiveAppBar(props: {
 								display: { xs: 'block', md: 'none' },
 							}}
 						>
-							{pages.map((page) => (
+							{visiblePages.map((page) => (
 								<MenuItem key={page} onClick={handleCloseNavMenu}>
 									<Typography textAlign="center">{page}</Typography>
 								</MenuItem>
@@ -119,7 +137,7 @@ function ResponsiveAppBar(props: {
 
 					{/* Desktop */}
 					<Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-						{pages.map((page) => (
+						{visiblePages.map((page) => (
 							<Button
 								key={page}
 								onClick={() => {
