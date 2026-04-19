@@ -45,13 +45,14 @@ export const ProtectedLayout = () => {
 
 	const guilds = userGuilds.map((value, index) => {
 		return (
-			<Grid size={{ xs: 1 }} key={index}>
-				<div
+			<Grid size={{ xs: 1 }} key={value.id}>
+				<button
+					type="button"
 					onClick={() => handleGuildSelect(index)}
-					className="cursor-pointer"
+					className="cursor-pointer bg-transparent border-none p-0 text-inherit font-inherit"
 				>
 					{value.name}
-				</div>
+				</button>
 			</Grid>
 		);
 	});

@@ -27,12 +27,19 @@ export function ItemsEl(props: {
 	const { time, username } = parseFileName(props.file.file);
 
 	return (
-		<div
+		<button
+			type="button"
 			id={props.file.file}
-			className={`${baseColor} ${hoverColor} ${activeRing} px-2 py-1 mb-0.5 rounded border-b border-violet-900 cursor-pointer select-none text-sm`}
+			className={`${baseColor} ${hoverColor} ${activeRing} w-full text-left px-2 py-1 mb-0.5 rounded border-b border-violet-900 cursor-pointer select-none text-sm`}
 			onClick={(e) => {
 				e.preventDefault();
 				if (!isActive) navigate(targetPath + location.search);
+			}}
+			onKeyDown={(e) => {
+				if (e.key === "Enter" || e.key === " ") {
+					e.preventDefault();
+					if (!isActive) navigate(targetPath + location.search);
+				}
 			}}
 			title={props.file.file}
 		>
@@ -41,6 +48,6 @@ export function ItemsEl(props: {
 			{props.file.comment && (
 				<span className="ml-2 text-xs opacity-75">— {props.file.comment}</span>
 			)}
-		</div>
+		</button>
 	);
 }

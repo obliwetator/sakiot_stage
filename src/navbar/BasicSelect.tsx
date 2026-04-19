@@ -31,8 +31,8 @@ export function BasicSelect(props: {
 		}
 	};
 
-	const guilds = props.userGuilds?.map((value, index) => (
-		<MenuItem key={index} value={value.name}>
+	const guilds = props.userGuilds?.map((value) => (
+		<MenuItem key={value.id} value={value.name}>
 			{value.name}
 		</MenuItem>
 	));

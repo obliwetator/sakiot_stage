@@ -15,7 +15,7 @@ export function TreeViewYears(props: { el: Dirs; index: number }) {
 				index={index}
 				month_name={month}
 				year={props.el.year}
-				key={index}
+				key={month}
 			/>
 		);
 	});

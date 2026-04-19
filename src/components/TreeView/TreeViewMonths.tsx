@@ -34,16 +34,17 @@ export function TreeViewMonths(props: {
 					files={file_names}
 					month_name={props.month_name}
 					year={props.year}
-					key={index}
+					key={el.file}
 				/>
 			);
-		} else {
-			file_names.push({
-				file: el.file,
-				comment: el.comment,
-				channel_id: el.channel_id,
-			});
 		}
+
+		file_names.push({
+			file: el.file,
+			comment: el.comment,
+			channel_id: el.channel_id,
+		});
+		return null;
 	});
 
 	return (
@@ -53,7 +54,10 @@ export function TreeViewMonths(props: {
 			label={getMonthName(props.month_name)}
 			itemId={`${props.year}-${props.month_name}`}
 		>
-			<div key={props.index} className="bg-green-500 overflow-hidden">
+			<div
+				key={`${props.year}-${props.month_name}`}
+				className="bg-green-500 overflow-hidden"
+			>
 				{days}
 			</div>
 		</StyledTreeItem>

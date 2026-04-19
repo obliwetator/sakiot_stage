@@ -12,14 +12,13 @@ export default function CustomizedTreeView(_props: {
 }) {
 	const [data, setData] = useState<Dirs[] | null>(null);
 	const params = useParams();
-	const {
-		data: channelsData,
-		isError,
-		isSuccess,
-	} = useGetCurrentGuildDirsQuery(params.guild_id ?? "", {
-		skip: !params.guild_id,
-		refetchOnMountOrArgChange: true,
-	});
+	const { data: channelsData, isSuccess } = useGetCurrentGuildDirsQuery(
+		params.guild_id ?? "",
+		{
+			skip: !params.guild_id,
+			refetchOnMountOrArgChange: true,
+		},
+	);
 
 	React.useEffect(() => {
 		if (isSuccess && channelsData) {
@@ -31,7 +30,7 @@ export default function CustomizedTreeView(_props: {
 	if (!data) return <div className="w-full p-3">Loading</div>;
 
 	const years = data.map((el, index) => (
-		<TreeViewYears el={el} index={index} key={index} />
+		<TreeViewYears el={el} index={index} key={el.year} />
 	));
 	const month = new Date().toLocaleString("default", { month: "long" });
 

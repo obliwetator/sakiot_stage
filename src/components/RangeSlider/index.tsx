@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDownloadFileMutation } from "../../app/apiSlice";
 import type { AudioParams, UserGuilds } from "../../Constants";
@@ -76,7 +76,26 @@ export function RangeSlider(props: {
 		return () => window.removeEventListener("keydown", handleArrowKeys);
 	}, [props.audioRef]);
 
-	const togglePlay = () => {
+	const startTimer = useCallback(() => {
+		clearInterval(props.intervalRef.current);
+		props.intervalRef.current = setInterval(() => {
+			if (!isSliderClicked) {
+				setZoomInStartEnd((prev) => {
+					if (prev < 0) {
+						if (prev >= -2) return 0;
+						return Math.round(-Math.abs(prev * 0.6666));
+					} else if (prev > 0) {
+						if (prev <= 2) return 0;
+						return Math.round(prev * 0.6666);
+					}
+					return 0;
+				});
+			}
+			setStartEnd((prev) => [props.audioRef.currentTime, prev[1]]);
+		}, 1000);
+	}, [isSliderClicked, props.audioRef, props.intervalRef]);
+
+	const togglePlay = useCallback(() => {
 		setPlaying((prev) => {
 			if (prev) {
 				clearInterval(props.intervalRef.current);
@@ -87,7 +106,7 @@ export function RangeSlider(props: {
 			startTimer();
 			return true;
 		});
-	};
+	}, [props.audioRef, props.intervalRef, startTimer]);
 
 	useEffect(() => {
 		const handleSpace = (event: KeyboardEvent) => {
@@ -106,25 +125,6 @@ export function RangeSlider(props: {
 		window.addEventListener("keydown", handleSpace);
 		return () => window.removeEventListener("keydown", handleSpace);
 	}, [togglePlay]);
-
-	const startTimer = () => {
-		clearInterval(props.intervalRef.current);
-		props.intervalRef.current = setInterval(() => {
-			if (!isSliderClicked) {
-				setZoomInStartEnd((prev) => {
-					if (prev < 0) {
-						if (prev >= -2) return 0;
-						return Math.round(-Math.abs(prev * 0.6666));
-					} else if (prev > 0) {
-						if (prev <= 2) return 0;
-						return Math.round(prev * 0.6666);
-					}
-					return 0;
-				});
-			}
-			setStartEnd((prev) => [props.audioRef.currentTime, prev[1]]);
-		}, 1000);
-	};
 
 	useEffect(() => {
 		if (isSliderClicked) startTimer();

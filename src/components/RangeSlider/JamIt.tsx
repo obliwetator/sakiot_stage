@@ -18,8 +18,6 @@ export function JamIt(props: {
 	disabled: boolean;
 	userGuilds: UserGuilds[] | null;
 }) {
-	if (!props.disabled) return <></>;
-
 	const [isError, setIsError] = useState<{
 		type: JamItRespStatus;
 		code: number;
@@ -31,6 +29,8 @@ export function JamIt(props: {
 	const params = useParams();
 	const [jamIt] = useJamItMutation();
 	const [open, setOpen] = React.useState(false);
+
+	if (!props.disabled) return null;
 
 	const handleJamIt = async () => {
 		try {
