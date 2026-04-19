@@ -16,10 +16,11 @@ export function BasicSelect(props: {
 	const location = useLocation();
 
 	const handleChange = (event: SelectChangeEvent) => {
-		const index = props.userGuilds
-			?.map((item) => item.name)
-			.indexOf(event.target.value);
-		const newGuild = props.userGuilds?.[index];
+		const newGuild = props.userGuilds?.find(
+			(item) => item.name === event.target.value,
+		);
+		if (!newGuild) return;
+
 		props.setGuildSelected(newGuild);
 
 		if (
