@@ -1,18 +1,20 @@
+import Button from "@mui/material/Button";
 import { useWavesurfer } from "@wavesurfer/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Params } from "react-router-dom";
-// @ts-ignore
-import Button from '@mui/material/Button';
+import type { Params } from "react-router-dom";
 import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline.js";
-import { AudioParams } from "../Constants";
 import { useGetWaveformQuery } from "../app/apiSlice";
+import type { AudioParams } from "../Constants";
 
-function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd?: number[] }) {
+function WaveFormButton(props: {
+	params: Readonly<Params<AudioParams>>;
+	startEnd?: number[];
+}) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [shouldGenerate, setShouldGenerate] = useState(false);
 	const [timestamp, setTimestamp] = useState<number | undefined>(undefined);
 	const [zoomLevel, setZoomLevel] = useState(1);
-	const [minPxPerSec, setMinPxPerSec] = useState(1); // default minimum px per second
+	const [_minPxPerSec, _setMinPxPerSec] = useState(1); // default minimum px per second
 
 	const { wavesurfer, isReady } = useWavesurfer({
 		container: containerRef,
@@ -22,34 +24,37 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd
 		barGap: 1,
 		barRadius: 2,
 		interact: false,
-		plugins: useMemo(() => [
-			TimelinePlugin.create({
-				// Not providing a container renders it inside the main wavesurfer wrapper
-				height: 20,
-				timeInterval: 60,
-				primaryLabelInterval: 600,
-				style: {
-					fontSize: '12px',
-					color: '#6a6a6a',
-				}
-			}),
-		], []),
+		plugins: useMemo(
+			() => [
+				TimelinePlugin.create({
+					// Not providing a container renders it inside the main wavesurfer wrapper
+					height: 20,
+					timeInterval: 60,
+					primaryLabelInterval: 600,
+					style: {
+						fontSize: "12px",
+						color: "#6a6a6a",
+					},
+				}),
+			],
+			[],
+		),
 	});
 
 	const { data: waveformData, error: queryError } = useGetWaveformQuery(
 		{
-			guild_id: props.params.guild_id!,
-			channel_id: props.params.channel_id!,
-			year: props.params.year!,
+			guild_id: props.params.guild_id ?? "",
+			channel_id: props.params.channel_id ?? "",
+			year: props.params.year ?? "",
 			month: Number(props.params.month),
-			file_name: props.params.file_name!,
-			timestamp
+			file_name: props.params.file_name ?? "",
+			timestamp,
 		},
 		{
 			skip: !shouldGenerate,
 			// Poll every 1 second while generating
-			pollingInterval: shouldGenerate ? 1000 : 0
-		}
+			pollingInterval: shouldGenerate ? 1000 : 0,
+		},
 	);
 
 	useEffect(() => {
@@ -113,8 +118,9 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd
 		}
 	}
 
-	const error = queryError ? "Connection to waveform generation failed." : (waveformData?.error || null);
-
+	const error = queryError
+		? "Connection to waveform generation failed."
+		: waveformData?.error || null;
 
 	// Update waveform position based on startEnd
 	useEffect(() => {
@@ -144,19 +150,44 @@ function WaveFormButton(props: { params: Readonly<Params<AudioParams>>, startEnd
 
 	return (
 		<div style={{ width: "100%", maxWidth: "100%", marginBottom: "20px" }}>
-			<Button variant="contained" onClick={handleClick} disabled={progress !== null}>
-				{progress !== null ? `Generating (${progress}%)` : 'Generate Waveform'}
+			<Button
+				variant="contained"
+				onClick={handleClick}
+				disabled={progress !== null}
+			>
+				{progress !== null ? `Generating (${progress}%)` : "Generate Waveform"}
 			</Button>
-			<p>You have to click every time you want to generate a waveform. (for now). Be patient for big files</p>
+			<p>
+				You have to click every time you want to generate a waveform. (for now).
+				Be patient for big files
+			</p>
 			{error && <p style={{ color: "red", padding: "10px" }}>{error}</p>}
 			<div style={{ marginTop: "10px", marginBottom: "10px" }}>
 				<label>
-					Zoom: <input type="range" min="0" max="10" value={zoomLevel} onChange={handleZoom} style={{ width: "200px" }} />
+					Zoom:{" "}
+					<input
+						type="range"
+						min="0"
+						max="10"
+						value={zoomLevel}
+						onChange={handleZoom}
+						style={{ width: "200px" }}
+					/>
 				</label>
 			</div>
-			<div ref={containerRef} style={{ width: "100%", height: "148px", backgroundColor: "transparent", border: "none", borderRadius: "4px", paddingBottom: "10px" }}></div>
+			<div
+				ref={containerRef}
+				style={{
+					width: "100%",
+					height: "148px",
+					backgroundColor: "transparent",
+					border: "none",
+					borderRadius: "4px",
+					paddingBottom: "10px",
+				}}
+			></div>
 		</div>
-	)
+	);
 }
 
 export default WaveFormButton;

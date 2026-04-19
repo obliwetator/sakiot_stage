@@ -1,11 +1,11 @@
-import Box from '@mui/material/Box';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import * as React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { UserGuilds } from '../Constants';
+import Box from "@mui/material/Box";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select, { type SelectChangeEvent } from "@mui/material/Select";
+import type * as React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import type { UserGuilds } from "../Constants";
 
 export function BasicSelect(props: {
 	guildSelected: UserGuilds | null;
@@ -16,18 +16,24 @@ export function BasicSelect(props: {
 	const location = useLocation();
 
 	const handleChange = (event: SelectChangeEvent) => {
-		const index = props.userGuilds!.map((item) => item.name).indexOf(event.target.value);
-		const newGuild = props.userGuilds![index];
+		const newGuild = props.userGuilds?.find(
+			(item) => item.name === event.target.value,
+		);
+		if (!newGuild) return;
+
 		props.setGuildSelected(newGuild);
 
-		if (props.guildSelected && location.pathname.includes(props.guildSelected.id)) {
+		if (
+			props.guildSelected &&
+			location.pathname.includes(props.guildSelected.id)
+		) {
 			const result = location.pathname.split(props.guildSelected.id);
 			navigate(result[0] + newGuild.id);
 		}
 	};
 
-	const guilds = props.userGuilds?.map((value, index) => (
-		<MenuItem key={index} value={value.name}>
+	const guilds = props.userGuilds?.map((value) => (
+		<MenuItem key={value.id} value={value.name}>
 			{value.name}
 		</MenuItem>
 	));
@@ -41,7 +47,7 @@ export function BasicSelect(props: {
 					id="demo-simple-select"
 					label="Server"
 					onChange={handleChange}
-					value={props.guildSelected ? props.guildSelected.name : ''}
+					value={props.guildSelected ? props.guildSelected.name : ""}
 				>
 					{guilds}
 				</Select>

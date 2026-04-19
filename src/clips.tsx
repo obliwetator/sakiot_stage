@@ -1,46 +1,58 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import MovieIcon from '@mui/icons-material/Movie';
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Drawer from '@mui/material/Drawer';
-import { useTheme } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-
-import { ClipData, useDeleteClipMutation, useGetAuthDetailsQuery, useGetClipsQuery } from './app/apiSlice';
-import { useAppSelector } from './app/hooks';
-import { AudioInterface } from './AudioInterface';
-import { formatDuration } from './components/RangeSlider/formatDuration';
-import { BASE_URL, PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from './Constants';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import MovieIcon from "@mui/icons-material/Movie";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import Drawer from "@mui/material/Drawer";
+import { useTheme } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { AudioInterface } from "./AudioInterface";
+import {
+	type ClipData,
+	useDeleteClipMutation,
+	useGetAuthDetailsQuery,
+	useGetClipsQuery,
+} from "./app/apiSlice";
+import { useAppSelector } from "./app/hooks";
+import { PATH_PREFIX_FOR_LOGGED_USERS, type UserGuilds } from "./Constants";
+import { formatDuration } from "./components/RangeSlider/formatDuration";
 
 function SimpleAccordion(props: { data: ClipData[] }) {
 	const navigate = useNavigate();
 	const [expanded, setExpanded] = useState<string | false>(false);
 
 	const handleClickAccordion = (guild_id: string, clip_id: string) => {
-		console.log('here', `${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_id)}`);
+		console.log(
+			"here",
+			`${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_id)}`,
+		);
 		if (
-			location.pathname === `${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_id)}`
+			location.pathname ===
+			`${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_id)}`
 		) {
 			// do nothing
 		} else {
-			navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_id)}`);
+			navigate(
+				`${PATH_PREFIX_FOR_LOGGED_USERS}/${guild_id}/clips/${encodeURIComponent(clip_id)}`,
+			);
 		}
 	};
 
-	const handleChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
-		setExpanded(isExpanded ? panel : false);
-	};
+	const handleChange =
+		(panel: string) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
+			setExpanded(isExpanded ? panel : false);
+		};
 
 	const elements = props.data.map((el, index) => {
 		return (
@@ -52,7 +64,11 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 				onChange={handleChange(`panel${index}`)}
 				expanded={expanded === `panel${index}`}
 			>
-				<AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+				<AccordionSummary
+					expandIcon={<ExpandMoreIcon />}
+					aria-controls="panel1a-content"
+					id="panel1a-header"
+				>
 					<Typography>CLIP_NAME: {el.name}</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
@@ -89,7 +105,10 @@ function AlertDialog(props: { clip_id: string }) {
 	const handleYes = async () => {
 		if (params.guild_id) {
 			try {
-				await deleteClip({ guild_id: params.guild_id, file_name: props.clip_id }).unwrap();
+				await deleteClip({
+					guild_id: params.guild_id,
+					file_name: props.clip_id,
+				}).unwrap();
 				setOpen(false);
 			} catch (error) {
 				console.error("Failed to delete clip:", error);
@@ -133,20 +152,32 @@ export default function Clips() {
 	const location = useLocation();
 
 	const guildSelected = useAppSelector((state) => state.app.guildSelected);
-	const { data: authData } = useGetAuthDetailsQuery(undefined, { skip: !localStorage.getItem('token') });
+	const { data: authData } = useGetAuthDetailsQuery(undefined, {
+		skip: !localStorage.getItem("token"),
+	});
 	const userGuilds = authData?.guilds || null;
 
-	const { data, isError, isSuccess } = useGetClipsQuery(guildSelected?.id || '', {
-		skip: !guildSelected?.id,
-		refetchOnMountOrArgChange: true,
-	});
+	const { data, isError, isSuccess } = useGetClipsQuery(
+		guildSelected?.id || "",
+		{
+			skip: !guildSelected?.id,
+			refetchOnMountOrArgChange: true,
+		},
+	);
 
 	if (isError) {
-		console.log('cannot get clip data');
+		console.log("cannot get clip data");
 	}
 
 	if (isSuccess && data) {
-		return <ClipsLayout data={data} params={params} location={location} userGuilds={userGuilds} />;
+		return (
+			<ClipsLayout
+				data={data}
+				params={params}
+				location={location}
+				userGuilds={userGuilds}
+			/>
+		);
 	} else {
 		return <div>No clip data</div>;
 	}
@@ -159,22 +190,40 @@ function ClipsLayout(props: {
 	userGuilds: UserGuilds[] | null;
 }) {
 	const theme = useTheme();
-	const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+	const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 	const [drawerOpen, setDrawerOpen] = useState(false);
 
 	useEffect(() => {
 		if (!isDesktop) setDrawerOpen(false);
-	}, [props.location.pathname, isDesktop]);
+	}, [isDesktop]);
 
 	const list = <SimpleAccordion data={props.data} />;
 
-	const selectedClipId = props.params.file_name ? decodeURIComponent(props.params.file_name) : null;
-	const selectedClip = selectedClipId ? props.data.find((c) => c.clip_id === selectedClipId) : null;
+	const selectedClipId = props.params.file_name
+		? decodeURIComponent(props.params.file_name)
+		: null;
+	const selectedClip = selectedClipId
+		? props.data.find((c) => c.clip_id === selectedClipId)
+		: null;
 
 	return (
-		<Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, width: '100%', gap: 1 }}>
+		<Box
+			sx={{
+				display: "flex",
+				flexDirection: { xs: "column", md: "row" },
+				width: "100%",
+				gap: 1,
+			}}
+		>
 			{isDesktop ? (
-				<Box sx={{ flex: '0 0 40%', maxWidth: 480, width: '100%', overflow: 'auto' }}>
+				<Box
+					sx={{
+						flex: "0 0 40%",
+						maxWidth: 480,
+						width: "100%",
+						overflow: "auto",
+					}}
+				>
 					{list}
 				</Box>
 			) : (
@@ -190,11 +239,17 @@ function ClipsLayout(props: {
 					<Typography
 						variant="body2"
 						color="text.secondary"
-						sx={{ mt: 1, px: 0.5, wordBreak: 'break-word' }}
+						sx={{ mt: 1, px: 0.5, wordBreak: "break-word" }}
 					>
-						{selectedClip ? `Current: ${selectedClip.name}` : 'No clip selected'}
+						{selectedClip
+							? `Current: ${selectedClip.name}`
+							: "No clip selected"}
 					</Typography>
-					<Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+					<Drawer
+						anchor="left"
+						open={drawerOpen}
+						onClose={() => setDrawerOpen(false)}
+					>
 						<Box sx={{ width: 320 }}>{list}</Box>
 					</Drawer>
 				</Box>

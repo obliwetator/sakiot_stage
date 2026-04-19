@@ -1,10 +1,10 @@
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import { formatTimeSince, formatUptime } from './format';
-import { GroupPanel, Tile } from './primitives';
-import { GuildInfo, RecordingMetrics, VoiceState } from './types';
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import { formatTimeSince, formatUptime } from "./format";
+import { GroupPanel, Tile } from "./primitives";
+import type { GuildInfo, RecordingMetrics, VoiceState } from "./types";
 
 export function VoiceUsersSection(props: {
 	selectedGuild: GuildInfo | null;
@@ -26,7 +26,10 @@ export function VoiceUsersSection(props: {
 			{props.guildRecordingMetrics && (
 				<Box sx={{ mb: 2 }}>
 					<GroupPanel title="Guild Recording Metrics">
-						<Tile label="Active Recordings" value={props.guildRecordingMetrics.active_recordings} />
+						<Tile
+							label="Active Recordings"
+							value={props.guildRecordingMetrics.active_recordings}
+						/>
 						<Tile
 							label="Packets Received"
 							value={props.guildRecordingMetrics.audio_packets_received.toLocaleString()}
@@ -48,18 +51,23 @@ export function VoiceUsersSection(props: {
 						/>
 						<Tile
 							label="Last Voice Packet"
-							value={formatTimeSince(props.guildRecordingMetrics.last_voice_packet_time, props.currentTime)}
+							value={formatTimeSince(
+								props.guildRecordingMetrics.last_voice_packet_time,
+								props.currentTime,
+							)}
 						/>
 					</GroupPanel>
 				</Box>
 			)}
 
 			{props.voiceUsers.length === 0 ? (
-				<Typography color="text.secondary">No users currently in voice channels.</Typography>
+				<Typography color="text.secondary">
+					No users currently in voice channels.
+				</Typography>
 			) : (
-				<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+				<Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
 					{props.voiceUsers.map((user) => (
-						<Box sx={{ flex: '1 1 280px', maxWidth: 360 }} key={user.user_id}>
+						<Box sx={{ flex: "1 1 280px", maxWidth: 360 }} key={user.user_id}>
 							<Card variant="outlined">
 								<CardContent>
 									<Typography variant="subtitle2" fontWeight={700} gutterBottom>
@@ -70,14 +78,24 @@ export function VoiceUsersSection(props: {
 									</Typography>
 									{props.userStartTimes[user.user_id] && (
 										<Typography variant="body2" color="text.secondary">
-											Active for: {formatUptime(props.currentTime - props.userStartTimes[user.user_id])}
+											Active for:{" "}
+											{formatUptime(
+												props.currentTime - props.userStartTimes[user.user_id],
+											)}
 										</Typography>
 									)}
-									<Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+									<Box
+										sx={{ display: "flex", gap: 1, mt: 1, flexWrap: "wrap" }}
+									>
 										{user.mute && (
 											<Typography
 												variant="caption"
-												sx={{ bgcolor: 'warning.dark', px: 0.75, py: 0.25, borderRadius: 0.5 }}
+												sx={{
+													bgcolor: "warning.dark",
+													px: 0.75,
+													py: 0.25,
+													borderRadius: 0.5,
+												}}
 											>
 												Server Muted
 											</Typography>
@@ -85,7 +103,12 @@ export function VoiceUsersSection(props: {
 										{user.deaf && (
 											<Typography
 												variant="caption"
-												sx={{ bgcolor: 'warning.dark', px: 0.75, py: 0.25, borderRadius: 0.5 }}
+												sx={{
+													bgcolor: "warning.dark",
+													px: 0.75,
+													py: 0.25,
+													borderRadius: 0.5,
+												}}
 											>
 												Server Deafened
 											</Typography>
@@ -93,7 +116,12 @@ export function VoiceUsersSection(props: {
 										{user.self_mute && (
 											<Typography
 												variant="caption"
-												sx={{ bgcolor: 'action.selected', px: 0.75, py: 0.25, borderRadius: 0.5 }}
+												sx={{
+													bgcolor: "action.selected",
+													px: 0.75,
+													py: 0.25,
+													borderRadius: 0.5,
+												}}
 											>
 												Muted
 											</Typography>
@@ -101,7 +129,12 @@ export function VoiceUsersSection(props: {
 										{user.self_deaf && (
 											<Typography
 												variant="caption"
-												sx={{ bgcolor: 'action.selected', px: 0.75, py: 0.25, borderRadius: 0.5 }}
+												sx={{
+													bgcolor: "action.selected",
+													px: 0.75,
+													py: 0.25,
+													borderRadius: 0.5,
+												}}
 											>
 												Deafened
 											</Typography>
@@ -109,7 +142,12 @@ export function VoiceUsersSection(props: {
 										{user.self_stream && (
 											<Typography
 												variant="caption"
-												sx={{ bgcolor: 'info.dark', px: 0.75, py: 0.25, borderRadius: 0.5 }}
+												sx={{
+													bgcolor: "info.dark",
+													px: 0.75,
+													py: 0.25,
+													borderRadius: 0.5,
+												}}
 											>
 												Streaming
 											</Typography>

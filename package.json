@@ -5,9 +5,11 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc && vite build",
+		"build": "biome check . && tsc && vite build",
 		"deploy": "bun run build && ./scripts/deploy.sh",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"lint": "biome lint .",
+		"format": "biome format --write ."
 	},
 	"dependencies": {
 		"@emotion/react": "^11.10.4",

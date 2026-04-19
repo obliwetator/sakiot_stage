@@ -1,29 +1,26 @@
-import Autocomplete from '@mui/material/Autocomplete';
-import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import { useState } from 'react';
-import { useGetAuthDetailsQuery } from '../../app/apiSlice';
-import { HealthSection } from './HealthSection';
-import { useGuildVoiceStream, useMetricsStream, useNowTick } from './hooks';
-import { Overview } from './Overview';
-import { GuildInfo } from './types';
-import { VoiceUsersSection } from './VoiceUsersSection';
+import Autocomplete from "@mui/material/Autocomplete";
+import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import { useState } from "react";
+import { useGetAuthDetailsQuery } from "../../app/apiSlice";
+import { HealthSection } from "./HealthSection";
+import { useGuildVoiceStream, useMetricsStream, useNowTick } from "./hooks";
+import { Overview } from "./Overview";
+import type { GuildInfo } from "./types";
+import { VoiceUsersSection } from "./VoiceUsersSection";
 
 export function Metrics() {
 	const [selectedGuild, setSelectedGuild] = useState<GuildInfo | null>(null);
 
-	const hasToken = !!localStorage.getItem('token');
+	const hasToken = !!localStorage.getItem("token");
 	useGetAuthDetailsQuery(undefined, { skip: !hasToken });
 	const isAdmin = true;
 
 	const { metrics: m, localUptime, refreshCounter } = useMetricsStream(isAdmin);
-	const { voiceUsers, userStartTimes, guildRecordingMetrics } = useGuildVoiceStream(
-		isAdmin,
-		selectedGuild?.id ?? null,
-		refreshCounter
-	);
+	const { voiceUsers, userStartTimes, guildRecordingMetrics } =
+		useGuildVoiceStream(isAdmin, selectedGuild?.id ?? null, refreshCounter);
 	const currentTime = useNowTick();
 
 	if (!isAdmin) {
@@ -34,24 +31,24 @@ export function Metrics() {
 		);
 	}
 
-	const L = 'Loading...';
+	const L = "Loading...";
 
 	return (
 		<Box sx={{ flexGrow: 1, p: { xs: 1.5, md: 3 }, maxWidth: 1400 }}>
 			<Box
 				sx={{
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'space-between',
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "space-between",
 					mb: 3,
-					flexWrap: 'wrap',
+					flexWrap: "wrap",
 					gap: 2,
 				}}
 			>
 				<Typography variant="h4" fontWeight={700}>
 					Bot Metrics Dashboard
 				</Typography>
-				<Box sx={{ width: { xs: '100%', sm: 280 } }}>
+				<Box sx={{ width: { xs: "100%", sm: 280 } }}>
 					<Autocomplete
 						size="small"
 						options={m?.guilds || []}
@@ -72,7 +69,7 @@ export function Metrics() {
 
 			<Divider sx={{ my: 3 }} />
 			<Typography variant="h5" fontWeight={600} gutterBottom>
-				Active Voice Users {selectedGuild ? `— ${selectedGuild.name}` : ''}
+				Active Voice Users {selectedGuild ? `— ${selectedGuild.name}` : ""}
 			</Typography>
 
 			<VoiceUsersSection

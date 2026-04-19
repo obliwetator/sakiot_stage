@@ -1,32 +1,42 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
-import ResponsiveAppBar from '../navbar';
-
-import { useDispatch } from 'react-redux';
-import { useGetAuthDetailsQuery } from '../app/apiSlice';
-import { useAppSelector } from '../app/hooks';
-import { setGuildSelected } from '../reducers/appSlice';
+import { useDispatch } from "react-redux";
+import { Outlet } from "react-router-dom";
+import { useGetAuthDetailsQuery } from "../app/apiSlice";
+import { useAppSelector } from "../app/hooks";
+import ResponsiveAppBar from "../navbar";
+import { setGuildSelected } from "../reducers/appSlice";
 
 export function LayoutsWithNavbar() {
 	const dispatch = useDispatch();
 	const guildSelected = useAppSelector((state) => state.app.guildSelected);
-	const { data: authData, isError } = useGetAuthDetailsQuery(undefined, { skip: !localStorage.getItem('token') });
+	const { data: authData, isError } = useGetAuthDetailsQuery(undefined, {
+		skip: !localStorage.getItem("token"),
+	});
 
 	const isLoggedIn = !!authData?.user && !isError;
 	const userGuilds = authData?.guilds || null;
 
-	// In the real app, setIsLoggedIn is likely no longer necessary with RTK Query since state is bound to the query, 
+	// In the real app, setIsLoggedIn is likely no longer necessary with RTK Query since state is bound to the query,
 	// but we provide a dummy or logic to clear token to avoid breaking ResponsiveAppBar
-	const setIsLoggedIn = (value: any) => {
-		if (value === false || value(isLoggedIn) === false) {
-			localStorage.removeItem('token');
+	const setIsLoggedIn = (value: boolean | ((prev: boolean) => boolean)) => {
+		if (
+			value === false ||
+			(typeof value === "function" && value(isLoggedIn) === false)
+		) {
+			localStorage.removeItem("token");
 			window.location.reload();
 		}
 	};
 
-	const setGuildSelectedAction = (guild: any) => {
+	const setGuildSelectedAction = (
+		guild:
+			| import("../Constants").UserGuilds
+			| null
+			| ((
+					prev: import("../Constants").UserGuilds | null,
+			  ) => import("../Constants").UserGuilds | null),
+	) => {
 		// Since setState accepts value or callback:
-		const selected = typeof guild === 'function' ? guild(guildSelected) : guild;
+		const selected = typeof guild === "function" ? guild(guildSelected) : guild;
 		dispatch(setGuildSelected(selected));
 	};
 
