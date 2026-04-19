@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Params, useLocation, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useLocation, useParams } from "react-router-dom";
 import { useCheckSilenceFileQuery, useGetAudioFileQuery } from "./app/apiSlice";
 import { useAppSelector } from "./app/hooks";
-import { type AudioParams, type UserGuilds, valuetext } from "./Constants";
+import type { AudioParams, UserGuilds } from "./Constants";
 import { RangeSlider } from "./components/RangeSlider";
 import { setHasSilence } from "./reducers/silence";
 
@@ -90,13 +90,13 @@ export function AudioInterface(props: {
 			if (!isActive) return;
 			if (
 				localAudioRef.duration !== Infinity &&
-				isFinite(localAudioRef.duration)
+				Number.isFinite(localAudioRef.duration)
 			) {
 				setTrueDuration(localAudioRef.duration);
 			}
 		});
 
-		localAudioRef!.addEventListener("canplaythrough", (e) => {
+		localAudioRef?.addEventListener("canplaythrough", (_e) => {
 			if (!isActive) return;
 			console.log("canplaythrough");
 
@@ -111,7 +111,7 @@ export function AudioInterface(props: {
 
 			if (
 				localAudioRef.duration !== Infinity &&
-				isFinite(localAudioRef.duration)
+				Number.isFinite(localAudioRef.duration)
 			) {
 				setTrueDuration(localAudioRef.duration);
 			}
@@ -130,7 +130,7 @@ export function AudioInterface(props: {
 			localAudioRef.src = "";
 			URL.revokeObjectURL(objectUrl);
 		};
-	}, [audioBlob]);
+	}, [audioBlob, location.search]);
 
 	// If it's the silence player and it's not active yet, return nothing instead of "Downloading"
 	if (props.isSilence && !value) {
@@ -159,21 +159,19 @@ export function AudioInterface(props: {
 	}
 
 	return (
-		<>
-			<div className="w-full">
-				{readyToPlay ? (
-					<RangeSlider
-						audioRef={audioRef!}
-						intervalRef={intervalRef}
-						isClip={props.isClip}
-						userGuilds={props.userGuilds}
-						isSilence={props.isSilence}
-						trueDuration={trueDuration}
-					/>
-				) : (
-					"Downloading"
-				)}
-			</div>
-		</>
+		<div className="w-full">
+			{readyToPlay ? (
+				<RangeSlider
+					audioRef={audioRef!}
+					intervalRef={intervalRef}
+					isClip={props.isClip}
+					userGuilds={props.userGuilds}
+					isSilence={props.isSilence}
+					trueDuration={trueDuration}
+				/>
+			) : (
+				"Downloading"
+			)}
+		</div>
 	);
 }

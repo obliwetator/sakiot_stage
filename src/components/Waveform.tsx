@@ -15,7 +15,7 @@ function WaveFormButton(props: {
 	const [shouldGenerate, setShouldGenerate] = useState(false);
 	const [timestamp, setTimestamp] = useState<number | undefined>(undefined);
 	const [zoomLevel, setZoomLevel] = useState(1);
-	const [minPxPerSec, setMinPxPerSec] = useState(1); // default minimum px per second
+	const [_minPxPerSec, _setMinPxPerSec] = useState(1); // default minimum px per second
 
 	const { wavesurfer, isReady } = useWavesurfer({
 		container: containerRef,

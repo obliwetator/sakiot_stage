@@ -16,10 +16,10 @@ export function TreeViewMonths(props: {
 	let file_names: IndividualFileArray = [];
 
 	const days = safeFiles.map((el, index) => {
-		const timestamp = parseInt(el.file.slice(0, 13));
+		const timestamp = parseInt(el.file.slice(0, 13), 10);
 		const date = new Date(timestamp);
 
-		if (prevDay != date.getDate()) {
+		if (prevDay !== date.getDate()) {
 			file_names = [];
 			file_names.push({
 				file: el.file,

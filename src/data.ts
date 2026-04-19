@@ -27,7 +27,7 @@ export function transform_to_months(data: Channels[]) {
 			const months_obj = Object.keys(dirs.months);
 			// Loops over the months in the year of the channel
 			months_obj.map((month_name) => {
-				const month = parseInt(month_name) as months;
+				const month = parseInt(month_name, 10) as months;
 				// In JavaScript, object keys are strings. Using month_name works reliably.
 				const files = (dirs.months as any)[month_name];
 

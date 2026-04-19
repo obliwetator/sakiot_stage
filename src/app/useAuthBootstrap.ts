@@ -50,7 +50,7 @@ export function useAuthBootstrap() {
 		};
 		window.addEventListener("message", handler);
 		return () => window.removeEventListener("message", handler);
-	}, []);
+	}, [refetch]);
 
 	return { authData, isLoading, isLoggedIn };
 }

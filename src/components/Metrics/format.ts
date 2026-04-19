@@ -12,8 +12,8 @@ export function formatUptime(seconds: number) {
 
 export function formatBytes(bytes: number): string {
 	if (bytes >= 1024 * 1024 * 1024)
-		return (bytes / (1024 * 1024 * 1024)).toFixed(1) + " GB";
-	return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+		return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export function formatTimeSince(
@@ -22,5 +22,5 @@ export function formatTimeSince(
 ): string {
 	if (!timestampMs) return "Never";
 	const seconds = Math.max(0, currentUnixSecs - Math.floor(timestampMs / 1000));
-	return formatUptime(seconds) + " ago";
+	return `${formatUptime(seconds)} ago`;
 }

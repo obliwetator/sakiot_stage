@@ -29,9 +29,9 @@ export function RangeSlider(props: {
 	trueDuration?: number | null;
 }) {
 	const [actualDuration, setActualDuration] = useState(
-		props.trueDuration && isFinite(props.trueDuration)
+		props.trueDuration && Number.isFinite(props.trueDuration)
 			? props.trueDuration
-			: isFinite(props.audioRef.duration)
+			: Number.isFinite(props.audioRef.duration)
 				? props.audioRef.duration
 				: 0,
 	);
@@ -48,7 +48,7 @@ export function RangeSlider(props: {
 	const [downloadFile] = useDownloadFileMutation();
 
 	useEffect(() => {
-		if (props.trueDuration && isFinite(props.trueDuration)) {
+		if (props.trueDuration && Number.isFinite(props.trueDuration)) {
 			setActualDuration(props.trueDuration);
 			setStartEnd((prev) => [
 				prev[0],
@@ -74,7 +74,7 @@ export function RangeSlider(props: {
 		};
 		window.addEventListener("keydown", handleArrowKeys);
 		return () => window.removeEventListener("keydown", handleArrowKeys);
-	}, []);
+	}, [props.audioRef]);
 
 	const togglePlay = () => {
 		setPlaying((prev) => {
@@ -105,7 +105,7 @@ export function RangeSlider(props: {
 		};
 		window.addEventListener("keydown", handleSpace);
 		return () => window.removeEventListener("keydown", handleSpace);
-	}, []);
+	}, [togglePlay]);
 
 	const startTimer = () => {
 		clearInterval(props.intervalRef.current);
@@ -129,7 +129,7 @@ export function RangeSlider(props: {
 	useEffect(() => {
 		if (isSliderClicked) startTimer();
 		return () => clearInterval(props.intervalRef.current);
-	}, [isSliderClicked]);
+	}, [isSliderClicked, startTimer, props.intervalRef.current]);
 
 	const handleChange = (
 		_event: Event,

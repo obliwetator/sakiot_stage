@@ -27,7 +27,7 @@ export function YearSelection() {
 
 	React.useEffect(() => {
 		if (!isDesktop) setTreeOpen(false);
-	}, [location.pathname, isDesktop]);
+	}, [isDesktop]);
 
 	const tree = <CustomizedTreeView guildSelected={guildSelected} />;
 

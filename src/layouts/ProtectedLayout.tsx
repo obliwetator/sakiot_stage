@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 import { useGetAuthDetailsQuery } from "../app/apiSlice";

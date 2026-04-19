@@ -42,13 +42,13 @@ export function useMetricsStream(enabled: boolean) {
 				ws.send(JSON.stringify({ action: "unsubscribe", topic: "global" }));
 			ws.close();
 		};
-	}, [enabled, refreshCounter]);
+	}, [enabled, refreshToken]);
 
 	useEffect(() => {
 		if (localUptime <= 0) return;
 		const id = setInterval(() => setLocalUptime((p) => p + 1), 1000);
 		return () => clearInterval(id);
-	}, [localUptime > 0]);
+	}, [localUptime]);
 
 	return {
 		metrics,
@@ -61,7 +61,7 @@ export function useMetricsStream(enabled: boolean) {
 export function useGuildVoiceStream(
 	enabled: boolean,
 	guildId: string | null,
-	refreshCounter: number,
+	_refreshCounter: number,
 ) {
 	const [voiceUsers, setVoiceUsers] = useState<VoiceState[]>([]);
 	const [userStartTimes, setUserStartTimes] = useState<Record<string, number>>(
@@ -123,7 +123,7 @@ export function useGuildVoiceStream(
 				);
 			ws.close();
 		};
-	}, [enabled, guildId, refreshCounter]);
+	}, [enabled, guildId, refreshToken]);
 
 	return { voiceUsers, userStartTimes, guildRecordingMetrics };
 }

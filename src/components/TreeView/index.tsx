@@ -7,7 +7,7 @@ import type { Dirs, UserGuilds } from "../../Constants";
 import { transform_to_months } from "../../data";
 import { TreeViewYears } from "./TreeViewYears";
 
-export default function CustomizedTreeView(props: {
+export default function CustomizedTreeView(_props: {
 	guildSelected: UserGuilds | null;
 }) {
 	const [data, setData] = useState<Dirs[] | null>(null);
@@ -26,7 +26,7 @@ export default function CustomizedTreeView(props: {
 			const res = transform_to_months(channelsData);
 			setData(res);
 		}
-	}, [channelsData, isSuccess, isError, props.guildSelected]);
+	}, [channelsData, isSuccess]);
 
 	if (!data) return <div className="w-full p-3">Loading</div>;
 

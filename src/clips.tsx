@@ -25,11 +25,7 @@ import {
 	useGetClipsQuery,
 } from "./app/apiSlice";
 import { useAppSelector } from "./app/hooks";
-import {
-	BASE_URL,
-	PATH_PREFIX_FOR_LOGGED_USERS,
-	type UserGuilds,
-} from "./Constants";
+import { PATH_PREFIX_FOR_LOGGED_USERS, type UserGuilds } from "./Constants";
 import { formatDuration } from "./components/RangeSlider/formatDuration";
 
 function SimpleAccordion(props: { data: ClipData[] }) {
@@ -54,7 +50,7 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 	};
 
 	const handleChange =
-		(panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+		(panel: string) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
 			setExpanded(isExpanded ? panel : false);
 		};
 
@@ -199,7 +195,7 @@ function ClipsLayout(props: {
 
 	useEffect(() => {
 		if (!isDesktop) setDrawerOpen(false);
-	}, [props.location.pathname, isDesktop]);
+	}, [isDesktop]);
 
 	const list = <SimpleAccordion data={props.data} />;
 

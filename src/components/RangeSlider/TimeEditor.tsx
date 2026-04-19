@@ -82,7 +82,7 @@ function TimeEditor(props: {
 						}
 						if (typeof raw !== "string" || raw === "") return;
 						setIsError(false);
-						const nextValue = parseInt(raw);
+						const nextValue = parseInt(raw, 10);
 						if (nextValue > 60) {
 							setIsError(true);
 							return;
