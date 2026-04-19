@@ -6,12 +6,12 @@ import DialogContentText from "@mui/material/DialogContentText";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
-import { Params } from "react-router-dom";
+import type { Params } from "react-router-dom";
 import {
 	useCreateClipMutation,
 	useDownloadFileMutation,
 } from "../../app/apiSlice";
-import { AudioParams } from "../../Constants";
+import type { AudioParams } from "../../Constants";
 
 export function ClipDialog(props: {
 	params: Readonly<Params<AudioParams>>;

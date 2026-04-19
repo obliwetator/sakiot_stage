@@ -1,4 +1,4 @@
-import { IndividualFileArray } from "../../Constants";
+import type { IndividualFileArray } from "../../Constants";
 import { ItemsEl } from "./ItemsEl";
 import { StyledTreeItem } from "./StyledTreeItem";
 

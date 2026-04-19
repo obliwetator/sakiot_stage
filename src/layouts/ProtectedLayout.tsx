@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 import { useGetAuthDetailsQuery } from "../app/apiSlice";
 import { useAppSelector } from "../app/hooks";
-import { AudioParams } from "../Constants";
+import type { AudioParams } from "../Constants";
 import { setGuildSelected } from "../reducers/appSlice";
 
 export const ProtectedLayout = () => {

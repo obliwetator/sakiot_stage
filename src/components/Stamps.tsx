@@ -11,8 +11,8 @@ import Typography from "@mui/material/Typography";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useGetStampsQuery } from "../app/apiSlice";
+import type { RootState } from "../store";
 import { formatDuration } from "./RangeSlider/formatDuration";
-import { RootState } from "../store";
 
 function formatTimestamp(ms: number): string {
 	return new Date(ms).toLocaleString();

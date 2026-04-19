@@ -1,13 +1,13 @@
 import {
-	BaseQueryFn,
+	type BaseQueryFn,
 	createApi,
-	FetchArgs,
+	type FetchArgs,
+	type FetchBaseQueryError,
 	fetchBaseQuery,
-	FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 import { Mutex } from "async-mutex";
-import { Channels, UserGuilds } from "../Constants";
-import { JamItRespStatus } from "../components/RangeSlider/JamIt";
+import type { Channels, UserGuilds } from "../Constants";
+import type { JamItRespStatus } from "../components/RangeSlider/JamIt";
 
 export interface User {
 	guild_id: string;

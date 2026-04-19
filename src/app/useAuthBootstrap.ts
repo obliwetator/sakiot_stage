@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useGetAuthDetailsQuery } from "./apiSlice";
 import { setGuildSelected } from "../reducers/appSlice";
+import { useGetAuthDetailsQuery } from "./apiSlice";
 
 export function useAuthBootstrap() {
 	const dispatch = useDispatch();

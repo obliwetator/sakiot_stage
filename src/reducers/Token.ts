@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 
 // Define a type for the slice state
@@ -6,7 +6,7 @@ interface TokenState {
 	value: string;
 }
 
-let date = new Date().toISOString();
+const date = new Date().toISOString();
 // Define the initial state using that type
 const initialState: TokenState = {
 	value: date,

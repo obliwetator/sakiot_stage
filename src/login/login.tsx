@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import React from "react";
+import type React from "react";
 import { BASE_API_URL, useLogoutMutation } from "../app/apiSlice";
 export default function Login(props: {
 	isLoggedIn: boolean;

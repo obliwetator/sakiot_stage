@@ -4,7 +4,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { formatTimeSince, formatUptime } from "./format";
 import { GroupPanel, Tile } from "./primitives";
-import { GuildInfo, RecordingMetrics, VoiceState } from "./types";
+import type { GuildInfo, RecordingMetrics, VoiceState } from "./types";
 
 export function VoiceUsersSection(props: {
 	selectedGuild: GuildInfo | null;

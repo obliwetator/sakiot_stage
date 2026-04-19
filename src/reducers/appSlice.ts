@@ -1,5 +1,5 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { UserGuilds } from "../Constants";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { UserGuilds } from "../Constants";
 
 interface AppState {
 	guildSelected: UserGuilds | null;

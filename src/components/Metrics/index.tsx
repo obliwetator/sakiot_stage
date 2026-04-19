@@ -8,7 +8,7 @@ import { useGetAuthDetailsQuery } from "../../app/apiSlice";
 import { HealthSection } from "./HealthSection";
 import { useGuildVoiceStream, useMetricsStream, useNowTick } from "./hooks";
 import { Overview } from "./Overview";
-import { GuildInfo } from "./types";
+import type { GuildInfo } from "./types";
 import { VoiceUsersSection } from "./VoiceUsersSection";
 
 export function Metrics() {

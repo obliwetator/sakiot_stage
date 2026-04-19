@@ -8,11 +8,11 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
 import Typography from "@mui/material/Typography";
-import * as React from "react";
-import { UserGuilds } from "../Constants";
+import type * as React from "react";
+import type { UserGuilds } from "../Constants";
 import Login from "../login/login";
 import { BasicSelect } from "./BasicSelect";
-import { PageName, pageIcons } from "./constants";
+import { type PageName, pageIcons } from "./constants";
 
 export function MobileDrawer(props: {
 	isLoggedIn: boolean;

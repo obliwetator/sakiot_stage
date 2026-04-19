@@ -1,7 +1,11 @@
 import Collapse from "@mui/material/Collapse";
 import { styled } from "@mui/material/styles";
-import { TransitionProps } from "@mui/material/transitions";
-import { TreeItem, treeItemClasses, TreeItemProps } from "@mui/x-tree-view";
+import type { TransitionProps } from "@mui/material/transitions";
+import {
+	TreeItem,
+	type TreeItemProps,
+	treeItemClasses,
+} from "@mui/x-tree-view";
 import { animated, useSpring } from "@react-spring/web";
 
 function TransitionComponent(props: TransitionProps) {

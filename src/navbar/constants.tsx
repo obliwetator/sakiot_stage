@@ -3,7 +3,7 @@ import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import MovieIcon from "@mui/icons-material/Movie";
-import * as React from "react";
+import type * as React from "react";
 
 export type PageName = "Audio" | "Clips" | "Metrics" | "Stamps" | "Admin";
 

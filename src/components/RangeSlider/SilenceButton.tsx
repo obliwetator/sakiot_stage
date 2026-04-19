@@ -1,8 +1,8 @@
 import Button from "@mui/material/Button";
 import { useState } from "react";
-import { Params } from "react-router-dom";
+import type { Params } from "react-router-dom";
 import { useRemoveSilenceMutation } from "../../app/apiSlice";
-import { AudioParams } from "../../Constants";
+import type { AudioParams } from "../../Constants";
 import { setHasSilence } from "../../reducers/silence";
 import { store } from "../../store";
 

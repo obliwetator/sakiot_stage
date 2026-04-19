@@ -2,9 +2,9 @@ import { styled } from "@mui/material";
 import Box from "@mui/material/Box";
 import Slider from "@mui/material/Slider";
 import Typography from "@mui/material/Typography";
-import React from "react";
+import type React from "react";
 import { useParams } from "react-router-dom";
-import { AudioParams, valuetext } from "../../Constants";
+import { type AudioParams, valuetext } from "../../Constants";
 import WaveFormButton from "../Waveform";
 import { formatDuration } from "./formatDuration";
 

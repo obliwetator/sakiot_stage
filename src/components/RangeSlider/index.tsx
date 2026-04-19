@@ -1,10 +1,11 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDownloadFileMutation } from "../../app/apiSlice";
-import { AudioParams, UserGuilds } from "../../Constants";
+import type { AudioParams, UserGuilds } from "../../Constants";
 import { ClipDialog } from "./ClipDialog";
 import { DoubleSlider } from "./DoubleSlider";
 import { formatDuration } from "./formatDuration";

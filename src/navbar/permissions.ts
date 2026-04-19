@@ -1,4 +1,4 @@
-import { UserGuilds } from "../Constants";
+import type { UserGuilds } from "../Constants";
 
 const ADMIN_BIT = 0x8n;
 const MANAGE_GUILD_BIT = 0x20n;

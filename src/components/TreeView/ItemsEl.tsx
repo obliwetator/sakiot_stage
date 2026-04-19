@@ -1,5 +1,8 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { IndividualFile, PATH_PREFIX_FOR_LOGGED_USERS } from "../../Constants";
+import {
+	type IndividualFile,
+	PATH_PREFIX_FOR_LOGGED_USERS,
+} from "../../Constants";
 import { parseFileName } from "./parseFileName";
 
 export function ItemsEl(props: {

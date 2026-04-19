@@ -3,7 +3,7 @@ import * as React from "react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetCurrentGuildDirsQuery } from "../../app/apiSlice";
-import { Dirs, UserGuilds } from "../../Constants";
+import type { Dirs, UserGuilds } from "../../Constants";
 import { transform_to_months } from "../../data";
 import { TreeViewYears } from "./TreeViewYears";
 

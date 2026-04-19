@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { formatUptime } from "./format";
 import { StatCard } from "./primitives";
-import { Metrics } from "./types";
+import type { Metrics } from "./types";
 
 export function Overview({
 	m,

@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Params, useLocation, useParams } from "react-router-dom";
-import { AudioParams, UserGuilds, valuetext } from "./Constants";
 import { useCheckSilenceFileQuery, useGetAudioFileQuery } from "./app/apiSlice";
 import { useAppSelector } from "./app/hooks";
+import { type AudioParams, type UserGuilds, valuetext } from "./Constants";
 import { RangeSlider } from "./components/RangeSlider";
 import { setHasSilence } from "./reducers/silence";
 
@@ -20,7 +20,7 @@ export function AudioInterface(props: {
 	const [readyToPlay, setReadyToPlay] = useState(false);
 	const [error, setError] = useState(false);
 	const dispatch = useDispatch();
-	let value = useAppSelector((state) => state.hasSilence.value);
+	const value = useAppSelector((state) => state.hasSilence.value);
 
 	const shouldCheckSilence =
 		!props.isClip && !props.isSilence && !!params.file_name;
@@ -82,7 +82,7 @@ export function AudioInterface(props: {
 		setTrueDuration(null);
 
 		const objectUrl = URL.createObjectURL(audioBlob);
-		let localAudioRef: HTMLAudioElement = new Audio(objectUrl);
+		const localAudioRef: HTMLAudioElement = new Audio(objectUrl);
 		let isActive = true;
 
 		// Update duration safely as the file buffers/plays

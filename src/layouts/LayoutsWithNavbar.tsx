@@ -1,10 +1,9 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
-import ResponsiveAppBar from "../navbar";
-
 import { useDispatch } from "react-redux";
+import { Outlet } from "react-router-dom";
 import { useGetAuthDetailsQuery } from "../app/apiSlice";
 import { useAppSelector } from "../app/hooks";
+import ResponsiveAppBar from "../navbar";
 import { setGuildSelected } from "../reducers/appSlice";
 
 export function LayoutsWithNavbar() {

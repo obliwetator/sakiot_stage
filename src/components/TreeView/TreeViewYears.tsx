@@ -1,4 +1,4 @@
-import { Dirs, months } from "../../Constants";
+import type { Dirs, months } from "../../Constants";
 import { StyledTreeItem } from "./StyledTreeItem";
 import { TreeViewMonths } from "./TreeViewMonths";
 

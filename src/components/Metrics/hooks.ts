@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRefreshMutation } from "../../app/apiSlice";
-import { Metrics, RecordingMetrics, VoiceState } from "./types";
+import type { Metrics, RecordingMetrics, VoiceState } from "./types";
 
 export function useMetricsStream(enabled: boolean) {
 	const [metrics, setMetrics] = useState<Metrics | null>(null);

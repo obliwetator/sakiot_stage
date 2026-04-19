@@ -1,4 +1,4 @@
-import { getMonthName, IndividualFileArray } from "../../Constants";
+import { getMonthName, type IndividualFileArray } from "../../Constants";
 import { StyledTreeItem } from "./StyledTreeItem";
 import { TreeViewDays } from "./TreeViewDays";
 

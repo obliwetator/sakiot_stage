@@ -14,23 +14,23 @@ import Drawer from "@mui/material/Drawer";
 import { useTheme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-
+import { AudioInterface } from "./AudioInterface";
 import {
-	ClipData,
+	type ClipData,
 	useDeleteClipMutation,
 	useGetAuthDetailsQuery,
 	useGetClipsQuery,
 } from "./app/apiSlice";
 import { useAppSelector } from "./app/hooks";
-import { AudioInterface } from "./AudioInterface";
-import { formatDuration } from "./components/RangeSlider/formatDuration";
 import {
 	BASE_URL,
 	PATH_PREFIX_FOR_LOGGED_USERS,
-	UserGuilds,
+	type UserGuilds,
 } from "./Constants";
+import { formatDuration } from "./components/RangeSlider/formatDuration";
 
 function SimpleAccordion(props: { data: ClipData[] }) {
 	const navigate = useNavigate();

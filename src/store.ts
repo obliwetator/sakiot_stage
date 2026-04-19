@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { apiSlice } from "./app/apiSlice";
-import TokenReducer from "./reducers/Token";
 import appReducer from "./reducers/appSlice";
 import hasSilenceReducer from "./reducers/silence";
+import TokenReducer from "./reducers/Token";
 
 export const store = configureStore({
 	reducer: {

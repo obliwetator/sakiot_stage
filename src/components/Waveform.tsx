@@ -1,11 +1,11 @@
+// @ts-expect-error
+import Button from "@mui/material/Button";
 import { useWavesurfer } from "@wavesurfer/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Params } from "react-router-dom";
-// @ts-ignore
-import Button from "@mui/material/Button";
+import type { Params } from "react-router-dom";
 import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline.js";
-import { AudioParams } from "../Constants";
 import { useGetWaveformQuery } from "../app/apiSlice";
+import type { AudioParams } from "../Constants";
 
 function WaveFormButton(props: {
 	params: Readonly<Params<AudioParams>>;

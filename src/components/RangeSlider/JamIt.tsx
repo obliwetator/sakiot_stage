@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useJamItMutation } from "../../app/apiSlice";
-import { UserGuilds } from "../../Constants";
+import type { UserGuilds } from "../../Constants";
 
 export enum JamItRespStatus {
 	CONNECTED,

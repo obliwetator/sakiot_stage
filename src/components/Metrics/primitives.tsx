@@ -3,7 +3,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export function Tile({
 	label,
