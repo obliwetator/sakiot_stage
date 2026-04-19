@@ -51,7 +51,7 @@ export function RangeSlider(props: {
 	}, [props.trueDuration]);
 
 	useEffect(() => {
-		const handleKeyPress = (event: KeyboardEvent) => {
+		const handleArrowKeys = (event: KeyboardEvent) => {
 			if (event.key === 'ArrowRight') {
 				const skip = event.ctrlKey ? CtrlArrowKeySkip : ArrowKeySkip;
 				setStartEnd((s) => [s[0] + skip, s[1]]);
@@ -65,8 +65,33 @@ export function RangeSlider(props: {
 			}
 			setZoomInStartEnd(0);
 		};
-		window.addEventListener('keydown', handleKeyPress);
-		return () => window.removeEventListener('keydown', handleKeyPress);
+		window.addEventListener('keydown', handleArrowKeys);
+		return () => window.removeEventListener('keydown', handleArrowKeys);
+	}, []);
+
+	const togglePlay = () => {
+		setPlaying((prev) => {
+			if (prev) {
+				clearInterval(props.intervalRef.current);
+				props.audioRef.pause();
+				return false;
+			}
+			props.audioRef.play();
+			startTimer();
+			return true;
+		});
+	};
+
+	useEffect(() => {
+		const handleSpace = (event: KeyboardEvent) => {
+			if (event.key !== ' ' && event.code !== 'Space') return;
+			const target = event.target as HTMLElement | null;
+			if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+			event.preventDefault();
+			togglePlay();
+		};
+		window.addEventListener('keydown', handleSpace);
+		return () => window.removeEventListener('keydown', handleSpace);
 	}, []);
 
 	const startTimer = () => {
@@ -144,22 +169,8 @@ export function RangeSlider(props: {
 
 	return (
 		<Box sx={{ m: { xs: 1, md: 8 } }}>
-			<Button
-				onClick={(e) => {
-					if (!playing) {
-						props.audioRef.play();
-						setPlaying(true);
-						startTimer();
-						e.currentTarget.innerHTML = 'Pause';
-					} else {
-						setPlaying(false);
-						clearInterval(props.intervalRef.current);
-						props.audioRef.pause();
-						e.currentTarget.innerHTML = 'Play';
-					}
-				}}
-			>
-				Play
+			<Button variant="contained" onClick={togglePlay}>
+				{playing ? 'Pause' : 'Play'}
 			</Button>
 			<DoubleSlider
 				audioRef={props.audioRef}
