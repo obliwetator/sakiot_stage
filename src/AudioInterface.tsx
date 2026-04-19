@@ -3,9 +3,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Params, useLocation, useParams } from 'react-router-dom';
 import { AudioParams, UserGuilds, valuetext } from './Constants';
-import { RangeSlider } from './components/RangeSlider';
 import { useCheckSilenceFileQuery, useGetAudioFileQuery } from './app/apiSlice';
 import { useAppSelector } from './app/hooks';
+import { RangeSlider } from './components/RangeSlider';
 import { setHasSilence } from './reducers/silence';
 
 
@@ -14,7 +14,6 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 	const intervalRef = useRef<number | undefined>(undefined);
 	const params = useParams<AudioParams>();
 	const location = useLocation();
-	// const audioElementRef = React.useRef<HTMLMediaElement>(null);
 	const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
 	const [readyToPlay, setReadyToPlay] = useState(false);
 	const [error, setError] = useState(false);
@@ -88,7 +87,7 @@ export function AudioInterface(props: { isClip: boolean; userGuilds: UserGuilds[
 		localAudioRef!.addEventListener('canplaythrough', (e) => {
 			if (!isActive) return;
 			console.log('canplaythrough');
-			
+
 			const searchParams = new URLSearchParams(location.search);
 			const t = searchParams.get('t');
 			if (t && localAudioRef.currentTime === 0) {

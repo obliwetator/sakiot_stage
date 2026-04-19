@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom';
 import { useJamItMutation } from '../../app/apiSlice';
 import { UserGuilds } from '../../Constants';
 
-enum RespStatus {
+export enum JamItRespStatus {
 	CONNECTED,
 	NOT_CONNECTED,
 	UNKOWN,
@@ -17,8 +17,8 @@ enum RespStatus {
 export function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | null }) {
 	if (!props.disabled) return <></>;
 
-	const [isError, setIsError] = useState<{ type: RespStatus; code: number; cooldownRemaining?: number }>({
-		type: RespStatus.UNKOWN,
+	const [isError, setIsError] = useState<{ type: JamItRespStatus; code: number; cooldownRemaining?: number }>({
+		type: JamItRespStatus.UNKOWN,
 		code: 0,
 	});
 	const params = useParams();
@@ -33,18 +33,18 @@ export function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | nul
 			}).unwrap();
 
 			if (res.code) {
-				setIsError({ type: RespStatus.CONNECTED, code: res.code as number });
+				setIsError({ type: JamItRespStatus.CONNECTED, code: res.code });
 				setOpen(true);
 			}
 		} catch (err: any) {
 			if (err?.status === 429) {
 				setIsError({
-					type: RespStatus.COOLDOWN,
+					type: JamItRespStatus.COOLDOWN,
 					code: err?.data?.code ?? 3,
 					cooldownRemaining: err?.data?.cooldown_remaining_seconds,
 				});
 			} else {
-				setIsError({ type: RespStatus.NOT_CONNECTED, code: 0 });
+				setIsError({ type: JamItRespStatus.NOT_CONNECTED, code: 0 });
 			}
 			setOpen(true);
 		}
@@ -65,7 +65,7 @@ export function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | nul
 
 	const handleClose = () => {
 		setOpen(false);
-		setIsError({ type: RespStatus.CONNECTED, code: 0 });
+		setIsError({ type: JamItRespStatus.CONNECTED, code: 0 });
 	};
 
 	return (
@@ -73,7 +73,7 @@ export function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | nul
 			<Button onClick={handleJamIt} variant="contained">
 				Jam It
 			</Button>
-			{(isError.code > 0 || isError.type === RespStatus.NOT_CONNECTED || isError.type === RespStatus.COOLDOWN) && (
+			{(isError.code > 0 || isError.type === JamItRespStatus.NOT_CONNECTED || isError.type === JamItRespStatus.COOLDOWN) && (
 				<div>
 					<Modal
 						open={open}
@@ -83,10 +83,10 @@ export function JamIt(props: { disabled: boolean; userGuilds: UserGuilds[] | nul
 					>
 						<Box sx={style}>
 							<Typography id="modal-modal-title" variant="h6" component="h2">
-								{isError.type === RespStatus.COOLDOWN ? 'On cooldown' : 'Error'}
+								{isError.type === JamItRespStatus.COOLDOWN ? 'On cooldown' : 'Error'}
 							</Typography>
 							<Typography id="modal-modal-description" sx={{ mt: 2 }}>
-								{isError.type === RespStatus.COOLDOWN ? (
+								{isError.type === JamItRespStatus.COOLDOWN ? (
 									<>Try again in {isError.cooldownRemaining ?? '?'}s.</>
 								) : (
 									<>

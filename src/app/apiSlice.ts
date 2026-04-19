@@ -1,6 +1,7 @@
 import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { Mutex } from 'async-mutex';
 import { Channels, UserGuilds } from '../Constants';
+import { JamItRespStatus } from '../components/RangeSlider/JamIt';
 
 export interface User {
 	guild_id: string;
@@ -120,7 +121,7 @@ export const apiSlice = createApi({
 	baseQuery: baseQueryWithReauth,
 	tagTypes: ['Clips', 'GuildCooldown', 'UserOverrides'],
 	endpoints: (builder) => ({
-		jamIt: builder.mutation<any, { guild_id: string, clip_name: string }>({
+		jamIt: builder.mutation<{ code: JamItRespStatus }, { guild_id: string, clip_name: string }>({
 			query: (body) => ({
 				url: 'jamit',
 				method: 'POST',
@@ -186,7 +187,7 @@ export const apiSlice = createApi({
 		}),
 		checkSilenceFile: builder.query<any, { guild_id: string, channel_id: string, year: string, month: number, file_name: string }>({
 			query: ({ guild_id, channel_id, year, month, file_name }) => ({
-				url: `https://dev.patrykstyla.com/audio/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}.ogg?silence=true`,
+				url: `audio/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}.ogg?silence=true`,
 				method: 'HEAD',
 			}),
 		}),
