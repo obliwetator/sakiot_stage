@@ -27,7 +27,7 @@ export function TreeViewDays(props: {
 		>
 			<div
 				key={`${props.year}-${props.month_name}-${props.day}`}
-				className="bg-green-500 overflow-hidden"
+				className="bg-violet-700 overflow-hidden rounded"
 			>
 				{itemsEl}
 			</div>

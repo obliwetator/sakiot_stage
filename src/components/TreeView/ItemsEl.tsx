@@ -18,11 +18,9 @@ export function ItemsEl(props: {
 	const targetPath = `${PATH_PREFIX_FOR_LOGGED_USERS}/${params.guild_id}/audio/${props.file.channel_id}/${props.year}/${props.month_name}/${fileId}`;
 	const isActive = location.pathname === targetPath;
 
-	const baseColor =
-		props.file.comment !== null ? "bg-orange-600" : "bg-violet-600";
-	const hoverColor =
-		props.file.comment !== null ? "hover:bg-orange-500" : "hover:bg-violet-500";
-	const activeRing = isActive ? "ring-2 ring-white" : "";
+	const baseColor = "bg-violet-600";
+	const hoverColor = "hover:bg-violet-500";
+	const activeRing = isActive ? "ring-2 ring-inset ring-white" : "";
 
 	const { time, username } = parseFileName(props.file.file);
 
@@ -30,7 +28,7 @@ export function ItemsEl(props: {
 		<button
 			type="button"
 			id={props.file.file}
-			className={`${baseColor} ${hoverColor} ${activeRing} w-full text-left px-2 py-1 mb-0.5 rounded border-b border-violet-900 cursor-pointer select-none text-sm`}
+			className={`${baseColor} ${hoverColor} ${activeRing} w-full text-left px-2 py-1 border-b border-violet-900 last:border-b-0 cursor-pointer select-none text-sm`}
 			onClick={(e) => {
 				e.preventDefault();
 				if (!isActive) navigate(targetPath + location.search);
@@ -45,9 +43,6 @@ export function ItemsEl(props: {
 		>
 			<span className="font-mono">{time}</span>
 			{username && <span className="ml-2">{username}</span>}
-			{props.file.comment && (
-				<span className="ml-2 text-xs opacity-75">— {props.file.comment}</span>
-			)}
 		</button>
 	);
 }

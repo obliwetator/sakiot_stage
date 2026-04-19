@@ -23,7 +23,6 @@ export function TreeViewMonths(props: {
 			file_names = [];
 			file_names.push({
 				file: el.file,
-				comment: el.comment,
 				channel_id: el.channel_id,
 			});
 			prevDay = date.getDate();
@@ -41,7 +40,6 @@ export function TreeViewMonths(props: {
 
 		file_names.push({
 			file: el.file,
-			comment: el.comment,
 			channel_id: el.channel_id,
 		});
 		return null;

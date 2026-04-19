@@ -38,14 +38,13 @@ export function transform_to_months(data: Channels[]) {
 				files.forEach((file: IndividualFile) => {
 					const indi: IndividualFile = {
 						channel_id: channel.channel_id,
-						comment: file.comment,
 						file: file.file,
 					};
 					all_file.push(indi);
 
 					all_stuff.push({
 						channel_id: channel.channel_id,
-						file: { file: file.file, comment: file.comment },
+						file: { file: file.file },
 						year: dirs.year,
 						month: month,
 					});
@@ -68,7 +67,6 @@ export function transform_to_months(data: Channels[]) {
 
 		if (!hashmap_month[value.month]) hashmap_month[value.month] = [];
 		hashmap_month[value.month]?.push({
-			comment: value.file.comment,
 			channel_id: value.channel_id,
 			file: value.file.file,
 		});
@@ -79,7 +77,6 @@ export function transform_to_months(data: Channels[]) {
 		if (!dirs[value.month]) dirs[value.month] = [];
 
 		dirs[value.month]?.push({
-			comment: value.file.comment,
 			channel_id: value.channel_id,
 			file: value.file.file,
 		});
