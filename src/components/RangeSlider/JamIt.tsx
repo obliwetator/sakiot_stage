@@ -43,12 +43,16 @@ export function JamIt(props: {
 				setIsError({ type: JamItRespStatus.CONNECTED, code: res.code });
 				setOpen(true);
 			}
-		} catch (err: any) {
-			if (err?.status === 429) {
+		} catch (err: unknown) {
+			const apiError = err as {
+				status?: number;
+				data?: { code?: number; cooldown_remaining_seconds?: number };
+			};
+			if (apiError?.status === 429) {
 				setIsError({
 					type: JamItRespStatus.COOLDOWN,
-					code: err?.data?.code ?? 3,
-					cooldownRemaining: err?.data?.cooldown_remaining_seconds,
+					code: apiError?.data?.code ?? 3,
+					cooldownRemaining: apiError?.data?.cooldown_remaining_seconds,
 				});
 			} else {
 				setIsError({ type: JamItRespStatus.NOT_CONNECTED, code: 0 });

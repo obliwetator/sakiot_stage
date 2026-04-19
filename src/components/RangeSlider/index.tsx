@@ -176,7 +176,7 @@ export function RangeSlider(props: {
 			const objectUrl = URL.createObjectURL(blob);
 			const a = document.createElement("a");
 			a.href = objectUrl;
-			a.download = params.file_name!;
+			a.download = params.file_name ?? "";
 			a.click();
 			URL.revokeObjectURL(objectUrl);
 		} catch (e) {

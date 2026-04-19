@@ -16,7 +16,7 @@ export default function CustomizedTreeView(_props: {
 		data: channelsData,
 		isError,
 		isSuccess,
-	} = useGetCurrentGuildDirsQuery(params.guild_id!, {
+	} = useGetCurrentGuildDirsQuery(params.guild_id ?? "", {
 		skip: !params.guild_id,
 		refetchOnMountOrArgChange: true,
 	});

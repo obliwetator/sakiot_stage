@@ -26,11 +26,11 @@ export function AudioInterface(props: {
 		!props.isClip && !props.isSilence && !!params.file_name;
 	const { isSuccess, isError } = useCheckSilenceFileQuery(
 		{
-			guild_id: params.guild_id!,
-			channel_id: params.channel_id!,
-			year: params.year!,
-			month: Number(params.month!),
-			file_name: params.file_name!,
+			guild_id: params.guild_id ?? "",
+			channel_id: params.channel_id ?? "",
+			year: params.year ?? "",
+			month: Number(params.month ?? ""),
+			file_name: params.file_name ?? "",
 		},
 		{ skip: !shouldCheckSilence },
 	);
@@ -54,8 +54,8 @@ export function AudioInterface(props: {
 	const [trueDuration, setTrueDuration] = useState<number | null>(null);
 
 	const audioUrl = props.isClip
-		? `audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name!)}`
-		: `audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${encodeURIComponent(params.file_name!)}.ogg${props.isSilence ? "?silence=true" : ""}`;
+		? `audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name ?? "")}`
+		: `audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${encodeURIComponent(params.file_name ?? "")}.ogg${props.isSilence ? "?silence=true" : ""}`;
 
 	const shouldFetchAudio = !(props.isSilence && !value) && !!params.file_name;
 	const { data: audioBlob, isError: audioFetchError } = useGetAudioFileQuery(
@@ -117,11 +117,13 @@ export function AudioInterface(props: {
 			}
 		});
 
-		localAudioRef!.onerror = (ev) => {
-			if (!isActive) return;
-			console.log("Audio Ref error", ev);
-			setError(true);
-		};
+		if (localAudioRef) {
+			localAudioRef.onerror = (ev) => {
+				if (!isActive) return;
+				console.log("Audio Ref error", ev);
+				setError(true);
+			};
+		}
 		console.log("mount Audio Interface");
 
 		return function cleanup() {
@@ -162,7 +164,7 @@ export function AudioInterface(props: {
 		<div className="w-full">
 			{readyToPlay ? (
 				<RangeSlider
-					audioRef={audioRef!}
+					audioRef={audioRef as HTMLAudioElement}
 					intervalRef={intervalRef}
 					isClip={props.isClip}
 					userGuilds={props.userGuilds}

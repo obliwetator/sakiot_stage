@@ -40,11 +40,11 @@ export function ClipDialog(props: {
 
 		try {
 			const response = await createClip({
-				guild_id: props.params.guild_id!,
-				channel_id: props.params.channel_id!,
-				year: props.params.year!,
-				month: Number(props.params.month!),
-				file_name: props.params.file_name!,
+				guild_id: props.params.guild_id ?? "",
+				channel_id: props.params.channel_id ?? "",
+				year: props.params.year ?? "",
+				month: Number(props.params.month ?? ""),
+				file_name: props.params.file_name ?? "",
 				start: props.startEnd[0],
 				end: props.startEnd[1],
 				name: text.length > 0 ? text : undefined,

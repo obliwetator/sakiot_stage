@@ -29,6 +29,18 @@ export interface UserOverride {
 	updated_at: string;
 }
 
+export interface RemoveSilenceResponse {
+	url?: string;
+	message?: string;
+}
+
+export interface CreateClipResponse {
+	status: string;
+	file: string;
+	id: string;
+	name: string;
+}
+
 // Create a new mutex
 const mutex = new Mutex();
 
@@ -144,7 +156,7 @@ export const apiSlice = createApi({
 			}),
 		}),
 		removeSilence: builder.mutation<
-			any,
+			RemoveSilenceResponse,
 			{
 				guild_id: string;
 				channel_id: string;
@@ -205,7 +217,7 @@ export const apiSlice = createApi({
 			},
 		),
 		createClip: builder.mutation<
-			any,
+			CreateClipResponse,
 			{
 				guild_id: string;
 				channel_id: string;
@@ -237,7 +249,7 @@ export const apiSlice = createApi({
 			}),
 		}),
 		checkSilenceFile: builder.query<
-			any,
+			void,
 			{
 				guild_id: string;
 				channel_id: string;
@@ -340,7 +352,7 @@ export const apiSlice = createApi({
 						error:
 							userResult.error ||
 							guildsResult.error ||
-							(tokenResult.error as any),
+							(tokenResult.error as FetchBaseQueryError),
 					};
 				}
 
@@ -348,7 +360,7 @@ export const apiSlice = createApi({
 					data: {
 						user: userResult.data as User,
 						guilds: guildsResult.data as UserGuilds[],
-						token: (tokenResult.data as any).token as string,
+						token: (tokenResult.data as { token: string }).token,
 					},
 				};
 			},

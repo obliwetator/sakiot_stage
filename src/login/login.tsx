@@ -13,7 +13,7 @@ export default function Login(props: {
 			"https://discord.com/oauth2/authorize?client_id=877617434029350972&redirect_uri=https%3A%2F%2Fdev.patrykstyla.com%2Fapi%2Fdiscord_login&response_type=code&scope=email%20identify%20guilds",
 			"popup",
 			"width=500,height=800",
-		)!;
+		);
 	};
 
 	const handleLogout = async () => {
@@ -37,7 +37,7 @@ export default function Login(props: {
 			`${BASE_API_URL}dev_login?t=${Date.now()}`,
 			"popup",
 			"width=500,height=800",
-		)!;
+		);
 	};
 
 	return props.isLoggedIn ? (

@@ -17,14 +17,24 @@ export function LayoutsWithNavbar() {
 
 	// In the real app, setIsLoggedIn is likely no longer necessary with RTK Query since state is bound to the query,
 	// but we provide a dummy or logic to clear token to avoid breaking ResponsiveAppBar
-	const setIsLoggedIn = (value: any) => {
-		if (value === false || value(isLoggedIn) === false) {
+	const setIsLoggedIn = (value: boolean | ((prev: boolean) => boolean)) => {
+		if (
+			value === false ||
+			(typeof value === "function" && value(isLoggedIn) === false)
+		) {
 			localStorage.removeItem("token");
 			window.location.reload();
 		}
 	};
 
-	const setGuildSelectedAction = (guild: any) => {
+	const setGuildSelectedAction = (
+		guild:
+			| import("../Constants").UserGuilds
+			| null
+			| ((
+					prev: import("../Constants").UserGuilds | null,
+			  ) => import("../Constants").UserGuilds | null),
+	) => {
 		// Since setState accepts value or callback:
 		const selected = typeof guild === "function" ? guild(guildSelected) : guild;
 		dispatch(setGuildSelected(selected));

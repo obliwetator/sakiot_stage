@@ -1,4 +1,3 @@
-// @ts-expect-error
 import Button from "@mui/material/Button";
 import { useWavesurfer } from "@wavesurfer/react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -44,11 +43,11 @@ function WaveFormButton(props: {
 
 	const { data: waveformData, error: queryError } = useGetWaveformQuery(
 		{
-			guild_id: props.params.guild_id!,
-			channel_id: props.params.channel_id!,
-			year: props.params.year!,
+			guild_id: props.params.guild_id ?? "",
+			channel_id: props.params.channel_id ?? "",
+			year: props.params.year ?? "",
 			month: Number(props.params.month),
-			file_name: props.params.file_name!,
+			file_name: props.params.file_name ?? "",
 			timestamp,
 		},
 		{

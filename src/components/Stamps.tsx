@@ -100,7 +100,8 @@ export function Stamps() {
 													if (s.file_name && s.year && s.month) {
 														console.log("S", s);
 														const relSecs =
-															(s.stamp_ts - s.start_ts! + s.offset_ms) / 1000;
+															(s.stamp_ts - (s.start_ts ?? 0) + s.offset_ms) /
+															1000;
 														navigate(
 															`/dashboard/${guildId}/audio/${s.channel_id}/${s.year}/${s.month}/${s.file_name}?t=${relSecs}`,
 														);

@@ -17,11 +17,11 @@ export function SilenceButton(props: {
 		setIsLoading(true);
 		try {
 			const payload = {
-				guild_id: props.params.guild_id!,
-				channel_id: props.params.channel_id!,
-				year: props.params.year!,
-				month: Number(props.params.month!),
-				file_name: props.params.file_name!,
+				guild_id: props.params.guild_id ?? "",
+				channel_id: props.params.channel_id ?? "",
+				year: props.params.year ?? "",
+				month: Number(props.params.month ?? ""),
+				file_name: props.params.file_name ?? "",
 				idempotency_key: store.getState().token.value as string,
 			};
 			const res = await removeSilence(payload).unwrap();
