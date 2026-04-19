@@ -1,7 +1,13 @@
-import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
-import { Mutex } from 'async-mutex';
-import { Channels, UserGuilds } from '../Constants';
-import { JamItRespStatus } from '../components/RangeSlider/JamIt';
+import {
+	BaseQueryFn,
+	createApi,
+	FetchArgs,
+	fetchBaseQuery,
+	FetchBaseQueryError,
+} from "@reduxjs/toolkit/query/react";
+import { Mutex } from "async-mutex";
+import { Channels, UserGuilds } from "../Constants";
+import { JamItRespStatus } from "../components/RangeSlider/JamIt";
 
 export interface User {
 	guild_id: string;
@@ -26,13 +32,13 @@ export interface UserOverride {
 // Create a new mutex
 const mutex = new Mutex();
 
-export const BASE_API_URL = 'https://dev.patrykstyla.com/api/';
+export const BASE_API_URL = "https://dev.patrykstyla.com/api/";
 
 // Create our base query separately so we can wrap it
 const baseQuery = fetchBaseQuery({
 	baseUrl: BASE_API_URL,
 	// Ensure cookies are sent for authentication
-	fetchFn: (input, init) => fetch(input, { ...init, credentials: 'include' })
+	fetchFn: (input, init) => fetch(input, { ...init, credentials: "include" }),
 });
 
 // Wrap the base query with reauthentication logic
@@ -45,18 +51,20 @@ const baseQueryWithReauth: BaseQueryFn<
 	await mutex.waitForUnlock();
 	let result = await baseQuery(args, api, extraOptions);
 
-	console.log('[baseQueryWithReauth] Result:', result);
+	console.log("[baseQueryWithReauth] Result:", result);
 
 	if (result.error && result.error.status === 401) {
-		console.log('[baseQueryWithReauth] Hit 401. Attempting to refresh token...');
+		console.log(
+			"[baseQueryWithReauth] Hit 401. Attempting to refresh token...",
+		);
 		// checking whether the mutex is locked
 		if (!mutex.isLocked()) {
 			const release = await mutex.acquire();
 			try {
 				const refreshResult = await baseQuery(
-					{ url: 'refresh', method: 'GET' },
+					{ url: "refresh", method: "GET" },
 					api,
-					extraOptions
+					extraOptions,
 				);
 				if (refreshResult.data) {
 					// retry the initial query
@@ -117,78 +125,130 @@ export interface StampData {
 }
 
 export const apiSlice = createApi({
-	reducerPath: 'api',
+	reducerPath: "api",
 	baseQuery: baseQueryWithReauth,
-	tagTypes: ['Clips', 'GuildCooldown', 'UserOverrides'],
+	tagTypes: ["Clips", "GuildCooldown", "UserOverrides"],
 	endpoints: (builder) => ({
-		jamIt: builder.mutation<{ code: JamItRespStatus }, { guild_id: string, clip_name: string }>({
+		jamIt: builder.mutation<
+			{ code: JamItRespStatus },
+			{ guild_id: string; clip_name: string }
+		>({
 			query: (body) => ({
-				url: 'jamit',
-				method: 'POST',
+				url: "jamit",
+				method: "POST",
 				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json',
+					Accept: "application/json",
+					"Content-Type": "application/json",
 				},
 				body,
 			}),
 		}),
-		removeSilence: builder.mutation<any, { guild_id: string, channel_id: string, year: string, month: number, file_name: string, idempotency_key: string }>({
-			query: ({ guild_id, channel_id, year, month, file_name, idempotency_key }) => ({
+		removeSilence: builder.mutation<
+			any,
+			{
+				guild_id: string;
+				channel_id: string;
+				year: string;
+				month: number;
+				file_name: string;
+				idempotency_key: string;
+			}
+		>({
+			query: ({
+				guild_id,
+				channel_id,
+				year,
+				month,
+				file_name,
+				idempotency_key,
+			}) => ({
 				url: `remove_silence/${guild_id}/${channel_id}/${year}/${month}/${file_name}`,
-				method: 'GET',
+				method: "GET",
 				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json',
-					'Idempotency-Key': idempotency_key
+					Accept: "application/json",
+					"Content-Type": "application/json",
+					"Idempotency-Key": idempotency_key,
 				},
 			}),
 		}),
 		refresh: builder.mutation<void, void>({
-			query: () => 'refresh'
+			query: () => "refresh",
 		}),
 		logout: builder.mutation<void, void>({
-			query: () => ({ url: 'logout', method: 'GET' })
+			query: () => ({ url: "logout", method: "GET" }),
 		}),
 		getCurrentGuildDirs: builder.query<Channels[], string>({
-			query: (guild_id) => `current/${guild_id}`
+			query: (guild_id) => `current/${guild_id}`,
 		}),
 		getClips: builder.query<ClipData[], string>({
 			query: (guild_id) => ({
-				url: `audio/clips/${guild_id}`
+				url: `audio/clips/${guild_id}`,
 			}),
-			providesTags: ['Clips'],
+			providesTags: ["Clips"],
 		}),
 		getStamps: builder.query<StampData[], string>({
 			query: (guild_id) => ({
-				url: `stamps/${guild_id}`
+				url: `stamps/${guild_id}`,
 			}),
 		}),
-		deleteClip: builder.mutation<void, { guild_id: string, file_name: string }>({
-			query: ({ guild_id, file_name }) => ({
-				url: `audio/clips/delete/${guild_id}`,
-				method: 'POST',
-				headers: {
-					'Content-Type': 'text/plain',
-				},
-				body: file_name,
-			}),
-			invalidatesTags: ['Clips'],
-		}),
-		createClip: builder.mutation<any, { guild_id: string, channel_id: string, year: string, month: number, file_name: string, start: number, end: number, name?: string }>({
-			query: ({ guild_id, channel_id, year, month, file_name, start, end, name }) => ({
+		deleteClip: builder.mutation<void, { guild_id: string; file_name: string }>(
+			{
+				query: ({ guild_id, file_name }) => ({
+					url: `audio/clips/delete/${guild_id}`,
+					method: "POST",
+					headers: {
+						"Content-Type": "text/plain",
+					},
+					body: file_name,
+				}),
+				invalidatesTags: ["Clips"],
+			},
+		),
+		createClip: builder.mutation<
+			any,
+			{
+				guild_id: string;
+				channel_id: string;
+				year: string;
+				month: number;
+				file_name: string;
+				start: number;
+				end: number;
+				name?: string;
+			}
+		>({
+			query: ({
+				guild_id,
+				channel_id,
+				year,
+				month,
+				file_name,
+				start,
+				end,
+				name,
+			}) => ({
 				url: `audio/clips/create/${guild_id}/${channel_id}/${year}/${month}/${file_name}`,
-				method: 'POST',
+				method: "POST",
 				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json',
+					Accept: "application/json",
+					"Content-Type": "application/json",
 				},
-				body: { start, end, name }
+				body: { start, end, name },
 			}),
 		}),
-		checkSilenceFile: builder.query<any, { guild_id: string, channel_id: string, year: string, month: number, file_name: string }>({
+		checkSilenceFile: builder.query<
+			any,
+			{
+				guild_id: string;
+				channel_id: string;
+				year: string;
+				month: number;
+				file_name: string;
+			}
+		>({
 			query: ({ guild_id, channel_id, year, month, file_name }) => ({
 				url: `audio/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}.ogg?silence=true`,
-				method: 'HEAD',
+				method: "HEAD",
 			}),
 		}),
 		getAudioFile: builder.query<Blob, string>({
@@ -197,9 +257,19 @@ export const apiSlice = createApi({
 				responseHandler: (response) => response.blob(),
 			}),
 		}),
-		getWaveform: builder.query<WaveformResponse, { guild_id: string, channel_id: string, year: string, month: number, file_name: string, timestamp?: number }>({
+		getWaveform: builder.query<
+			WaveformResponse,
+			{
+				guild_id: string;
+				channel_id: string;
+				year: string;
+				month: number;
+				file_name: string;
+				timestamp?: number;
+			}
+		>({
 			query: ({ guild_id, channel_id, year, month, file_name, timestamp }) => ({
-				url: `audio/waveform/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}${timestamp ? `?t=${timestamp}` : ''}`,
+				url: `audio/waveform/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}${timestamp ? `?t=${timestamp}` : ""}`,
 			}),
 		}),
 		downloadFile: builder.mutation<Blob, string>({
@@ -210,60 +280,101 @@ export const apiSlice = createApi({
 		}),
 		getGuildCooldown: builder.query<{ cooldown_seconds: number }, string>({
 			query: (guild_id) => `admin/guilds/${guild_id}/cooldown`,
-			providesTags: (_r, _e, id) => [{ type: 'GuildCooldown', id }],
+			providesTags: (_r, _e, id) => [{ type: "GuildCooldown", id }],
 		}),
-		setGuildCooldown: builder.mutation<void, { guild_id: string, cooldown_seconds: number }>({
+		setGuildCooldown: builder.mutation<
+			void,
+			{ guild_id: string; cooldown_seconds: number }
+		>({
 			query: ({ guild_id, cooldown_seconds }) => ({
 				url: `admin/guilds/${guild_id}/cooldown`,
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
 				body: { cooldown_seconds },
 			}),
-			invalidatesTags: (_r, _e, { guild_id }) => [{ type: 'GuildCooldown', id: guild_id }],
+			invalidatesTags: (_r, _e, { guild_id }) => [
+				{ type: "GuildCooldown", id: guild_id },
+			],
 		}),
 		listUserOverrides: builder.query<UserOverride[], string>({
 			query: (guild_id) => `admin/guilds/${guild_id}/cooldown/overrides`,
-			providesTags: (_r, _e, id) => [{ type: 'UserOverrides', id }],
+			providesTags: (_r, _e, id) => [{ type: "UserOverrides", id }],
 		}),
-		setUserOverride: builder.mutation<void, { guild_id: string, user_id: string, cooldown_seconds: number }>({
+		setUserOverride: builder.mutation<
+			void,
+			{ guild_id: string; user_id: string; cooldown_seconds: number }
+		>({
 			query: ({ guild_id, user_id, cooldown_seconds }) => ({
 				url: `admin/guilds/${guild_id}/cooldown/overrides/${user_id}`,
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
 				body: { cooldown_seconds },
 			}),
-			invalidatesTags: (_r, _e, { guild_id }) => [{ type: 'UserOverrides', id: guild_id }],
+			invalidatesTags: (_r, _e, { guild_id }) => [
+				{ type: "UserOverrides", id: guild_id },
+			],
 		}),
-		deleteUserOverride: builder.mutation<void, { guild_id: string, user_id: string }>({
+		deleteUserOverride: builder.mutation<
+			void,
+			{ guild_id: string; user_id: string }
+		>({
 			query: ({ guild_id, user_id }) => ({
 				url: `admin/guilds/${guild_id}/cooldown/overrides/${user_id}`,
-				method: 'DELETE',
+				method: "DELETE",
 			}),
-			invalidatesTags: (_r, _e, { guild_id }) => [{ type: 'UserOverrides', id: guild_id }],
+			invalidatesTags: (_r, _e, { guild_id }) => [
+				{ type: "UserOverrides", id: guild_id },
+			],
 		}),
 		// Combine all 3 requests into a single query to emulate the existing Promise.all behavior
 		getAuthDetails: builder.query<AuthDetails, void>({
 			async queryFn(_arg, _queryApi, _extraOptions, fetchWithBQ) {
 				const [userResult, guildsResult, tokenResult] = await Promise.all([
-					fetchWithBQ('users/@me'),
-					fetchWithBQ('users/@me/guilds'),
-					fetchWithBQ('token')
+					fetchWithBQ("users/@me"),
+					fetchWithBQ("users/@me/guilds"),
+					fetchWithBQ("token"),
 				]);
 
 				if (userResult.error || guildsResult.error || tokenResult.error) {
-					return { error: userResult.error || guildsResult.error || tokenResult.error as any };
+					return {
+						error:
+							userResult.error ||
+							guildsResult.error ||
+							(tokenResult.error as any),
+					};
 				}
 
 				return {
 					data: {
 						user: userResult.data as User,
 						guilds: guildsResult.data as UserGuilds[],
-						token: (tokenResult.data as any).token as string
-					}
+						token: (tokenResult.data as any).token as string,
+					},
 				};
-			}
+			},
 		}),
 	}),
 });
 
-export const { useGetAuthDetailsQuery, useGetCurrentGuildDirsQuery, useGetClipsQuery, useDeleteClipMutation, useJamItMutation, useRemoveSilenceMutation, useCheckSilenceFileQuery, useRefreshMutation, useLogoutMutation, useCreateClipMutation, useGetAudioFileQuery, useDownloadFileMutation, useGetWaveformQuery, useLazyGetWaveformQuery, useGetStampsQuery, useGetGuildCooldownQuery, useSetGuildCooldownMutation, useListUserOverridesQuery, useSetUserOverrideMutation, useDeleteUserOverrideMutation } = apiSlice;
+export const {
+	useGetAuthDetailsQuery,
+	useGetCurrentGuildDirsQuery,
+	useGetClipsQuery,
+	useDeleteClipMutation,
+	useJamItMutation,
+	useRemoveSilenceMutation,
+	useCheckSilenceFileQuery,
+	useRefreshMutation,
+	useLogoutMutation,
+	useCreateClipMutation,
+	useGetAudioFileQuery,
+	useDownloadFileMutation,
+	useGetWaveformQuery,
+	useLazyGetWaveformQuery,
+	useGetStampsQuery,
+	useGetGuildCooldownQuery,
+	useSetGuildCooldownMutation,
+	useListUserOverridesQuery,
+	useSetUserOverrideMutation,
+	useDeleteUserOverrideMutation,
+} = apiSlice;

@@ -1,12 +1,12 @@
-import Collapse from '@mui/material/Collapse';
-import { styled } from '@mui/material/styles';
-import { TransitionProps } from '@mui/material/transitions';
-import { TreeItem, treeItemClasses, TreeItemProps } from '@mui/x-tree-view';
-import { animated, useSpring } from '@react-spring/web';
+import Collapse from "@mui/material/Collapse";
+import { styled } from "@mui/material/styles";
+import { TransitionProps } from "@mui/material/transitions";
+import { TreeItem, treeItemClasses, TreeItemProps } from "@mui/x-tree-view";
+import { animated, useSpring } from "@react-spring/web";
 
 function TransitionComponent(props: TransitionProps) {
 	const style = useSpring({
-		from: { opacity: 0, transform: 'translate3d(20px,0,0)' },
+		from: { opacity: 0, transform: "translate3d(20px,0,0)" },
 		to: {
 			opacity: props.in ? 1 : 0,
 			transform: `translate3d(${props.in ? 0 : 2}px,0,0)`,
@@ -24,6 +24,6 @@ export const StyledTreeItem = styled((props: TreeItemProps) => (
 	<TreeItem {...props} slots={{ groupTransition: TransitionComponent }} />
 ))(() => ({
 	[`& .${treeItemClasses.iconContainer}`]: {
-		'& .close': { opacity: 0.3 },
+		"& .close": { opacity: 0.3 },
 	},
 }));

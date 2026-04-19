@@ -1,5 +1,5 @@
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { UserGuilds } from '../Constants';
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { UserGuilds } from "../Constants";
 
 interface AppState {
 	guildSelected: UserGuilds | null;
@@ -10,7 +10,7 @@ const initialState: AppState = {
 };
 
 export const appSlice = createSlice({
-	name: 'app',
+	name: "app",
 	initialState,
 	reducers: {
 		setGuildSelected: (state, action: PayloadAction<UserGuilds | null>) => {

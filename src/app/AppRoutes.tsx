@@ -1,15 +1,21 @@
-import Box from '@mui/material/Box';
-import React, { Suspense } from 'react';
-import { Route, Routes } from 'react-router-dom';
-import Clips from '../clips';
-import { YearSelection } from '../components/YearSelection';
-import { LayoutsWithNavbar } from '../layouts/LayoutsWithNavbar';
-import { ProtectedLayout } from '../layouts/ProtectedLayout';
+import Box from "@mui/material/Box";
+import React, { Suspense } from "react";
+import { Route, Routes } from "react-router-dom";
+import Clips from "../clips";
+import { YearSelection } from "../components/YearSelection";
+import { LayoutsWithNavbar } from "../layouts/LayoutsWithNavbar";
+import { ProtectedLayout } from "../layouts/ProtectedLayout";
 
-const Metrics = React.lazy(() => import('../components/Metrics').then((m) => ({ default: m.Metrics })));
-const Stamps = React.lazy(() => import('../components/Stamps').then((m) => ({ default: m.Stamps })));
+const Metrics = React.lazy(() =>
+	import("../components/Metrics").then((m) => ({ default: m.Metrics })),
+);
+const Stamps = React.lazy(() =>
+	import("../components/Stamps").then((m) => ({ default: m.Stamps })),
+);
 const GuildAdminCooldowns = React.lazy(() =>
-	import('../components/GuildAdminCooldowns').then((m) => ({ default: m.GuildAdminCooldowns }))
+	import("../components/GuildAdminCooldowns").then((m) => ({
+		default: m.GuildAdminCooldowns,
+	})),
 );
 
 const lazyRoute = (node: React.ReactNode) => (
@@ -21,7 +27,10 @@ export function AppRoutes() {
 		<Routes>
 			<Route path="/" element={<LayoutsWithNavbar />}>
 				<Route path="/" element={<ProtectedLayout />} />
-				<Route path=":guild_id" element={<Box p={2}>select from top navbar</Box>} />
+				<Route
+					path=":guild_id"
+					element={<Box p={2}>select from top navbar</Box>}
+				/>
 
 				<Route path="/metrics" element={lazyRoute(<Metrics />)} />
 				<Route path="/metrics/:guild_id" element={lazyRoute(<Metrics />)} />
@@ -33,14 +42,20 @@ export function AppRoutes() {
 						<Route path="" element={<Box p={2}>select from top navbar</Box>} />
 						<Route path="audio">
 							<Route path="" element={<YearSelection />} />
-							<Route path=":channel_id/:year/:month/:file_name" element={<YearSelection />} />
+							<Route
+								path=":channel_id/:year/:month/:file_name"
+								element={<YearSelection />}
+							/>
 						</Route>
 						<Route path="clips">
 							<Route path="" element={<Clips />} />
 							<Route path=":file_name" element={<Clips />} />
 						</Route>
 						<Route path="admin">
-							<Route path="cooldowns" element={lazyRoute(<GuildAdminCooldowns />)} />
+							<Route
+								path="cooldowns"
+								element={lazyRoute(<GuildAdminCooldowns />)}
+							/>
 						</Route>
 					</Route>
 				</Route>

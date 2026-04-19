@@ -1,6 +1,6 @@
-export const BASE_URL = 'https://dev.patrykstyla.com/';
+export const BASE_URL = "https://dev.patrykstyla.com/";
 
-export const PATH_PREFIX_FOR_LOGGED_USERS = '/dashboard';
+export const PATH_PREFIX_FOR_LOGGED_USERS = "/dashboard";
 export function valuetext(value: number) {
 	return `${value}°C`;
 }
@@ -19,7 +19,12 @@ export type AudioParams2 = {
 	month?: number;
 	year?: string;
 };
-export type AudioParams = 'guild_id' | 'channel_id' | 'file_name' | 'month' | 'year';
+export type AudioParams =
+	| "guild_id"
+	| "channel_id"
+	| "file_name"
+	| "month"
+	| "year";
 
 export interface Dirs {
 	year: number;
@@ -27,25 +32,29 @@ export interface Dirs {
 }
 
 export type IndividualFileArray = IndividualFile[];
-export type IndividualFile = { channel_id?: string; file: string; comment: string | null };
+export type IndividualFile = {
+	channel_id?: string;
+	file: string;
+	comment: string | null;
+};
 
 export function getMonthName(monthNumber: number): string {
 	const months = [
-		'Unknown',
-		'January',
-		'February',
-		'March',
-		'April',
-		'May',
-		'June',
-		'July',
-		'August',
-		'September',
-		'October',
-		'November',
-		'December',
+		"Unknown",
+		"January",
+		"February",
+		"March",
+		"April",
+		"May",
+		"June",
+		"July",
+		"August",
+		"September",
+		"October",
+		"November",
+		"December",
 	];
-	return months[monthNumber] || 'Unknown';
+	return months[monthNumber] || "Unknown";
 }
 
 export type months = number;

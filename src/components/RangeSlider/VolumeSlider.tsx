@@ -1,9 +1,9 @@
-import VolumeDown from '@mui/icons-material/VolumeDown';
-import VolumeMute from '@mui/icons-material/VolumeMute';
-import Slider from '@mui/material/Slider';
-import Stack from '@mui/material/Stack';
-import { useState } from 'react';
-import { valuetext } from '../../Constants';
+import VolumeDown from "@mui/icons-material/VolumeDown";
+import VolumeMute from "@mui/icons-material/VolumeMute";
+import Slider from "@mui/material/Slider";
+import Stack from "@mui/material/Stack";
+import { useState } from "react";
+import { valuetext } from "../../Constants";
 
 export function VolumeSlider(props: { audioRef: HTMLAudioElement }) {
 	const [volume, setVolume] = useState(0.5);
@@ -15,7 +15,12 @@ export function VolumeSlider(props: { audioRef: HTMLAudioElement }) {
 	};
 
 	return (
-		<Stack spacing={2} direction="row" sx={{ mb: 1, width: { xs: '100%', md: 200 } }} alignItems="center">
+		<Stack
+			spacing={2}
+			direction="row"
+			sx={{ mb: 1, width: { xs: "100%", md: 200 } }}
+			alignItems="center"
+		>
 			{muted ? (
 				<VolumeMute
 					onClick={() => {
@@ -34,7 +39,7 @@ export function VolumeSlider(props: { audioRef: HTMLAudioElement }) {
 			<Slider
 				max={1}
 				step={0.01}
-				getAriaLabel={() => 'Minimum distance'}
+				getAriaLabel={() => "Minimum distance"}
 				value={volume}
 				onChange={handleChangeVolume}
 				valueLabelDisplay="auto"

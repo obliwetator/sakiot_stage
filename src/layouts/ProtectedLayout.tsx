@@ -1,12 +1,12 @@
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import { useGetAuthDetailsQuery } from '../app/apiSlice';
-import { useAppSelector } from '../app/hooks';
-import { AudioParams } from '../Constants';
-import { setGuildSelected } from '../reducers/appSlice';
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { Outlet, useNavigate, useParams } from "react-router-dom";
+import { useGetAuthDetailsQuery } from "../app/apiSlice";
+import { useAppSelector } from "../app/hooks";
+import { AudioParams } from "../Constants";
+import { setGuildSelected } from "../reducers/appSlice";
 
 export const ProtectedLayout = () => {
 	const navigate = useNavigate();
@@ -14,7 +14,9 @@ export const ProtectedLayout = () => {
 	const dispatch = useDispatch();
 
 	const guildSelected = useAppSelector((state) => state.app.guildSelected);
-	const { data: authData } = useGetAuthDetailsQuery(undefined, { skip: !localStorage.getItem('token') });
+	const { data: authData } = useGetAuthDetailsQuery(undefined, {
+		skip: !localStorage.getItem("token"),
+	});
 
 	const userGuilds = authData?.guilds || null;
 
@@ -28,7 +30,9 @@ export const ProtectedLayout = () => {
 
 	useEffect(() => {
 		if (params.guild_id && userGuilds) {
-			const guild = userGuilds.find((element) => element.id === params.guild_id);
+			const guild = userGuilds.find(
+				(element) => element.id === params.guild_id,
+			);
 			if (guild) {
 				dispatch(setGuildSelected(guild));
 			}
@@ -42,7 +46,12 @@ export const ProtectedLayout = () => {
 	const guilds = userGuilds.map((value, index) => {
 		return (
 			<Grid size={{ xs: 1 }} key={index}>
-				<div onClick={() => handleGuildSelect(index)} className="cursor-pointer">{value.name}</div>
+				<div
+					onClick={() => handleGuildSelect(index)}
+					className="cursor-pointer"
+				>
+					{value.name}
+				</div>
 			</Grid>
 		);
 	});
@@ -51,7 +60,12 @@ export const ProtectedLayout = () => {
 		return (
 			<Box sx={{ flexGrow: 1 }}>
 				SELECT A SERVER
-				<Grid container justifyContent="center" alignItems="center" minHeight={300}>
+				<Grid
+					container
+					justifyContent="center"
+					alignItems="center"
+					minHeight={300}
+				>
 					{guilds}
 				</Grid>
 			</Box>

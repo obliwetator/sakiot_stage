@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { RootState } from '../store';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { RootState } from "../store";
 
 // Define a type for the slice state
 interface TokenState {
@@ -13,7 +13,7 @@ const initialState: TokenState = {
 };
 
 const token = createSlice({
-	name: 'token',
+	name: "token",
 	// `createSlice` will infer the state type from the `initialState` argument
 	initialState,
 	reducers: {

@@ -1,4 +1,10 @@
-import { Channels, Dirs, IndividualFile, IndividualFileArray, months } from './Constants';
+import {
+	Channels,
+	Dirs,
+	IndividualFile,
+	IndividualFileArray,
+	months,
+} from "./Constants";
 
 interface Super {
 	channel_id: string;
@@ -48,7 +54,10 @@ export function transform_to_months(data: Channels[]) {
 		});
 	});
 
-	const hashmap3 = new Map<number, Partial<Record<months, IndividualFileArray>>>();
+	const hashmap3 = new Map<
+		number,
+		Partial<Record<months, IndividualFileArray>>
+	>();
 	const hashmap_month: Partial<Record<months, IndividualFileArray>> = {};
 
 	const sorted_by_year: Dirs[] = [];
@@ -68,7 +77,11 @@ export function transform_to_months(data: Channels[]) {
 
 		if (!dirs[value.month]) dirs[value.month] = [];
 
-		dirs[value.month]?.push({ comment: value.file.comment, channel_id: value.channel_id, file: value.file.file });
+		dirs[value.month]?.push({
+			comment: value.file.comment,
+			channel_id: value.channel_id,
+			file: value.file.file,
+		});
 	});
 
 	// Transform Map into object
@@ -77,7 +90,7 @@ export function transform_to_months(data: Channels[]) {
 	});
 
 	// Sort by years (descending)
-	sorted_by_year.sort((a, b) => b.year - a.year)
+	sorted_by_year.sort((a, b) => b.year - a.year);
 
 	console.log(sorted_by_year);
 

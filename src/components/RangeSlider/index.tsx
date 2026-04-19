@@ -1,20 +1,20 @@
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useDownloadFileMutation } from '../../app/apiSlice';
-import { AudioParams, UserGuilds } from '../../Constants';
-import { ClipDialog } from './ClipDialog';
-import { DoubleSlider } from './DoubleSlider';
-import { formatDuration } from './formatDuration';
-import { JamIt } from './JamIt';
-import { PlaybackSpeedSlider } from './PlaybackSpeedSlider';
-import { SilenceButton } from './SilenceButton';
-import { TimeEditors } from './TimeEditor';
-import { VolumeSlider } from './VolumeSlider';
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useDownloadFileMutation } from "../../app/apiSlice";
+import { AudioParams, UserGuilds } from "../../Constants";
+import { ClipDialog } from "./ClipDialog";
+import { DoubleSlider } from "./DoubleSlider";
+import { formatDuration } from "./formatDuration";
+import { JamIt } from "./JamIt";
+import { PlaybackSpeedSlider } from "./PlaybackSpeedSlider";
+import { SilenceButton } from "./SilenceButton";
+import { TimeEditors } from "./TimeEditor";
+import { VolumeSlider } from "./VolumeSlider";
 
-export { formatDuration } from './formatDuration';
+export { formatDuration } from "./formatDuration";
 
 const ArrowKeySkip = 5;
 const CtrlArrowKeySkip = 30;
@@ -32,11 +32,14 @@ export function RangeSlider(props: {
 			? props.trueDuration
 			: isFinite(props.audioRef.duration)
 				? props.audioRef.duration
-				: 0
+				: 0,
 	);
 
 	const [playing, setPlaying] = useState(false);
-	const [startEnd, setStartEnd] = useState<number[]>([props.audioRef.currentTime || 0, actualDuration]);
+	const [startEnd, setStartEnd] = useState<number[]>([
+		props.audioRef.currentTime || 0,
+		actualDuration,
+	]);
 	const [zoomInStartEnd, setZoomInStartEnd] = useState<number>(0);
 	const [isSliderClicked, setIsSliderClicked] = useState(false);
 
@@ -46,17 +49,20 @@ export function RangeSlider(props: {
 	useEffect(() => {
 		if (props.trueDuration && isFinite(props.trueDuration)) {
 			setActualDuration(props.trueDuration);
-			setStartEnd((prev) => [prev[0], Math.max(prev[1], props.trueDuration as number)]);
+			setStartEnd((prev) => [
+				prev[0],
+				Math.max(prev[1], props.trueDuration as number),
+			]);
 		}
 	}, [props.trueDuration]);
 
 	useEffect(() => {
 		const handleArrowKeys = (event: KeyboardEvent) => {
-			if (event.key === 'ArrowRight') {
+			if (event.key === "ArrowRight") {
 				const skip = event.ctrlKey ? CtrlArrowKeySkip : ArrowKeySkip;
 				setStartEnd((s) => [s[0] + skip, s[1]]);
 				props.audioRef.currentTime += skip;
-			} else if (event.key === 'ArrowLeft') {
+			} else if (event.key === "ArrowLeft") {
 				const skip = event.ctrlKey ? CtrlArrowKeySkip : ArrowKeySkip;
 				setStartEnd((s) => [s[0] - skip, s[1]]);
 				props.audioRef.currentTime -= skip;
@@ -65,8 +71,8 @@ export function RangeSlider(props: {
 			}
 			setZoomInStartEnd(0);
 		};
-		window.addEventListener('keydown', handleArrowKeys);
-		return () => window.removeEventListener('keydown', handleArrowKeys);
+		window.addEventListener("keydown", handleArrowKeys);
+		return () => window.removeEventListener("keydown", handleArrowKeys);
 	}, []);
 
 	const togglePlay = () => {
@@ -84,14 +90,20 @@ export function RangeSlider(props: {
 
 	useEffect(() => {
 		const handleSpace = (event: KeyboardEvent) => {
-			if (event.key !== ' ' && event.code !== 'Space') return;
+			if (event.key !== " " && event.code !== "Space") return;
 			const target = event.target as HTMLElement | null;
-			if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+			if (
+				target &&
+				(target.tagName === "INPUT" ||
+					target.tagName === "TEXTAREA" ||
+					target.isContentEditable)
+			)
+				return;
 			event.preventDefault();
 			togglePlay();
 		};
-		window.addEventListener('keydown', handleSpace);
-		return () => window.removeEventListener('keydown', handleSpace);
+		window.addEventListener("keydown", handleSpace);
+		return () => window.removeEventListener("keydown", handleSpace);
 	}, []);
 
 	const startTimer = () => {
@@ -118,7 +130,11 @@ export function RangeSlider(props: {
 		return () => clearInterval(props.intervalRef.current);
 	}, [isSliderClicked]);
 
-	const handleChange = (_event: Event, newValue: number | number[], activeThumb: number) => {
+	const handleChange = (
+		_event: Event,
+		newValue: number | number[],
+		activeThumb: number,
+	) => {
 		const minDistance = 1;
 		if (!Array.isArray(newValue)) {
 			setIsSliderClicked(true);
@@ -153,24 +169,24 @@ export function RangeSlider(props: {
 	const handleDownload = async () => {
 		const url = props.isClip
 			? `audio/clips/${params.guild_id}/${params.file_name}`
-			: `download/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${params.file_name}.ogg${props.isSilence ? '?silence=true' : ''}`;
+			: `download/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${params.file_name}.ogg${props.isSilence ? "?silence=true" : ""}`;
 		try {
 			const blob = await downloadFile(url).unwrap();
 			const objectUrl = URL.createObjectURL(blob);
-			const a = document.createElement('a');
+			const a = document.createElement("a");
 			a.href = objectUrl;
 			a.download = params.file_name!;
 			a.click();
 			URL.revokeObjectURL(objectUrl);
 		} catch (e) {
-			console.error('Download failed', e);
+			console.error("Download failed", e);
 		}
 	};
 
 	return (
 		<Box sx={{ m: { xs: 1, md: 8 } }}>
 			<Button variant="contained" onClick={togglePlay}>
-				{playing ? 'Pause' : 'Play'}
+				{playing ? "Pause" : "Play"}
 			</Button>
 			<DoubleSlider
 				audioRef={props.audioRef}
@@ -182,26 +198,40 @@ export function RangeSlider(props: {
 			/>
 			<Stack
 				spacing={{ xs: 2, md: 8 }}
-				direction={{ xs: 'column', md: 'row' }}
-				alignItems={{ xs: 'stretch', md: 'center' }}
+				direction={{ xs: "column", md: "row" }}
+				alignItems={{ xs: "stretch", md: "center" }}
 				justifyContent="space-around"
 				sx={{ my: 2 }}
 			>
 				<VolumeSlider audioRef={props.audioRef} />
 				<PlaybackSpeedSlider audioRef={props.audioRef} />
 			</Stack>
-			<Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 1 }}>
-				<Box sx={{ flex: 1, minWidth: 0 }}>value 1: {formatDuration(Math.round(startEnd[0]))}</Box>
+			<Box
+				sx={{
+					display: "flex",
+					flexDirection: { xs: "column", md: "row" },
+					gap: 1,
+				}}
+			>
+				<Box sx={{ flex: 1, minWidth: 0 }}>
+					value 1: {formatDuration(Math.round(startEnd[0]))}
+				</Box>
 				<Box sx={{ flex: 1, minWidth: 0 }}>
 					Recorded in channel: {params.channel_id}
 					{(() => {
-						const parts = (params.file_name ?? '').split('-');
+						const parts = (params.file_name ?? "").split("-");
 						const userId = parts[1];
-						return userId ? <Box sx={{ fontSize: 12, opacity: 0.75 }}>User ID: {userId}</Box> : null;
+						return userId ? (
+							<Box sx={{ fontSize: 12, opacity: 0.75 }}>User ID: {userId}</Box>
+						) : null;
 					})()}
 				</Box>
 				<Box>
-					<TimeEditors startEnd={startEnd} setStartEnd={setStartEnd} audioRef={props.audioRef} />
+					<TimeEditors
+						startEnd={startEnd}
+						setStartEnd={setStartEnd}
+						audioRef={props.audioRef}
+					/>
 				</Box>
 			</Box>
 			<br />

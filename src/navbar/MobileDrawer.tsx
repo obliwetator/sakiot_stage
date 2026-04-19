@@ -1,18 +1,18 @@
-import Avatar from '@mui/material/Avatar';
-import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import ListSubheader from '@mui/material/ListSubheader';
-import Typography from '@mui/material/Typography';
-import * as React from 'react';
-import { UserGuilds } from '../Constants';
-import Login from '../login/login';
-import { BasicSelect } from './BasicSelect';
-import { PageName, pageIcons } from './constants';
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import ListSubheader from "@mui/material/ListSubheader";
+import Typography from "@mui/material/Typography";
+import * as React from "react";
+import { UserGuilds } from "../Constants";
+import Login from "../login/login";
+import { BasicSelect } from "./BasicSelect";
+import { PageName, pageIcons } from "./constants";
 
 export function MobileDrawer(props: {
 	isLoggedIn: boolean;
@@ -25,10 +25,10 @@ export function MobileDrawer(props: {
 }) {
 	return (
 		<Box sx={{ width: 280 }} role="presentation">
-			<Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+			<Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 2 }}>
 				<Avatar alt="user" src="/pepega.png" />
 				<Typography variant="subtitle1" noWrap>
-					{props.isLoggedIn ? 'Account' : 'Guest'}
+					{props.isLoggedIn ? "Account" : "Guest"}
 				</Typography>
 			</Box>
 			<Divider />
@@ -56,7 +56,10 @@ export function MobileDrawer(props: {
 			<List subheader={<ListSubheader>Account</ListSubheader>}>
 				<ListItem disablePadding>
 					<Box sx={{ px: 2, py: 1 }}>
-						<Login isLoggedIn={props.isLoggedIn} setIsLoggedIn={props.setIsLoggedIn} />
+						<Login
+							isLoggedIn={props.isLoggedIn}
+							setIsLoggedIn={props.setIsLoggedIn}
+						/>
 					</Box>
 				</ListItem>
 			</List>

@@ -1,22 +1,22 @@
-import MenuIcon from '@mui/icons-material/Menu';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
-import Drawer from '@mui/material/Drawer';
-import IconButton from '@mui/material/IconButton';
-import MenuItem from '@mui/material/MenuItem';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from '../Constants';
-import Login from '../login/login';
-import { BasicSelect } from './BasicSelect';
-import { PageName, pages } from './constants';
-import { MobileDrawer } from './MobileDrawer';
-import { isGuildAdmin } from './permissions';
-import { UserMenu } from './UserMenu';
+import MenuIcon from "@mui/icons-material/Menu";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Container from "@mui/material/Container";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import * as React from "react";
+import { useNavigate } from "react-router-dom";
+import { PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from "../Constants";
+import Login from "../login/login";
+import { BasicSelect } from "./BasicSelect";
+import { PageName, pages } from "./constants";
+import { MobileDrawer } from "./MobileDrawer";
+import { isGuildAdmin } from "./permissions";
+import { UserMenu } from "./UserMenu";
 
 function ResponsiveAppBar(props: {
 	isLoggedIn: boolean;
@@ -29,25 +29,39 @@ function ResponsiveAppBar(props: {
 	const [drawerOpen, setDrawerOpen] = React.useState(false);
 
 	const navigateTo = (name: PageName) => {
-		if (!props.guildSelected && name !== 'Metrics' && name !== 'Stamps') {
+		if (!props.guildSelected && name !== "Metrics" && name !== "Stamps") {
 			navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}`);
 			return;
 		}
 		switch (name) {
-			case 'Admin':
-				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${props.guildSelected?.id}/admin/cooldowns`);
+			case "Admin":
+				navigate(
+					`${PATH_PREFIX_FOR_LOGGED_USERS}/${props.guildSelected?.id}/admin/cooldowns`,
+				);
 				break;
-			case 'Audio':
-				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${props.guildSelected?.id}/audio`);
+			case "Audio":
+				navigate(
+					`${PATH_PREFIX_FOR_LOGGED_USERS}/${props.guildSelected?.id}/audio`,
+				);
 				break;
-			case 'Clips':
-				navigate(`${PATH_PREFIX_FOR_LOGGED_USERS}/${props.guildSelected?.id}/clips`);
+			case "Clips":
+				navigate(
+					`${PATH_PREFIX_FOR_LOGGED_USERS}/${props.guildSelected?.id}/clips`,
+				);
 				break;
-			case 'Metrics':
-				navigate(props.guildSelected?.id ? `/metrics/${props.guildSelected.id}` : `/metrics`);
+			case "Metrics":
+				navigate(
+					props.guildSelected?.id
+						? `/metrics/${props.guildSelected.id}`
+						: `/metrics`,
+				);
 				break;
-			case 'Stamps':
-				navigate(props.guildSelected?.id ? `/stamps/${props.guildSelected.id}` : `/stamps`);
+			case "Stamps":
+				navigate(
+					props.guildSelected?.id
+						? `/stamps/${props.guildSelected.id}`
+						: `/stamps`,
+				);
 				break;
 		}
 	};
@@ -57,13 +71,15 @@ function ResponsiveAppBar(props: {
 		navigateTo(name);
 	};
 
-	const visiblePages: PageName[] = isGuildAdmin(props.guildSelected) ? [...pages, 'Admin'] : pages;
+	const visiblePages: PageName[] = isGuildAdmin(props.guildSelected)
+		? [...pages, "Admin"]
+		: pages;
 
 	return (
 		<AppBar position="static">
 			<Container maxWidth="xl">
 				<Toolbar disableGutters>
-					<Box sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }}>
+					<Box sx={{ display: { xs: "flex", md: "none" }, mr: 1 }}>
 						<IconButton
 							size="large"
 							aria-label="open navigation"
@@ -79,19 +95,25 @@ function ResponsiveAppBar(props: {
 						noWrap
 						sx={{
 							flexGrow: 1,
-							display: { xs: 'flex', md: 'none' },
-							color: 'inherit',
+							display: { xs: "flex", md: "none" },
+							color: "inherit",
 						}}
 					>
-						{props.guildSelected?.name ?? 'Sakiot'}
+						{props.guildSelected?.name ?? "Sakiot"}
 					</Typography>
 
-					<Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
+					<Box
+						sx={{
+							flexGrow: 1,
+							display: { xs: "none", md: "flex" },
+							alignItems: "center",
+						}}
+					>
 						{visiblePages.map((page) => (
 							<Button
 								key={page}
 								onClick={() => navigateTo(page)}
-								sx={{ my: 2, color: 'white', display: 'block' }}
+								sx={{ my: 2, color: "white", display: "block" }}
 							>
 								{page}
 							</Button>
@@ -108,8 +130,11 @@ function ResponsiveAppBar(props: {
 						) : null}
 					</Box>
 
-					<Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-						<Login isLoggedIn={props.isLoggedIn} setIsLoggedIn={props.setIsLoggedIn} />
+					<Box sx={{ display: { xs: "none", md: "flex" } }}>
+						<Login
+							isLoggedIn={props.isLoggedIn}
+							setIsLoggedIn={props.setIsLoggedIn}
+						/>
 					</Box>
 
 					<UserMenu />
@@ -120,7 +145,7 @@ function ResponsiveAppBar(props: {
 				anchor="left"
 				open={drawerOpen}
 				onClose={() => setDrawerOpen(false)}
-				sx={{ display: { xs: 'block', md: 'none' } }}
+				sx={{ display: { xs: "block", md: "none" } }}
 			>
 				<MobileDrawer
 					isLoggedIn={props.isLoggedIn}

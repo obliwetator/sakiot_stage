@@ -1,6 +1,6 @@
-import { getMonthName, IndividualFileArray } from '../../Constants';
-import { StyledTreeItem } from './StyledTreeItem';
-import { TreeViewDays } from './TreeViewDays';
+import { getMonthName, IndividualFileArray } from "../../Constants";
+import { StyledTreeItem } from "./StyledTreeItem";
+import { TreeViewDays } from "./TreeViewDays";
 
 export function TreeViewMonths(props: {
 	files: IndividualFileArray | null;
@@ -21,7 +21,11 @@ export function TreeViewMonths(props: {
 
 		if (prevDay != date.getDate()) {
 			file_names = [];
-			file_names.push({ file: el.file, comment: el.comment, channel_id: el.channel_id });
+			file_names.push({
+				file: el.file,
+				comment: el.comment,
+				channel_id: el.channel_id,
+			});
 			prevDay = date.getDate();
 			return (
 				<TreeViewDays
@@ -34,7 +38,11 @@ export function TreeViewMonths(props: {
 				/>
 			);
 		} else {
-			file_names.push({ file: el.file, comment: el.comment, channel_id: el.channel_id });
+			file_names.push({
+				file: el.file,
+				comment: el.comment,
+				channel_id: el.channel_id,
+			});
 		}
 	});
 

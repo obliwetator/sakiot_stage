@@ -1,6 +1,6 @@
-import { Dirs, months } from '../../Constants';
-import { StyledTreeItem } from './StyledTreeItem';
-import { TreeViewMonths } from './TreeViewMonths';
+import { Dirs, months } from "../../Constants";
+import { StyledTreeItem } from "./StyledTreeItem";
+import { TreeViewMonths } from "./TreeViewMonths";
 
 export function TreeViewYears(props: { el: Dirs; index: number }) {
 	const months_obj = Object.keys(props.el.months);
@@ -10,7 +10,13 @@ export function TreeViewYears(props: { el: Dirs; index: number }) {
 		const month = month_name as months;
 		const files = props.el.months[month]!;
 		return (
-			<TreeViewMonths files={files} index={index} month_name={month} year={props.el.year} key={index} />
+			<TreeViewMonths
+				files={files}
+				index={index}
+				month_name={month}
+				year={props.el.year}
+				key={index}
+			/>
 		);
 	});
 

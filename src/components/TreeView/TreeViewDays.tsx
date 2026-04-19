@@ -1,6 +1,6 @@
-import { IndividualFileArray } from '../../Constants';
-import { ItemsEl } from './ItemsEl';
-import { StyledTreeItem } from './StyledTreeItem';
+import { IndividualFileArray } from "../../Constants";
+import { ItemsEl } from "./ItemsEl";
+import { StyledTreeItem } from "./StyledTreeItem";
 
 export function TreeViewDays(props: {
 	index: number;
@@ -10,12 +10,17 @@ export function TreeViewDays(props: {
 	month_name: number;
 }) {
 	const itemsEl = props.files.map((el, index) => (
-		<ItemsEl file={el} month_name={props.month_name} year={props.year} key={index} />
+		<ItemsEl
+			file={el}
+			month_name={props.month_name}
+			year={props.year}
+			key={index}
+		/>
 	));
 
 	return (
 		<StyledTreeItem
-			onContextMenu={() => console.log('days')}
+			onContextMenu={() => console.log("days")}
 			className="bg-pink-700"
 			label={props.day}
 			itemId={`${props.year}-${props.month_name}-${props.day}`}

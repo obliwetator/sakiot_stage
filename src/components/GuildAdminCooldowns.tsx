@@ -13,31 +13,33 @@ import {
 	TableRow,
 	TextField,
 	Typography,
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import {
 	useDeleteUserOverrideMutation,
 	useGetGuildCooldownQuery,
 	useListUserOverridesQuery,
 	useSetGuildCooldownMutation,
 	useSetUserOverrideMutation,
-} from '../app/apiSlice';
+} from "../app/apiSlice";
 
 export function GuildAdminCooldowns() {
 	const { guild_id } = useParams<{ guild_id: string }>();
-	const gid = guild_id ?? '';
+	const gid = guild_id ?? "";
 
-	const { data: guildCooldown, isLoading: loadingGuild } = useGetGuildCooldownQuery(gid, { skip: !gid });
-	const { data: overrides, isLoading: loadingOverrides } = useListUserOverridesQuery(gid, { skip: !gid });
+	const { data: guildCooldown, isLoading: loadingGuild } =
+		useGetGuildCooldownQuery(gid, { skip: !gid });
+	const { data: overrides, isLoading: loadingOverrides } =
+		useListUserOverridesQuery(gid, { skip: !gid });
 	const [setGuildCooldown, setGuildState] = useSetGuildCooldownMutation();
 	const [setUserOverride, setOverrideState] = useSetUserOverrideMutation();
 	const [deleteUserOverride] = useDeleteUserOverrideMutation();
 
-	const [guildSeconds, setGuildSeconds] = useState<string>('0');
-	const [newUserId, setNewUserId] = useState<string>('');
-	const [newSeconds, setNewSeconds] = useState<string>('0');
+	const [guildSeconds, setGuildSeconds] = useState<string>("0");
+	const [newUserId, setNewUserId] = useState<string>("");
+	const [newSeconds, setNewSeconds] = useState<string>("0");
 	const [formError, setFormError] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -52,7 +54,7 @@ export function GuildAdminCooldowns() {
 	const handleSaveGuild = async () => {
 		const n = parseSeconds(guildSeconds);
 		if (n === null) {
-			setFormError('Cooldown must be a non-negative integer.');
+			setFormError("Cooldown must be a non-negative integer.");
 			return;
 		}
 		setFormError(null);
@@ -62,13 +64,17 @@ export function GuildAdminCooldowns() {
 	const handleAddOverride = async () => {
 		const n = parseSeconds(newSeconds);
 		if (!newUserId.trim() || n === null) {
-			setFormError('Provide a user id and non-negative integer seconds.');
+			setFormError("Provide a user id and non-negative integer seconds.");
 			return;
 		}
 		setFormError(null);
-		await setUserOverride({ guild_id: gid, user_id: newUserId.trim(), cooldown_seconds: n });
-		setNewUserId('');
-		setNewSeconds('0');
+		await setUserOverride({
+			guild_id: gid,
+			user_id: newUserId.trim(),
+			cooldown_seconds: n,
+		});
+		setNewUserId("");
+		setNewSeconds("0");
 	};
 
 	const handleDelete = async (user_id: number) => {
@@ -79,14 +85,22 @@ export function GuildAdminCooldowns() {
 
 	return (
 		<Box p={2}>
-			<Typography variant="h5" gutterBottom>Jam cooldowns</Typography>
+			<Typography variant="h5" gutterBottom>
+				Jam cooldowns
+			</Typography>
 
 			<Paper sx={{ p: 2, mb: 3 }}>
-				<Typography variant="h6" gutterBottom>Guild default</Typography>
+				<Typography variant="h6" gutterBottom>
+					Guild default
+				</Typography>
 				{loadingGuild ? (
 					<Typography>Loading…</Typography>
 				) : (
-					<Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
+					<Stack
+						direction={{ xs: "column", sm: "row" }}
+						spacing={2}
+						alignItems={{ xs: "stretch", sm: "center" }}
+					>
 						<TextField
 							label="Cooldown (seconds)"
 							type="number"
@@ -103,18 +117,31 @@ export function GuildAdminCooldowns() {
 							Save
 						</Button>
 						{setGuildState.isSuccess && <Alert severity="success">Saved</Alert>}
-						{setGuildState.isError && <Alert severity="error">Save failed</Alert>}
+						{setGuildState.isError && (
+							<Alert severity="error">Save failed</Alert>
+						)}
 					</Stack>
 				)}
-				<Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+				<Typography
+					variant="caption"
+					color="text.secondary"
+					sx={{ mt: 1, display: "block" }}
+				>
 					0 disables the cooldown for this guild.
 				</Typography>
 			</Paper>
 
 			<Paper sx={{ p: 2 }}>
-				<Typography variant="h6" gutterBottom>Per-user overrides</Typography>
+				<Typography variant="h6" gutterBottom>
+					Per-user overrides
+				</Typography>
 
-				<Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ mb: 2 }}>
+				<Stack
+					direction={{ xs: "column", sm: "row" }}
+					spacing={2}
+					alignItems={{ xs: "stretch", sm: "center" }}
+					sx={{ mb: 2 }}
+				>
 					<TextField
 						label="User ID"
 						value={newUserId}
@@ -138,7 +165,11 @@ export function GuildAdminCooldowns() {
 					</Button>
 				</Stack>
 
-				{formError && <Alert severity="warning" sx={{ mb: 2 }}>{formError}</Alert>}
+				{formError && (
+					<Alert severity="warning" sx={{ mb: 2 }}>
+						{formError}
+					</Alert>
+				)}
 
 				{loadingOverrides ? (
 					<Typography>Loading…</Typography>
@@ -158,9 +189,14 @@ export function GuildAdminCooldowns() {
 									<TableRow key={o.user_id}>
 										<TableCell>{o.user_id}</TableCell>
 										<TableCell align="right">{o.cooldown_seconds}</TableCell>
-										<TableCell>{new Date(o.updated_at).toLocaleString()}</TableCell>
+										<TableCell>
+											{new Date(o.updated_at).toLocaleString()}
+										</TableCell>
 										<TableCell align="right">
-											<IconButton size="small" onClick={() => handleDelete(o.user_id)}>
+											<IconButton
+												size="small"
+												onClick={() => handleDelete(o.user_id)}
+											>
 												<DeleteIcon fontSize="small" />
 											</IconButton>
 										</TableCell>

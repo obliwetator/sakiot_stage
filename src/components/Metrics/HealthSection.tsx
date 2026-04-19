@@ -1,15 +1,33 @@
-import Box from '@mui/material/Box';
-import { formatBytes, formatTimeSince } from './format';
-import { GroupPanel, Tile } from './primitives';
-import { Metrics } from './types';
+import Box from "@mui/material/Box";
+import { formatBytes, formatTimeSince } from "./format";
+import { GroupPanel, Tile } from "./primitives";
+import { Metrics } from "./types";
 
-export function HealthSection({ m, currentTime, L }: { m: Metrics | null; currentTime: number; L: string }) {
+export function HealthSection({
+	m,
+	currentTime,
+	L,
+}: {
+	m: Metrics | null;
+	currentTime: number;
+	L: string;
+}) {
 	return (
-		<Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-			<Box sx={{ flex: '1 1 340px' }}>
+		<Box
+			sx={{
+				display: "flex",
+				gap: 3,
+				flexWrap: "wrap",
+				alignItems: "flex-start",
+			}}
+		>
+			<Box sx={{ flex: "1 1 340px" }}>
 				<GroupPanel title="Voice Recording Pipeline">
 					<Tile label="Active Recordings" value={m ? m.active_recordings : L} />
-					<Tile label="Packets Received" value={m ? m.audio_packets_received.toLocaleString() : L} />
+					<Tile
+						label="Packets Received"
+						value={m ? m.audio_packets_received.toLocaleString() : L}
+					/>
 					<Tile
 						label="Packets Dropped"
 						value={m ? m.audio_packets_dropped.toLocaleString() : L}
@@ -27,14 +45,26 @@ export function HealthSection({ m, currentTime, L }: { m: Metrics | null; curren
 					/>
 					<Tile
 						label="Last Voice Packet"
-						value={m ? formatTimeSince(m.last_voice_packet_time, currentTime) : L}
+						value={
+							m ? formatTimeSince(m.last_voice_packet_time, currentTime) : L
+						}
 					/>
 				</GroupPanel>
 			</Box>
 
-			<Box sx={{ flex: '1 1 340px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+			<Box
+				sx={{
+					flex: "1 1 340px",
+					display: "flex",
+					flexDirection: "column",
+					gap: 2,
+				}}
+			>
 				<GroupPanel title="Discord Gateway">
-					<Tile label="Voice State Updates" value={m ? m.voice_state_updates_received.toLocaleString() : L} />
+					<Tile
+						label="Voice State Updates"
+						value={m ? m.voice_state_updates_received.toLocaleString() : L}
+					/>
 					<Tile
 						label="Gateway Reconnects"
 						value={m ? m.gateway_reconnects : L}
@@ -48,17 +78,27 @@ export function HealthSection({ m, currentTime, L }: { m: Metrics | null; curren
 				</GroupPanel>
 
 				<GroupPanel title="Database & gRPC">
-					<Tile label="DB Query Errors" value={m ? m.db_query_errors : L} warn={!!m && m.db_query_errors > 0} />
+					<Tile
+						label="DB Query Errors"
+						value={m ? m.db_query_errors : L}
+						warn={!!m && m.db_query_errors > 0}
+					/>
 					<Tile
 						label="DB Insert Failures"
 						value={m ? m.db_insert_failures : L}
 						warn={!!m && m.db_insert_failures > 0}
 					/>
-					<Tile label="Active gRPC Streams" value={m ? m.grpc_active_streams : L} />
+					<Tile
+						label="Active gRPC Streams"
+						value={m ? m.grpc_active_streams : L}
+					/>
 				</GroupPanel>
 
 				<GroupPanel title="Process">
-					<Tile label="Memory (RSS)" value={m ? formatBytes(m.process_rss_bytes) : L} />
+					<Tile
+						label="Memory (RSS)"
+						value={m ? formatBytes(m.process_rss_bytes) : L}
+					/>
 					<Tile label="Open FDs" value={m ? m.process_open_fds : L} />
 					<Tile label="Tokio Tasks" value={m ? m.tokio_active_tasks : L} />
 				</GroupPanel>

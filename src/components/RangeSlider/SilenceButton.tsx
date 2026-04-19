@@ -1,12 +1,15 @@
-import Button from '@mui/material/Button';
-import { useState } from 'react';
-import { Params } from 'react-router-dom';
-import { useRemoveSilenceMutation } from '../../app/apiSlice';
-import { AudioParams } from '../../Constants';
-import { setHasSilence } from '../../reducers/silence';
-import { store } from '../../store';
+import Button from "@mui/material/Button";
+import { useState } from "react";
+import { Params } from "react-router-dom";
+import { useRemoveSilenceMutation } from "../../app/apiSlice";
+import { AudioParams } from "../../Constants";
+import { setHasSilence } from "../../reducers/silence";
+import { store } from "../../store";
 
-export function SilenceButton(props: { params: Readonly<Params<AudioParams>>; isSilence: boolean }) {
+export function SilenceButton(props: {
+	params: Readonly<Params<AudioParams>>;
+	isSilence: boolean;
+}) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [removeSilence] = useRemoveSilenceMutation();
 
@@ -23,15 +26,15 @@ export function SilenceButton(props: { params: Readonly<Params<AudioParams>>; is
 			};
 			const res = await removeSilence(payload).unwrap();
 
-			if (res.message === 'Success' || res.message === ' Accepted') {
+			if (res.message === "Success" || res.message === " Accepted") {
 				const res2 = await removeSilence(payload).unwrap();
-				if (res2.message === 'Success') {
-					console.log('Silence removed', res2.url);
+				if (res2.message === "Success") {
+					console.log("Silence removed", res2.url);
 					store.dispatch(setHasSilence(true));
 				}
 			}
 		} catch (error) {
-			console.error('Error removing silence:', error);
+			console.error("Error removing silence:", error);
 		} finally {
 			setIsLoading(false);
 		}
@@ -41,7 +44,7 @@ export function SilenceButton(props: { params: Readonly<Params<AudioParams>>; is
 
 	return (
 		<Button variant="contained" onClick={handleOnClick} disabled={isLoading}>
-			{isLoading ? 'Removing...' : 'Remove Silence'}
+			{isLoading ? "Removing..." : "Remove Silence"}
 		</Button>
 	);
 }
