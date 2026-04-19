@@ -11,17 +11,17 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Drawer from '@mui/material/Drawer';
+import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { ClipData, useDeleteClipMutation, useGetAuthDetailsQuery, useGetClipsQuery } from './app/apiSlice';
 import { useAppSelector } from './app/hooks';
 import { AudioInterface } from './AudioInterface';
-import { BASE_URL, PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from './Constants';
 import { formatDuration } from './components/RangeSlider/formatDuration';
+import { BASE_URL, PATH_PREFIX_FOR_LOGGED_USERS, UserGuilds } from './Constants';
 
 function SimpleAccordion(props: { data: ClipData[] }) {
 	const navigate = useNavigate();
@@ -45,7 +45,7 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 	const elements = props.data.map((el, index) => {
 		return (
 			<Accordion
-				key={index}
+				key={el.clip_id}
 				onClick={() => {
 					handleClickAccordion(el.guild_id, el.clip_id);
 				}}
@@ -93,7 +93,6 @@ function AlertDialog(props: { clip_id: string }) {
 				setOpen(false);
 			} catch (error) {
 				console.error("Failed to delete clip:", error);
-				alert("Failed to delete the clip.");
 				setOpen(false);
 			}
 		} else {
