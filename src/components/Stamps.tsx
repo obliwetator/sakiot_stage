@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useGetStampsQuery } from "../app/apiSlice";
 import type { RootState } from "../store";
-import { formatDuration } from "./RangeSlider/formatDuration";
+import { formatDuration } from "../utils/formatTime";
 
 function formatTimestamp(ms: number): string {
 	return new Date(ms).toLocaleString();

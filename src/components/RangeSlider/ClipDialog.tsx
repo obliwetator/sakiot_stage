@@ -1,10 +1,6 @@
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import type { Params } from "react-router-dom";
 import {
@@ -12,6 +8,7 @@ import {
 	useDownloadFileMutation,
 } from "../../app/apiSlice";
 import type { AudioParams } from "../../Constants";
+import { BaseDialog } from "../shared/BaseDialog";
 
 export function ClipDialog(props: {
 	params: Readonly<Params<AudioParams>>;
@@ -79,40 +76,40 @@ export function ClipDialog(props: {
 			>
 				Clip
 			</Button>
-			<Dialog open={open} onClose={handleClose}>
-				<DialogContent>
-					<DialogContentText>
-						Enter a name for this clip. Will return an error if name is a
-						duplicate. Leave blank for default name
-					</DialogContentText>
-					<TextField
-						value={text}
-						onChange={(e) => setText(e.currentTarget.value)}
-						autoFocus
-						margin="dense"
-						id="name"
-						label="Name"
-						type="text"
-						fullWidth
-						variant="standard"
-						autoComplete="off"
-						disabled={isLoading}
-					/>
-					{errorMsg && (
-						<Typography color="error" sx={{ mt: 1 }}>
-							{errorMsg}
-						</Typography>
-					)}
-				</DialogContent>
-				<DialogActions>
-					<Button onClick={handleClose} disabled={isLoading}>
-						Cancel
-					</Button>
-					<Button onClick={handleClip} disabled={isLoading}>
-						{isLoading ? "Creating..." : "Clip"}
-					</Button>
-				</DialogActions>
-			</Dialog>
+			<BaseDialog
+				open={open}
+				onClose={handleClose}
+				error={errorMsg}
+				busy={isLoading}
+				actions={
+					<>
+						<Button onClick={handleClose} disabled={isLoading}>
+							Cancel
+						</Button>
+						<Button onClick={handleClip} disabled={isLoading}>
+							{isLoading ? "Creating..." : "Clip"}
+						</Button>
+					</>
+				}
+			>
+				<DialogContentText>
+					Enter a name for this clip. Will return an error if name is a
+					duplicate. Leave blank for default name
+				</DialogContentText>
+				<TextField
+					value={text}
+					onChange={(e) => setText(e.currentTarget.value)}
+					autoFocus
+					margin="dense"
+					id="name"
+					label="Name"
+					type="text"
+					fullWidth
+					variant="standard"
+					autoComplete="off"
+					disabled={isLoading}
+				/>
+			</BaseDialog>
 		</>
 	);
 }

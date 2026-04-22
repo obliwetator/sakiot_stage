@@ -1,3 +1,8 @@
+export function formatDuration(value: number) {
+	if (!Number.isFinite(value) || Number.isNaN(value)) return "00:00:00";
+	return new Date(value * 1000).toISOString().slice(11, 19);
+}
+
 export function formatUptime(seconds: number) {
 	const d = Math.floor(seconds / (3600 * 24));
 	const h = Math.floor((seconds % (3600 * 24)) / 3600);
@@ -10,12 +15,6 @@ export function formatUptime(seconds: number) {
 	return dDisplay + hDisplay + mDisplay + sDisplay || "0 seconds";
 }
 
-export function formatBytes(bytes: number): string {
-	if (bytes >= 1024 * 1024 * 1024)
-		return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
-	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 export function formatTimeSince(
 	timestampMs: number | undefined,
 	currentUnixSecs: number,
@@ -23,4 +22,10 @@ export function formatTimeSince(
 	if (!timestampMs) return "Never";
 	const seconds = Math.max(0, currentUnixSecs - Math.floor(timestampMs / 1000));
 	return `${formatUptime(seconds)} ago`;
+}
+
+export function formatBytes(bytes: number): string {
+	if (bytes >= 1024 * 1024 * 1024)
+		return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }

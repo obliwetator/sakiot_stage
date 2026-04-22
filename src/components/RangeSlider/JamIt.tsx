@@ -1,11 +1,10 @@
-import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useJamItMutation } from "../../app/apiSlice";
 import type { UserGuilds } from "../../Constants";
+import { BaseDialog } from "../shared/BaseDialog";
 
 export enum JamItRespStatus {
 	CONNECTED,
@@ -28,7 +27,7 @@ export function JamIt(props: {
 	});
 	const params = useParams();
 	const [jamIt] = useJamItMutation();
-	const [open, setOpen] = React.useState(false);
+	const [open, setOpen] = useState(false);
 
 	if (!props.disabled) return null;
 
@@ -61,65 +60,47 @@ export function JamIt(props: {
 		}
 	};
 
-	const style = {
-		position: "absolute" as const,
-		top: "50%",
-		left: "50%",
-		transform: "translate(-50%, -50%)",
-		width: { xs: "90vw", sm: 400 },
-		maxWidth: 400,
-		bgcolor: "background.paper",
-		border: "2px solid #000",
-		boxShadow: 24,
-		p: 4,
-	};
-
 	const handleClose = () => {
 		setOpen(false);
 		setIsError({ type: JamItRespStatus.CONNECTED, code: 0 });
 	};
+
+	const shouldShow =
+		isError.code > 0 ||
+		isError.type === JamItRespStatus.NOT_CONNECTED ||
+		isError.type === JamItRespStatus.COOLDOWN;
 
 	return (
 		<>
 			<Button onClick={handleJamIt} variant="contained">
 				Jam It
 			</Button>
-			{(isError.code > 0 ||
-				isError.type === JamItRespStatus.NOT_CONNECTED ||
-				isError.type === JamItRespStatus.COOLDOWN) && (
-				<div>
-					<Modal
-						open={open}
-						onClose={handleClose}
-						aria-labelledby="modal-modal-title"
-						aria-describedby="modal-modal-description"
-					>
-						<Box sx={style}>
-							<Typography id="modal-modal-title" variant="h6" component="h2">
-								{isError.type === JamItRespStatus.COOLDOWN
-									? "On cooldown"
-									: "Error"}
-							</Typography>
-							<Typography id="modal-modal-description" sx={{ mt: 2 }}>
-								{isError.type === JamItRespStatus.COOLDOWN ? (
-									<>Try again in {isError.cooldownRemaining ?? "?"}s.</>
-								) : (
-									<>
-										error code: {isError.code}
-										<br />
-										TODO: proper messages
-										<br />
-										number 0 = Success
-										<br />
-										number 1 = bot is not in voice channel
-										<br />
-										number &gt;= 2 =¯\_(ツ)_/¯
-									</>
-								)}
-							</Typography>
-						</Box>
-					</Modal>
-				</div>
+			{shouldShow && (
+				<BaseDialog
+					open={open}
+					onClose={handleClose}
+					title={
+						isError.type === JamItRespStatus.COOLDOWN ? "On cooldown" : "Error"
+					}
+				>
+					<Typography>
+						{isError.type === JamItRespStatus.COOLDOWN ? (
+							<>Try again in {isError.cooldownRemaining ?? "?"}s.</>
+						) : (
+							<>
+								error code: {isError.code}
+								<br />
+								TODO: proper messages
+								<br />
+								number 0 = Success
+								<br />
+								number 1 = bot is not in voice channel
+								<br />
+								number &gt;= 2 =¯\_(ツ)_/¯
+							</>
+						)}
+					</Typography>
+				</BaseDialog>
 			)}
 		</>
 	);

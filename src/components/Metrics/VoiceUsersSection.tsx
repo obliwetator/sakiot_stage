@@ -2,8 +2,8 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import { formatTimeSince, formatUptime } from "./format";
-import { GroupPanel, Tile } from "./primitives";
+import { formatTimeSince, formatUptime } from "../../utils/formatTime";
+import { GroupPanel, Tile } from "../shared/primitives";
 import type { GuildInfo, RecordingMetrics, VoiceState } from "./types";
 
 export function VoiceUsersSection(props: {
