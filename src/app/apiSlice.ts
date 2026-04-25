@@ -1,10 +1,9 @@
-import {
-	type BaseQueryFn,
-	createApi,
-	type FetchArgs,
-	type FetchBaseQueryError,
-	fetchBaseQuery,
+import type {
+	BaseQueryFn,
+	FetchArgs,
+	FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Mutex } from "async-mutex";
 import type { Channels, UserGuilds } from "../Constants";
 import type { JamItRespStatus } from "../components/RangeSlider/JamIt";
@@ -46,6 +45,11 @@ const mutex = new Mutex();
 
 export const BASE_API_URL = "https://dev.patrykstyla.com/api/";
 
+function getCsrfToken(): string | null {
+	const match = document.cookie.match(/(?:^|;\s*)xsrf_token=([^;]*)/);
+	return match ? match[1] : null;
+}
+
 // Create our base query separately so we can wrap it
 const baseQuery = fetchBaseQuery({
 	baseUrl: BASE_API_URL,
@@ -61,6 +65,20 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
 	// wait until the mutex is available without locking it
 	await mutex.waitForUnlock();
+
+	// Inject CSRF token header for state-changing (non-GET/HEAD) requests
+	if (typeof args !== "string") {
+		const method = (args.method || "GET").toUpperCase();
+		if (method !== "GET" && method !== "HEAD") {
+			const csrf = getCsrfToken();
+			if (csrf) {
+				const headers = new Headers(args.headers as HeadersInit | undefined);
+				headers.set("X-CSRF-Token", csrf);
+				args = { ...args, headers };
+			}
+		}
+	}
+
 	let result = await baseQuery(args, api, extraOptions);
 
 	console.log("[baseQueryWithReauth] Result:", result);
@@ -207,7 +225,7 @@ export const apiSlice = createApi({
 			{
 				query: ({ guild_id, file_name }) => ({
 					url: `audio/clips/delete/${guild_id}`,
-					method: "POST",
+					method: "DELETE",
 					headers: {
 						"Content-Type": "text/plain",
 					},

@@ -22,7 +22,8 @@ export function ItemsEl(props: {
 	const hoverColor = "hover:bg-violet-500";
 	const activeRing = isActive ? "ring-2 ring-inset ring-white" : "";
 
-	const { time, username } = parseFileName(props.file.file);
+	const { time, username: legacyUsername } = parseFileName(props.file.file);
+	const username = props.file.display_name ?? legacyUsername;
 
 	return (
 		<button
