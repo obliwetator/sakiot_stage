@@ -6,16 +6,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDownloadFileMutation } from "../../app/apiSlice";
 import type { AudioParams, UserGuilds } from "../../Constants";
+import { formatDuration } from "../../utils/formatTime";
 import { ClipDialog } from "./ClipDialog";
 import { DoubleSlider } from "./DoubleSlider";
-import { formatDuration } from "./formatDuration";
 import { JamIt } from "./JamIt";
 import { PlaybackSpeedSlider } from "./PlaybackSpeedSlider";
 import { SilenceButton } from "./SilenceButton";
 import { TimeEditors } from "./TimeEditor";
 import { VolumeSlider } from "./VolumeSlider";
-
-export { formatDuration } from "./formatDuration";
 
 const ArrowKeySkip = 5;
 const CtrlArrowKeySkip = 30;

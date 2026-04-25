@@ -34,7 +34,8 @@ export type IndividualFileArray = IndividualFile[];
 export type IndividualFile = {
 	channel_id?: string;
 	file: string;
-	comment: string | null;
+	user_id?: string;
+	display_name?: string;
 };
 
 export function getMonthName(monthNumber: number): string {

@@ -21,10 +21,7 @@ export function TreeViewMonths(props: {
 
 		if (prevDay !== date.getDate()) {
 			file_names = [];
-			file_names.push({
-				file: el.file,
-				channel_id: el.channel_id,
-			});
+			file_names.push({ ...el });
 			prevDay = date.getDate();
 			return (
 				<TreeViewDays
@@ -38,10 +35,7 @@ export function TreeViewMonths(props: {
 			);
 		}
 
-		file_names.push({
-			file: el.file,
-			channel_id: el.channel_id,
-		});
+		file_names.push({ ...el });
 		return null;
 	});
 

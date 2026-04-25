@@ -5,8 +5,8 @@ import Typography from "@mui/material/Typography";
 import type React from "react";
 import { useParams } from "react-router-dom";
 import { type AudioParams, valuetext } from "../../Constants";
+import { formatDuration } from "../../utils/formatTime";
 import WaveFormButton from "../Waveform";
-import { formatDuration } from "./formatDuration";
 
 const TinyText = styled(Typography)({
 	fontSize: "0.75rem",

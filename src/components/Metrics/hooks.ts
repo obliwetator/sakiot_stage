@@ -1,48 +1,26 @@
 import { useEffect, useState } from "react";
-import { useRefreshMutation } from "../../app/apiSlice";
+import { useWebSocketStream } from "../../app/useWebSocketStream";
 import type { Metrics, RecordingMetrics, VoiceState } from "./types";
 
 export function useMetricsStream(enabled: boolean) {
 	const [metrics, setMetrics] = useState<Metrics | null>(null);
 	const [localUptime, setLocalUptime] = useState<number>(0);
 	const [refreshCounter, setRefreshCounter] = useState(0);
-	const [refreshToken] = useRefreshMutation();
 
-	useEffect(() => {
-		if (!enabled) return;
-		const ws = new WebSocket(
-			"wss://dev.patrykstyla.com/api/dashboard/stream?name=global",
-		);
-		ws.onopen = () =>
-			ws.send(JSON.stringify({ action: "subscribe", topic: "global" }));
-		ws.onmessage = (event) => {
-			try {
-				const data = JSON.parse(event.data);
-				if (data.event_type === "METRICS_UPDATE") {
-					const m: Metrics = JSON.parse(data.payload);
-					setMetrics(m);
-					setLocalUptime(m.uptime_seconds);
-				}
-			} catch (e) {
-				console.error("metrics parse error", e);
+	useWebSocketStream({
+		enabled,
+		url: "wss://dev.patrykstyla.com/api/dashboard/stream?name=global",
+		subscribe: { action: "subscribe", topic: "global" },
+		unsubscribe: { action: "unsubscribe", topic: "global" },
+		onMessage: (data) => {
+			if (data.event_type === "METRICS_UPDATE" && data.payload) {
+				const m: Metrics = JSON.parse(data.payload);
+				setMetrics(m);
+				setLocalUptime(m.uptime_seconds);
 			}
-		};
-		ws.onclose = async (event) => {
-			if (event.code === 4001) {
-				try {
-					await refreshToken().unwrap();
-					setRefreshCounter((p) => p + 1);
-				} catch {
-					/* ignored */
-				}
-			}
-		};
-		return () => {
-			if (ws.readyState === WebSocket.OPEN)
-				ws.send(JSON.stringify({ action: "unsubscribe", topic: "global" }));
-			ws.close();
-		};
-	}, [enabled, refreshToken]);
+		},
+		onAuthRefreshed: () => setRefreshCounter((p) => p + 1),
+	});
 
 	useEffect(() => {
 		if (localUptime <= 0) return;
@@ -70,60 +48,39 @@ export function useGuildVoiceStream(
 	const [guildRecordingMetrics, setGuildRecordingMetrics] =
 		useState<RecordingMetrics | null>(null);
 	const [, setLocalBump] = useState(0);
-	const [refreshToken] = useRefreshMutation();
 
 	useEffect(() => {
 		if (!enabled || !guildId) {
 			setVoiceUsers([]);
 			setUserStartTimes({});
 			setGuildRecordingMetrics(null);
-			return;
 		}
-		const ws = new WebSocket(
-			`wss://dev.patrykstyla.com/api/dashboard/stream?name=guild_voice_${guildId}`,
-		);
-		ws.onopen = () =>
-			ws.send(
-				JSON.stringify({
-					action: "subscribe",
-					topic: `guild_voice:${guildId}`,
-				}),
-			);
-		ws.onmessage = (event) => {
-			try {
-				const data = JSON.parse(event.data);
-				if (data.event_type === "GUILD_VOICE_UPDATE") {
-					const p = JSON.parse(data.payload);
-					setVoiceUsers(p.voice_states);
-					setUserStartTimes(p.user_start_times);
-					if (p.recording_metrics)
-						setGuildRecordingMetrics(p.recording_metrics);
-				}
-			} catch (e) {
-				console.error("guild voice parse error", e);
+	}, [enabled, guildId]);
+
+	useWebSocketStream({
+		enabled: enabled && !!guildId,
+		url: guildId
+			? `wss://dev.patrykstyla.com/api/dashboard/stream?name=guild_voice_${guildId}`
+			: null,
+		subscribe: {
+			action: "subscribe",
+			topic: `guild_voice:${guildId}`,
+		},
+		unsubscribe: {
+			action: "unsubscribe",
+			topic: `guild_voice:${guildId}`,
+		},
+		onMessage: (data) => {
+			if (data.event_type === "GUILD_VOICE_UPDATE" && data.payload) {
+				const p = JSON.parse(data.payload);
+				setVoiceUsers(p.voice_states);
+				setUserStartTimes(p.user_start_times);
+				if (p.recording_metrics) setGuildRecordingMetrics(p.recording_metrics);
 			}
-		};
-		ws.onclose = async (event) => {
-			if (event.code === 4001) {
-				try {
-					await refreshToken().unwrap();
-					setLocalBump((p) => p + 1);
-				} catch {
-					/* ignored */
-				}
-			}
-		};
-		return () => {
-			if (ws.readyState === WebSocket.OPEN)
-				ws.send(
-					JSON.stringify({
-						action: "unsubscribe",
-						topic: `guild_voice:${guildId}`,
-					}),
-				);
-			ws.close();
-		};
-	}, [enabled, guildId, refreshToken]);
+		},
+		onAuthRefreshed: () => setLocalBump((p) => p + 1),
+		deps: [guildId],
+	});
 
 	return { voiceUsers, userStartTimes, guildRecordingMetrics };
 }

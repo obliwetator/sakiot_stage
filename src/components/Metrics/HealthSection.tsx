@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
-import { formatBytes, formatTimeSince } from "./format";
-import { GroupPanel, Tile } from "./primitives";
+import { formatBytes, formatTimeSince } from "../../utils/formatTime";
+import { GroupPanel, Tile } from "../shared/primitives";
 import type { Metrics } from "./types";
 
 export function HealthSection({

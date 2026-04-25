@@ -26,7 +26,7 @@ import {
 } from "./app/apiSlice";
 import { useAppSelector } from "./app/hooks";
 import { PATH_PREFIX_FOR_LOGGED_USERS, type UserGuilds } from "./Constants";
-import { formatDuration } from "./components/RangeSlider/formatDuration";
+import { formatDuration } from "./utils/formatTime";
 
 function SimpleAccordion(props: { data: ClipData[] }) {
 	const navigate = useNavigate();
