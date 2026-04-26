@@ -138,8 +138,12 @@ export function AudioInterface(props: {
 		audio.addEventListener("canplay", onCanPlay);
 		audio.addEventListener("error", () => fallback("audio element error"));
 
-		// Safari can play HLS natively — skip the hls.js download entirely.
-		if (audio.canPlayType("application/vnd.apple.mpegurl")) {
+		// Safari natively decodes HLS and returns "probably" — skip the
+		// hls.js download. Some Chromium builds return "maybe" without
+		// actually being able to decode HLS, which lands in the native
+		// path and immediately fails; require "probably" so those
+		// browsers fall through to hls.js.
+		if (audio.canPlayType("application/vnd.apple.mpegurl") === "probably") {
 			audio.src = hlsUrl;
 		} else {
 			// Code-split hls.js so it doesn't bloat the initial bundle. Loaded
