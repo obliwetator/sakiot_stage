@@ -1,4 +1,4 @@
-import Hls from "hls.js";
+import type Hls from "hls.js";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useParams } from "react-router-dom";
@@ -138,28 +138,34 @@ export function AudioInterface(props: {
 		audio.addEventListener("canplay", onCanPlay);
 		audio.addEventListener("error", () => fallback("audio element error"));
 
-		if (Hls.isSupported()) {
-			hls = new Hls({
-				xhrSetup: (xhr) => {
-					xhr.withCredentials = true;
-				},
-				// Live latency target. Stays ~1 segment behind edge.
-				liveSyncDuration: 2,
-				liveMaxLatencyDuration: 15,
-			});
-			hls.on(Hls.Events.ERROR, (_e, data) => {
-				if (data.fatal) fallback(`hls fatal: ${data.type}/${data.details}`);
-			});
-			hls.loadSource(hlsUrl);
-			hls.attachMedia(audio);
-		} else if (audio.canPlayType("application/vnd.apple.mpegurl")) {
-			// Safari native HLS.
+		// Safari can play HLS natively — skip the hls.js download entirely.
+		if (audio.canPlayType("application/vnd.apple.mpegurl")) {
 			audio.src = hlsUrl;
 		} else {
-			fallback("hls not supported in this browser");
-			return () => {
-				isActive = false;
-			};
+			// Code-split hls.js so it doesn't bloat the initial bundle. Loaded
+			// only when an HLS-eligible recording is opened.
+			import("hls.js")
+				.then(({ default: Hls }) => {
+					if (!isActive) return;
+					if (!Hls.isSupported()) {
+						fallback("hls not supported in this browser");
+						return;
+					}
+					hls = new Hls({
+						xhrSetup: (xhr) => {
+							xhr.withCredentials = true;
+						},
+						// Live latency target. Stays ~1 segment behind edge.
+						liveSyncDuration: 2,
+						liveMaxLatencyDuration: 15,
+					});
+					hls.on(Hls.Events.ERROR, (_e, data) => {
+						if (data.fatal) fallback(`hls fatal: ${data.type}/${data.details}`);
+					});
+					hls.loadSource(hlsUrl);
+					hls.attachMedia(audio);
+				})
+				.catch((e) => fallback(`hls.js import failed: ${e}`));
 		}
 
 		return () => {
