@@ -55,6 +55,26 @@ export function RangeSlider(props: {
 		}
 	}, [props.trueDuration]);
 
+	// Mirror native play/pause/timeupdate into our slider state so the marker
+	// moves no matter how playback was started (togglePlay button, keyboard,
+	// hls.js auto-resume, etc).
+	useEffect(() => {
+		const audio = props.audioRef;
+		const onPlay = () => setPlaying(true);
+		const onPause = () => setPlaying(false);
+		const onTime = () => {
+			if (!isSliderClicked) setStartEnd((prev) => [audio.currentTime, prev[1]]);
+		};
+		audio.addEventListener("play", onPlay);
+		audio.addEventListener("pause", onPause);
+		audio.addEventListener("timeupdate", onTime);
+		return () => {
+			audio.removeEventListener("play", onPlay);
+			audio.removeEventListener("pause", onPause);
+			audio.removeEventListener("timeupdate", onTime);
+		};
+	}, [props.audioRef, isSliderClicked]);
+
 	useEffect(() => {
 		const handleArrowKeys = (event: KeyboardEvent) => {
 			if (event.key === "ArrowRight") {
