@@ -287,6 +287,20 @@ export const apiSlice = createApi({
 				responseHandler: (response) => response.blob(),
 			}),
 		}),
+		getLiveState: builder.query<
+			{ live: boolean; started_at: number | null; ended_at: number | null },
+			{
+				guild_id: string;
+				channel_id: string;
+				year: string;
+				month: number;
+				file_name: string;
+			}
+		>({
+			query: ({ guild_id, channel_id, year, month, file_name }) => ({
+				url: `audio/live/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}/state`,
+			}),
+		}),
 		getWaveform: builder.query<
 			WaveformResponse,
 			{
@@ -398,6 +412,7 @@ export const {
 	useLogoutMutation,
 	useCreateClipMutation,
 	useGetAudioFileQuery,
+	useGetLiveStateQuery,
 	useDownloadFileMutation,
 	useGetWaveformQuery,
 	useLazyGetWaveformQuery,
