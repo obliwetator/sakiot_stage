@@ -3,12 +3,14 @@ import {
 	type IndividualFile,
 	PATH_PREFIX_FOR_LOGGED_USERS,
 } from "../../Constants";
+import { LivePill } from "./LiveDot";
 import { parseFileName } from "./parseFileName";
 
 export function ItemsEl(props: {
 	file: IndividualFile;
 	year: number;
 	month_name: number;
+	isLive?: boolean;
 }) {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -44,6 +46,7 @@ export function ItemsEl(props: {
 		>
 			<span className="font-mono">{time}</span>
 			{username && <span className="ml-2">{username}</span>}
+			{props.isLive && <LivePill />}
 		</button>
 	);
 }

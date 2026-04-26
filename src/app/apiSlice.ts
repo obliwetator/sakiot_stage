@@ -210,6 +210,9 @@ export const apiSlice = createApi({
 		getCurrentGuildDirs: builder.query<Channels[], string>({
 			query: (guild_id) => `current/${guild_id}`,
 		}),
+		getLiveStems: builder.query<string[], string>({
+			query: (guild_id) => `current/${guild_id}/live-stems`,
+		}),
 		getClips: builder.query<ClipData[], string>({
 			query: (guild_id) => ({
 				url: `audio/clips/${guild_id}`,
@@ -403,6 +406,7 @@ export const apiSlice = createApi({
 export const {
 	useGetAuthDetailsQuery,
 	useGetCurrentGuildDirsQuery,
+	useGetLiveStemsQuery,
 	useGetClipsQuery,
 	useDeleteClipMutation,
 	useJamItMutation,

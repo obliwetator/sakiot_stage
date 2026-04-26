@@ -1,4 +1,5 @@
 import { getMonthName, type IndividualFileArray } from "../../Constants";
+import { LiveDot } from "./LiveDot";
 import { StyledTreeItem } from "./StyledTreeItem";
 import { TreeViewDays } from "./TreeViewDays";
 
@@ -7,11 +8,13 @@ export function TreeViewMonths(props: {
 	month_name: number;
 	year: number;
 	index: number;
+	liveSet: Set<string>;
 }) {
 	if (props.files) {
 		props.files.sort((a, b) => a.file.localeCompare(b.file));
 	}
 	const safeFiles = props.files || [];
+	const hasLive = safeFiles.some((f) => props.liveSet.has(f.file.slice(0, -4)));
 	let prevDay = 0;
 	let file_names: IndividualFileArray = [];
 
@@ -30,6 +33,7 @@ export function TreeViewMonths(props: {
 					files={file_names}
 					month_name={props.month_name}
 					year={props.year}
+					liveSet={props.liveSet}
 					key={el.file}
 				/>
 			);
@@ -43,7 +47,12 @@ export function TreeViewMonths(props: {
 		<StyledTreeItem
 			onContextMenu={() => console.log(`${props.month_name}`)}
 			className="bg-blue-700"
-			label={getMonthName(props.month_name)}
+			label={
+				<span className="inline-flex items-center">
+					{getMonthName(props.month_name)}
+					{hasLive && <LiveDot />}
+				</span>
+			}
 			itemId={`${props.year}-${props.month_name}`}
 		>
 			<div
