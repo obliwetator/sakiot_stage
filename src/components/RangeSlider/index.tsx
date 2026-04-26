@@ -25,6 +25,10 @@ export function RangeSlider(props: {
 	userGuilds: UserGuilds[] | null;
 	isSilence: boolean;
 	trueDuration?: number | null;
+	/** Wall-clock recording start (epoch ms) for live HLS sources.
+	 * When present, the slider's right edge advances continuously from this
+	 * anchor instead of stepping with each new HLS segment. */
+	liveStartedAt?: number | null;
 }) {
 	const [actualDuration, setActualDuration] = useState(
 		props.trueDuration && Number.isFinite(props.trueDuration)
@@ -41,6 +45,10 @@ export function RangeSlider(props: {
 	]);
 	const [zoomInStartEnd, setZoomInStartEnd] = useState<number>(0);
 	const [isSliderClicked, setIsSliderClicked] = useState(false);
+	// Once the user grabs the right (end) thumb to mark a clip range, freeze
+	// the right edge — neither HLS duration growth nor the live wall-clock
+	// tick should drag it forward and ruin their selection.
+	const [rightPinned, setRightPinned] = useState(false);
 
 	const params = useParams<AudioParams>();
 	const [downloadFile] = useDownloadFileMutation();
@@ -48,12 +56,35 @@ export function RangeSlider(props: {
 	useEffect(() => {
 		if (props.trueDuration && Number.isFinite(props.trueDuration)) {
 			setActualDuration(props.trueDuration);
-			setStartEnd((prev) => [
-				prev[0],
-				Math.max(prev[1], props.trueDuration as number),
-			]);
+			if (!rightPinned) {
+				setStartEnd((prev) => [
+					prev[0],
+					Math.max(prev[1], props.trueDuration as number),
+				]);
+			}
 		}
-	}, [props.trueDuration]);
+	}, [props.trueDuration, rightPinned]);
+
+	// Live mode: drive the slider's right edge from wall-clock since
+	// recording start, ticked every 250ms. Decouples the right edge from
+	// HLS segment polling (which used to step it ~2s at a time and visibly
+	// jump the slider). Once recording ends (`liveStartedAt` cleared),
+	// the trueDuration effect above takes back over.
+	useEffect(() => {
+		if (!props.liveStartedAt) return;
+		const startedAt = props.liveStartedAt;
+		const tick = () => {
+			const dur = (Date.now() - startedAt) / 1000;
+			if (dur <= 0) return;
+			setActualDuration(dur);
+			if (!rightPinned) {
+				setStartEnd((prev) => [prev[0], Math.max(prev[1], dur)]);
+			}
+		};
+		tick();
+		const id = window.setInterval(tick, 250);
+		return () => window.clearInterval(id);
+	}, [props.liveStartedAt, rightPinned]);
 
 	// Mirror native play/pause/timeupdate into our slider state so the marker
 	// moves no matter how playback was started (togglePlay button, keyboard,
@@ -181,6 +212,7 @@ export function RangeSlider(props: {
 		} else {
 			const newEnd = Math.max(newValue[1], startEnd[0] + minDistance);
 			setStartEnd([startEnd[0], newEnd]);
+			setRightPinned(true);
 		}
 		setZoomInStartEnd(0);
 	};
@@ -250,6 +282,7 @@ export function RangeSlider(props: {
 						startEnd={startEnd}
 						setStartEnd={setStartEnd}
 						audioRef={props.audioRef}
+						onPinEnd={() => setRightPinned(true)}
 					/>
 				</Box>
 			</Box>

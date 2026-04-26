@@ -10,6 +10,7 @@ function TimeEditor(props: {
 	startEnd: number[];
 	setStartEnd: React.Dispatch<React.SetStateAction<number[]>>;
 	audioRef: HTMLAudioElement;
+	onPinEnd?: () => void;
 }) {
 	const [isError, setIsError] = useState(false);
 	const idx = props.edge === "start" ? 0 : 1;
@@ -42,6 +43,7 @@ function TimeEditor(props: {
 			setStartEndWithTime(props.startEnd[0] + sign * diff, props.startEnd[1]);
 		} else {
 			setStartEndWithTime(props.startEnd[0], props.startEnd[1] + sign * diff);
+			props.onPinEnd?.();
 		}
 	}
 
@@ -99,6 +101,7 @@ export function TimeEditors(props: {
 	startEnd: number[];
 	setStartEnd: React.Dispatch<React.SetStateAction<number[]>>;
 	audioRef: HTMLAudioElement;
+	onPinEnd?: () => void;
 }) {
 	return (
 		<>
