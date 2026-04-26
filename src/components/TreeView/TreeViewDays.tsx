@@ -1,5 +1,6 @@
 import type { IndividualFileArray } from "../../Constants";
 import { ItemsEl } from "./ItemsEl";
+import { LiveDot } from "./LiveDot";
 import { StyledTreeItem } from "./StyledTreeItem";
 
 export function TreeViewDays(props: {
@@ -8,12 +9,17 @@ export function TreeViewDays(props: {
 	files: IndividualFileArray;
 	year: number;
 	month_name: number;
+	liveSet: Set<string>;
 }) {
+	const hasLive = props.files.some((f) =>
+		props.liveSet.has(f.file.slice(0, -4)),
+	);
 	const itemsEl = props.files.map((el) => (
 		<ItemsEl
 			file={el}
 			month_name={props.month_name}
 			year={props.year}
+			isLive={props.liveSet.has(el.file.slice(0, -4))}
 			key={el.file}
 		/>
 	));
@@ -22,7 +28,12 @@ export function TreeViewDays(props: {
 		<StyledTreeItem
 			onContextMenu={() => console.log("days")}
 			className="bg-pink-700"
-			label={props.day}
+			label={
+				<span className="inline-flex items-center">
+					{props.day}
+					{hasLive && <LiveDot />}
+				</span>
+			}
 			itemId={`${props.year}-${props.month_name}-${props.day}`}
 		>
 			<div
