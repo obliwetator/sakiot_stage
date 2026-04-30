@@ -11,7 +11,7 @@ import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import type { UserGuilds } from "../Constants";
 import Login from "../login/login";
-import { BasicSelect } from "./BasicSelect";
+import { BasicSelect } from "../shared/BasicSelect";
 import { type PageName, pageIcons } from "./constants";
 
 export function MobileDrawer(props: {

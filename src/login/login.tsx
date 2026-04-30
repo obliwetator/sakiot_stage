@@ -9,8 +9,9 @@ export default function Login(props: {
 	const [logout] = useLogoutMutation();
 
 	const handleLogin = () => {
+		const state = encodeURIComponent(window.location.origin);
 		window.open(
-			"https://discord.com/oauth2/authorize?client_id=877617434029350972&redirect_uri=https%3A%2F%2Fdev.patrykstyla.com%2Fapi%2Fdiscord_login&response_type=code&scope=email%20identify%20guilds",
+			`https://discord.com/oauth2/authorize?client_id=877617434029350972&redirect_uri=https%3A%2F%2Fdev.patrykstyla.com%2Fapi%2Fdiscord_login&response_type=code&scope=email%20identify%20guilds&state=${state}`,
 			"popup",
 			"width=500,height=800",
 		);

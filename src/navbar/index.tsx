@@ -12,10 +12,10 @@ import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { PATH_PREFIX_FOR_LOGGED_USERS, type UserGuilds } from "../Constants";
 import Login from "../login/login";
-import { BasicSelect } from "./BasicSelect";
+import { BasicSelect } from "../shared/BasicSelect";
+import { isGuildAdmin } from "../shared/permissions";
 import { type PageName, pages } from "./constants";
 import { MobileDrawer } from "./MobileDrawer";
-import { isGuildAdmin } from "./permissions";
 import { UserMenu } from "./UserMenu";
 
 function ResponsiveAppBar(props: {
