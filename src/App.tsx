@@ -2,10 +2,10 @@ import { ThemeProvider } from "@mui/material";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import { BrowserRouter } from "react-router-dom";
-import { AppRoutes } from "./app/AppRoutes";
 import { darkTheme } from "./app/theme";
 import { useAuthBootstrap } from "./app/useAuthBootstrap";
 import { LayoutsWithNavbar } from "./layouts/LayoutsWithNavbar";
+import { AppRoutes } from "./routes/AppRoutes";
 
 function App() {
 	const { authData, isLoading, isLoggedIn } = useAuthBootstrap();

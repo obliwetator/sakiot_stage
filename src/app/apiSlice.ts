@@ -6,7 +6,7 @@ import type {
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { Mutex } from "async-mutex";
 import type { Channels, UserGuilds } from "../Constants";
-import type { JamItRespStatus } from "../components/RangeSlider/JamIt";
+import type { JamItRespStatus } from "../features/audio-dashboard/RangeSlider/JamIt";
 
 export interface User {
 	guild_id: string;
