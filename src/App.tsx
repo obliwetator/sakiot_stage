@@ -1,6 +1,6 @@
-import { ThemeProvider } from "@mui/material";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider } from "@mui/material/styles";
 import { BrowserRouter } from "react-router-dom";
 import { darkTheme } from "./app/theme";
 import { useAuthBootstrap } from "./app/useAuthBootstrap";

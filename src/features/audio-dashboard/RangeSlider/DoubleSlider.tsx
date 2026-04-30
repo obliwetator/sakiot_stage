@@ -1,6 +1,6 @@
-import { styled } from "@mui/material";
 import Box from "@mui/material/Box";
 import Slider from "@mui/material/Slider";
+import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import type React from "react";
 import { useParams } from "react-router-dom";
