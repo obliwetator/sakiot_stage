@@ -165,13 +165,8 @@ export function AudioInterface(props: {
 						xhrSetup: (xhr) => {
 							xhr.withCredentials = true;
 						},
-						// Initial sync target only. liveMaxLatencyDuration is set
-						// huge so hls.js never silently fast-forwards the playhead
-						// when the user falls behind the live edge — that produced
-						// the ~20s jump (default = 10 × targetDuration). Users seek
-						// to edge manually via the slider.
 						liveSyncDuration: 2,
-						liveMaxLatencyDuration: 3600,
+						liveMaxLatencyDuration: Number.MAX_SAFE_INTEGER,
 					});
 					hls.on(Hls.Events.ERROR, (_e, data) => {
 						if (data.fatal) fallback(`hls fatal: ${data.type}/${data.details}`);
