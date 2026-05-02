@@ -81,8 +81,6 @@ const baseQueryWithReauth: BaseQueryFn<
 
 	let result = await baseQuery(args, api, extraOptions);
 
-	console.log("[baseQueryWithReauth] Result:", result);
-
 	if (result.error && result.error.status === 401) {
 		console.log(
 			"[baseQueryWithReauth] Hit 401. Attempting to refresh token...",

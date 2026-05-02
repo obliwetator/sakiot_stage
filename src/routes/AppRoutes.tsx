@@ -1,11 +1,15 @@
 import Box from "@mui/material/Box";
 import React, { Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
-import { YearSelection } from "../features/audio-dashboard/YearSelection";
-import Clips from "../features/clips";
 import { LayoutsWithNavbar } from "../layouts/LayoutsWithNavbar";
 import { ProtectedLayout } from "../layouts/ProtectedLayout";
 
+const Clips = React.lazy(() => import("../features/clips"));
+const YearSelection = React.lazy(() =>
+	import("../features/audio-dashboard/YearSelection").then((m) => ({
+		default: m.YearSelection,
+	})),
+);
 const Metrics = React.lazy(() =>
 	import("../features/metrics").then((m) => ({ default: m.Metrics })),
 );
@@ -41,15 +45,15 @@ export function AppRoutes() {
 					<Route path=":guild_id">
 						<Route path="" element={<Box p={2}>select from top navbar</Box>} />
 						<Route path="audio">
-							<Route path="" element={<YearSelection />} />
+							<Route path="" element={lazyRoute(<YearSelection />)} />
 							<Route
 								path=":channel_id/:year/:month/:file_name"
-								element={<YearSelection />}
+								element={lazyRoute(<YearSelection />)}
 							/>
 						</Route>
 						<Route path="clips">
-							<Route path="" element={<Clips />} />
-							<Route path=":file_name" element={<Clips />} />
+							<Route path="" element={lazyRoute(<Clips />)} />
+							<Route path=":file_name" element={lazyRoute(<Clips />)} />
 						</Route>
 						<Route path="admin">
 							<Route

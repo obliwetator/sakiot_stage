@@ -21,4 +21,26 @@ export default defineConfig({
 			"patrykstyla.com",
 		],
 	},
+	build: {
+		rolldownOptions: {
+			output: {
+				codeSplitting: {
+					groups: [
+						{
+							name: "react",
+							test: /node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//,
+						},
+						{
+							name: "redux",
+							test: /node_modules\/(@reduxjs\/toolkit|react-redux|redux|reselect|immer)\//,
+						},
+						{
+							name: "mui",
+							test: /node_modules\/(@mui|@emotion)\//,
+						},
+					],
+				},
+			},
+		},
+	},
 });

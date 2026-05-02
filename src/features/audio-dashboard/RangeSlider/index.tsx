@@ -175,10 +175,11 @@ export function RangeSlider(props: {
 		return () => window.removeEventListener("keydown", handleSpace);
 	}, [togglePlay]);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: intervalRef.current is a mutable ref; including it causes cleanup to clear the interval started by togglePlay on every re-render (the original slider-not-moving bug).
 	useEffect(() => {
 		if (isSliderClicked) startTimer();
 		return () => clearInterval(props.intervalRef.current);
-	}, [isSliderClicked, startTimer, props.intervalRef.current]);
+	}, [isSliderClicked, startTimer]);
 
 	const handleChange = (
 		_event: Event,
