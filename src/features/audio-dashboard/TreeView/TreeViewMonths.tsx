@@ -10,38 +10,32 @@ export function TreeViewMonths(props: {
 	index: number;
 	liveSet: Set<string>;
 }) {
-	if (props.files) {
-		props.files.sort((a, b) => a.file.localeCompare(b.file));
-	}
 	const safeFiles = props.files || [];
 	const hasLive = safeFiles.some((f) => props.liveSet.has(f.file.slice(0, -4)));
-	let prevDay = 0;
-	let file_names: IndividualFileArray = [];
 
-	const days = safeFiles.map((el, index) => {
-		const timestamp = parseInt(el.file.slice(0, 13), 10);
-		const date = new Date(timestamp);
+	const byDay = new Map<number, IndividualFileArray>();
+	for (const el of safeFiles) {
+		const day = new Date(parseInt(el.file.slice(0, 13), 10)).getDate();
+		const bucket = byDay.get(day) ?? [];
+		bucket.push({ ...el });
+		byDay.set(day, bucket);
+	}
+	for (const bucket of byDay.values()) {
+		bucket.sort((a, b) => b.file.localeCompare(a.file));
+	}
+	const sortedDays = [...byDay.keys()].sort((a, b) => b - a);
 
-		if (prevDay !== date.getDate()) {
-			file_names = [];
-			file_names.push({ ...el });
-			prevDay = date.getDate();
-			return (
-				<TreeViewDays
-					index={index}
-					day={date.getDate()}
-					files={file_names}
-					month_name={props.month_name}
-					year={props.year}
-					liveSet={props.liveSet}
-					key={el.file}
-				/>
-			);
-		}
-
-		file_names.push({ ...el });
-		return null;
-	});
+	const days = sortedDays.map((day, index) => (
+		<TreeViewDays
+			index={index}
+			day={day}
+			files={byDay.get(day) ?? []}
+			month_name={props.month_name}
+			year={props.year}
+			liveSet={props.liveSet}
+			key={day}
+		/>
+	));
 
 	return (
 		<StyledTreeItem

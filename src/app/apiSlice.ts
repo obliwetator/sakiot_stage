@@ -284,12 +284,6 @@ export const apiSlice = createApi({
 				method: "HEAD",
 			}),
 		}),
-		getAudioFile: builder.query<Blob, string>({
-			query: (url) => ({
-				url,
-				responseHandler: (response) => response.blob(),
-			}),
-		}),
 		getLiveState: builder.query<
 			{ live: boolean; started_at: number | null; ended_at: number | null },
 			{
@@ -415,7 +409,6 @@ export const {
 	useRefreshMutation,
 	useLogoutMutation,
 	useCreateClipMutation,
-	useGetAudioFileQuery,
 	useGetLiveStateQuery,
 	useDownloadFileMutation,
 	useGetWaveformQuery,

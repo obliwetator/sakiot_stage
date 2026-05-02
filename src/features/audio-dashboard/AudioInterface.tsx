@@ -5,7 +5,6 @@ import { useLocation, useParams } from "react-router-dom";
 import {
 	BASE_API_URL,
 	useCheckSilenceFileQuery,
-	useGetAudioFileQuery,
 	useGetLiveStateQuery,
 } from "../../app/apiSlice";
 import { useAppSelector } from "../../app/hooks";
@@ -25,12 +24,12 @@ export function AudioInterface(props: {
 	const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
 	const [readyToPlay, setReadyToPlay] = useState(false);
 	const [error, setError] = useState(false);
-	// `hls` path = streaming via HLS, `blob` path = legacy full-file blob.
-	// Clips and silence-stripped files always use blob; everything else tries
-	// HLS first and falls back to blob on error.
-	const [mode, setMode] = useState<"hls" | "blob">(
-		props.isClip || props.isSilence ? "blob" : "hls",
-	);
+	// `hls` path = streaming via HLS, `blob` path = full-file .ogg.
+	// HLS only earns its keep while a recording is still growing — for
+	// finished recordings the .ogg is complete and the blob path works
+	// directly. Clips/silence always blob. `hlsFailed` sticks the choice
+	// at blob if HLS errors out for a live recording.
+	const [hlsFailed, setHlsFailed] = useState(false);
 	const [trueDuration, setTrueDuration] = useState<number | null>(null);
 	const dispatch = useDispatch();
 	const value = useAppSelector((state) => state.hasSilence.value);
@@ -65,7 +64,7 @@ export function AudioInterface(props: {
 	}, [shouldCheckSilence, isSuccess, isError, dispatch, props.isSilence]);
 
 	const liveStateArgs =
-		mode === "hls" && !props.isClip && !!params.file_name
+		!props.isClip && !props.isSilence && !!params.file_name
 			? {
 					guild_id: params.guild_id ?? "",
 					channel_id: params.channel_id ?? "",
@@ -79,22 +78,29 @@ export function AudioInterface(props: {
 		{ skip: !liveStateArgs, pollingInterval: liveStateArgs ? 10_000 : 0 },
 	);
 	const isLive = !!liveState?.live;
+	const mode: "hls" | "blob" =
+		props.isClip || props.isSilence || hlsFailed
+			? "blob"
+			: isLive
+				? "hls"
+				: "blob";
 
-	// Blob fallback path (only fetched when in blob mode).
-	const blobUrl = props.isClip
-		? `audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name ?? "")}`
-		: `audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${encodeURIComponent(params.file_name ?? "")}.ogg${props.isSilence ? "?silence=true" : ""}`;
+	// Direct streaming URL — browser issues HTTP Range requests against
+	// the audio element so playback can start before the full file lands.
+	const streamUrl = props.isClip
+		? `${BASE_API_URL}audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name ?? "")}`
+		: `${BASE_API_URL}audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${encodeURIComponent(params.file_name ?? "")}.ogg${props.isSilence ? "?silence=true" : ""}`;
 
-	const shouldFetchBlob =
-		mode === "blob" && !(props.isSilence && !value) && !!params.file_name;
-	const { data: audioBlob, isError: audioFetchError } = useGetAudioFileQuery(
-		blobUrl,
-		{ skip: !shouldFetchBlob },
-	);
-
-	useEffect(() => {
-		if (audioFetchError) setError(true);
-	}, [audioFetchError]);
+	// For non-clip/silence files, wait for liveState before opening the
+	// stream — avoids racing a blob-style download against a live
+	// recording that should have used HLS instead.
+	const liveStateResolved =
+		props.isClip || props.isSilence || liveState !== undefined || hlsFailed;
+	const shouldStream =
+		mode === "blob" &&
+		liveStateResolved &&
+		!(props.isSilence && !value) &&
+		!!params.file_name;
 
 	// HLS playback
 	useEffect(() => {
@@ -119,7 +125,7 @@ export function AudioInterface(props: {
 			console.warn("HLS failed, falling back to blob:", reason);
 			hls?.destroy();
 			hls = null;
-			setMode("blob");
+			setHlsFailed(true);
 		};
 
 		const onDurationChange = () => {
@@ -195,10 +201,12 @@ export function AudioInterface(props: {
 		location.search,
 	]);
 
-	// Blob playback (legacy / fallback)
+	// Streaming playback. Audio element pulls bytes via HTTP Range so
+	// playback starts as soon as enough is buffered — no full blob download.
+	// `crossOrigin = use-credentials` lets cookies ride along for auth.
 	useEffect(() => {
 		if (mode !== "blob") return;
-		if (!audioBlob) {
+		if (!shouldStream) {
 			setReadyToPlay(false);
 			setAudioRef(null);
 			return;
@@ -208,8 +216,10 @@ export function AudioInterface(props: {
 		setError(false);
 		setTrueDuration(null);
 
-		const objectUrl = URL.createObjectURL(audioBlob);
-		const localAudioRef: HTMLAudioElement = new Audio(objectUrl);
+		const localAudioRef: HTMLAudioElement = new Audio();
+		localAudioRef.crossOrigin = "use-credentials";
+		localAudioRef.preload = "auto";
+		localAudioRef.src = streamUrl;
 		let isActive = true;
 
 		localAudioRef.addEventListener("durationchange", () => {
@@ -222,7 +232,7 @@ export function AudioInterface(props: {
 			}
 		});
 
-		localAudioRef.addEventListener("canplaythrough", () => {
+		localAudioRef.addEventListener("canplay", () => {
 			if (!isActive) return;
 			const t = new URLSearchParams(location.search).get("t");
 			if (t && localAudioRef.currentTime === 0)
@@ -245,10 +255,10 @@ export function AudioInterface(props: {
 		return () => {
 			isActive = false;
 			localAudioRef.pause();
-			localAudioRef.src = "";
-			URL.revokeObjectURL(objectUrl);
+			localAudioRef.removeAttribute("src");
+			localAudioRef.load();
 		};
-	}, [mode, audioBlob, location.search]);
+	}, [mode, shouldStream, streamUrl, location.search]);
 
 	if (props.isSilence && !value) {
 		return (
