@@ -14,4 +14,4 @@ if [ ! -d "$TARGET" ]; then
   exit 1
 fi
 
-sudo rsync -a --delete --checksum "$SRC" "$TARGET/"
+rsync -a --delete --checksum "$SRC" "$TARGET/"
