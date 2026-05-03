@@ -166,7 +166,7 @@ export default function Clips() {
 	);
 
 	if (isError) {
-		console.log("cannot get clip data");
+		console.error("cannot get clip data");
 	}
 
 	if (isSuccess && data) {

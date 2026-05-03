@@ -17,7 +17,6 @@ export function AudioInterface(props: {
 	userGuilds: UserGuilds[] | null;
 	isSilence: boolean;
 }) {
-	console.log("render Audio Interface");
 	const intervalRef = useRef<number | undefined>(undefined);
 	const params = useParams<AudioParams>();
 	const location = useLocation();

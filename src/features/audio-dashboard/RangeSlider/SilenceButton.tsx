@@ -29,7 +29,6 @@ export function SilenceButton(props: {
 			if (res.message === "Success" || res.message === " Accepted") {
 				const res2 = await removeSilence(payload).unwrap();
 				if (res2.message === "Success") {
-					console.log("Silence removed", res2.url);
 					store.dispatch(setHasSilence(true));
 				}
 			}

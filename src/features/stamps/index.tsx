@@ -56,7 +56,6 @@ export function Stamps() {
 	}
 
 	const rows = data ?? [];
-	console.log("Stamps data", data);
 
 	return (
 		<Box sx={{ p: { xs: 1.5, md: 3 }, maxWidth: 1400 }}>
@@ -98,7 +97,6 @@ export function Stamps() {
 												size="small"
 												onClick={() => {
 													if (s.file_name && s.year && s.month) {
-														console.log("S", s);
 														const relSecs =
 															(s.stamp_ts - (s.start_ts ?? 0) + s.offset_ms) /
 															1000;

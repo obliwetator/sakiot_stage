@@ -39,7 +39,6 @@ export function TreeViewMonths(props: {
 
 	return (
 		<StyledTreeItem
-			onContextMenu={() => console.log(`${props.month_name}`)}
 			className="bg-blue-700"
 			label={
 				<span className="inline-flex items-center">

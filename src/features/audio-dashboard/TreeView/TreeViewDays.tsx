@@ -26,7 +26,6 @@ export function TreeViewDays(props: {
 
 	return (
 		<StyledTreeItem
-			onContextMenu={() => console.log("days")}
 			className="bg-pink-700"
 			label={
 				<span className="inline-flex items-center">
