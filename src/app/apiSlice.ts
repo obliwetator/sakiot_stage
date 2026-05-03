@@ -43,7 +43,9 @@ export interface CreateClipResponse {
 // Create a new mutex
 const mutex = new Mutex();
 
-export const BASE_API_URL = "https://dev.patrykstyla.com/api/";
+export const BASE_API_URL =
+	(import.meta.env.VITE_API_URL as string | undefined) ||
+	"https://dev.patrykstyla.com/api/";
 
 function getCsrfToken(): string | null {
 	const match = document.cookie.match(/(?:^|;\s*)xsrf_token=([^;]*)/);

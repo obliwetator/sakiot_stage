@@ -33,12 +33,21 @@ export default function Login(props: {
 		window.location.hostname.includes("staging") ||
 		window.location.hostname.includes("dev");
 
-	const handleDevLogin = () => {
-		window.open(
-			`${BASE_API_URL}dev_login?t=${Date.now()}`,
-			"popup",
-			"width=500,height=800",
-		);
+	const handleDevLogin = async () => {
+		const secret =
+			(import.meta.env.VITE_DEV_LOGIN_SECRET as string | undefined) ||
+			window.prompt("Dev login secret:") ||
+			"";
+		if (!secret) return;
+		const res = await fetch(`${BASE_API_URL}dev_login?t=${Date.now()}`, {
+			credentials: "include",
+			headers: { "X-Dev-Login-Secret": secret },
+		});
+		if (!res.ok) {
+			console.error("dev login failed", res.status);
+			return;
+		}
+		window.location.reload();
 	};
 
 	return props.isLoggedIn ? (
