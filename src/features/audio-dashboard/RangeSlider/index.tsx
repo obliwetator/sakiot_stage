@@ -4,7 +4,7 @@ import Stack from "@mui/material/Stack";
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useDownloadFileMutation } from "../../../app/apiSlice";
+import { authedFetch } from "../../../app/authedFetch";
 import type { AudioParams, UserGuilds } from "../../../Constants";
 import { formatDuration } from "../../../utils/formatTime";
 import { ClipDialog } from "./ClipDialog";
@@ -51,7 +51,6 @@ export function RangeSlider(props: {
 	const [rightPinned, setRightPinned] = useState(false);
 
 	const params = useParams<AudioParams>();
-	const [downloadFile] = useDownloadFileMutation();
 
 	useEffect(() => {
 		if (props.trueDuration && Number.isFinite(props.trueDuration)) {
@@ -223,7 +222,9 @@ export function RangeSlider(props: {
 			? `audio/clips/${params.guild_id}/${params.file_name}`
 			: `download/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${params.file_name}.ogg${props.isSilence ? "?silence=true" : ""}`;
 		try {
-			const blob = await downloadFile(url).unwrap();
+			const fileRes = await authedFetch(url);
+			if (!fileRes.ok) throw new Error(`download failed: ${fileRes.status}`);
+			const blob = await fileRes.blob();
 			const objectUrl = URL.createObjectURL(blob);
 			const a = document.createElement("a");
 			a.href = objectUrl;

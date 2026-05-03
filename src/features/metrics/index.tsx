@@ -14,7 +14,7 @@ import { VoiceUsersSection } from "./VoiceUsersSection";
 export function Metrics() {
 	const [selectedGuild, setSelectedGuild] = useState<GuildInfo | null>(null);
 
-	const hasToken = !!localStorage.getItem("token");
+	const hasToken = !!localStorage.getItem("auth_probe");
 	useGetAuthDetailsQuery(undefined, { skip: !hasToken });
 	const isAdmin = true;
 

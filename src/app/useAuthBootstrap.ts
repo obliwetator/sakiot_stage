@@ -5,7 +5,9 @@ import { useGetAuthDetailsQuery } from "./apiSlice";
 
 export function useAuthBootstrap() {
 	const dispatch = useDispatch();
-	const [hasToken, setHasToken] = useState(!!localStorage.getItem("token"));
+	const [hasToken, setHasToken] = useState(
+		!!localStorage.getItem("auth_probe"),
+	);
 
 	const {
 		data: authData,
@@ -28,7 +30,7 @@ export function useAuthBootstrap() {
 			dispatch(setGuildSelected(guild));
 		}
 		if (authData.token) {
-			localStorage.setItem("token", authData.token);
+			localStorage.setItem("auth_probe", authData.token);
 		}
 	}, [authData, dispatch]);
 
@@ -39,8 +41,8 @@ export function useAuthBootstrap() {
 				console.error("something failed when authenticating");
 				return;
 			}
-			if (!localStorage.getItem("token")) {
-				localStorage.setItem("token", "logged-in");
+			if (!localStorage.getItem("auth_probe")) {
+				localStorage.setItem("auth_probe", "logged-in");
 			}
 			setHasToken(true);
 			refetch();

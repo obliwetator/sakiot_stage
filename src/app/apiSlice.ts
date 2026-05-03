@@ -4,9 +4,11 @@ import type {
 	FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { Mutex } from "async-mutex";
 import type { Channels, UserGuilds } from "../Constants";
 import type { JamItRespStatus } from "../features/audio-dashboard/RangeSlider/JamIt";
+import { BASE_API_URL, ensureRefreshed, getCsrfToken } from "./authedFetch";
+
+export { BASE_API_URL };
 
 export interface User {
 	guild_id: string;
@@ -40,35 +42,16 @@ export interface CreateClipResponse {
 	name: string;
 }
 
-// Create a new mutex
-const mutex = new Mutex();
-
-export const BASE_API_URL =
-	(import.meta.env.VITE_API_URL as string | undefined) ||
-	"https://dev.patrykstyla.com/api/";
-
-function getCsrfToken(): string | null {
-	const match = document.cookie.match(/(?:^|;\s*)xsrf_token=([^;]*)/);
-	return match ? match[1] : null;
-}
-
-// Create our base query separately so we can wrap it
 const baseQuery = fetchBaseQuery({
 	baseUrl: BASE_API_URL,
-	// Ensure cookies are sent for authentication
 	fetchFn: (input, init) => fetch(input, { ...init, credentials: "include" }),
 });
 
-// Wrap the base query with reauthentication logic
 const baseQueryWithReauth: BaseQueryFn<
 	string | FetchArgs,
 	unknown,
 	FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-	// wait until the mutex is available without locking it
-	await mutex.waitForUnlock();
-
-	// Inject CSRF token header for state-changing (non-GET/HEAD) requests
 	if (typeof args !== "string") {
 		const method = (args.method || "GET").toUpperCase();
 		if (method !== "GET" && method !== "HEAD") {
@@ -84,30 +67,8 @@ const baseQueryWithReauth: BaseQueryFn<
 	let result = await baseQuery(args, api, extraOptions);
 
 	if (result.error && result.error.status === 401) {
-		// checking whether the mutex is locked
-		if (!mutex.isLocked()) {
-			const release = await mutex.acquire();
-			try {
-				const refreshResult = await baseQuery(
-					{ url: "refresh", method: "GET" },
-					api,
-					extraOptions,
-				);
-				if (refreshResult.data) {
-					// retry the initial query
-					result = await baseQuery(args, api, extraOptions);
-				} else {
-					// Optionally dispatch logout or clear tokens
-				}
-			} finally {
-				// release must be called once the mutex should be released again.
-				release();
-			}
-		} else {
-			// wait until the mutex is available without locking it
-			await mutex.waitForUnlock();
-			result = await baseQuery(args, api, extraOptions);
-		}
+		const ok = await ensureRefreshed();
+		if (ok) result = await baseQuery(args, api, extraOptions);
 	}
 	return result;
 };
@@ -310,12 +271,6 @@ export const apiSlice = createApi({
 				url: `audio/waveform/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}${timestamp ? `?t=${timestamp}` : ""}`,
 			}),
 		}),
-		downloadFile: builder.mutation<Blob, string>({
-			query: (url) => ({
-				url,
-				responseHandler: (response) => response.blob(),
-			}),
-		}),
 		getGuildCooldown: builder.query<{ cooldown_seconds: number }, string>({
 			query: (guild_id) => `admin/guilds/${guild_id}/cooldown`,
 			providesTags: (_r, _e, id) => [{ type: "GuildCooldown", id }],
@@ -407,7 +362,6 @@ export const {
 	useLogoutMutation,
 	useCreateClipMutation,
 	useGetLiveStateQuery,
-	useDownloadFileMutation,
 	useGetWaveformQuery,
 	useLazyGetWaveformQuery,
 	useGetStampsQuery,

@@ -3,10 +3,8 @@ import DialogContentText from "@mui/material/DialogContentText";
 import TextField from "@mui/material/TextField";
 import { useState } from "react";
 import type { Params } from "react-router-dom";
-import {
-	useCreateClipMutation,
-	useDownloadFileMutation,
-} from "../../../app/apiSlice";
+import { useCreateClipMutation } from "../../../app/apiSlice";
+import { authedFetch } from "../../../app/authedFetch";
 import type { AudioParams } from "../../../Constants";
 import { BaseDialog } from "../../../shared/BaseDialog";
 
@@ -19,7 +17,6 @@ export function ClipDialog(props: {
 	const [text, setText] = useState("");
 	const [errorMsg, setErrorMsg] = useState("");
 	const [createClip, { isLoading }] = useCreateClipMutation();
-	const [downloadFile] = useDownloadFileMutation();
 
 	const handleClickOpen = () => {
 		setOpen(true);
@@ -48,9 +45,11 @@ export function ClipDialog(props: {
 			}).unwrap();
 
 			if (response && response.status === "success") {
-				const blob = await downloadFile(
+				const fileRes = await authedFetch(
 					`audio/clips/${props.params.guild_id}/${response.id}`,
-				).unwrap();
+				);
+				if (!fileRes.ok) throw new Error(`download failed: ${fileRes.status}`);
+				const blob = await fileRes.blob();
 				const objectUrl = URL.createObjectURL(blob);
 				const a = document.createElement("a");
 				a.href = objectUrl;

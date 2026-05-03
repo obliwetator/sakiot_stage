@@ -1,10 +1,11 @@
 import Button from "@mui/material/Button";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import type { Params } from "react-router-dom";
 import { useRemoveSilenceMutation } from "../../../app/apiSlice";
+import { useAppSelector } from "../../../app/hooks";
 import type { AudioParams } from "../../../Constants";
 import { setHasSilence } from "../../../reducers/silence";
-import { store } from "../../../store";
 
 export function SilenceButton(props: {
 	params: Readonly<Params<AudioParams>>;
@@ -12,6 +13,8 @@ export function SilenceButton(props: {
 }) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [removeSilence] = useRemoveSilenceMutation();
+	const dispatch = useDispatch();
+	const hasSilence = useAppSelector((state) => state.hasSilence.value);
 
 	const handleOnClick = async () => {
 		setIsLoading(true);
@@ -22,14 +25,14 @@ export function SilenceButton(props: {
 				year: props.params.year ?? "",
 				month: Number(props.params.month ?? ""),
 				file_name: props.params.file_name ?? "",
-				idempotency_key: store.getState().token.value as string,
+				idempotency_key: crypto.randomUUID(),
 			};
 			const res = await removeSilence(payload).unwrap();
 
 			if (res.message === "Success" || res.message === " Accepted") {
 				const res2 = await removeSilence(payload).unwrap();
 				if (res2.message === "Success") {
-					store.dispatch(setHasSilence(true));
+					dispatch(setHasSilence(true));
 				}
 			}
 		} catch (error) {
@@ -39,7 +42,7 @@ export function SilenceButton(props: {
 		}
 	};
 
-	if (store.getState().hasSilence.value || props.isSilence) return null;
+	if (hasSilence || props.isSilence) return null;
 
 	return (
 		<Button variant="contained" onClick={handleOnClick} disabled={isLoading}>
