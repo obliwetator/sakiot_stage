@@ -9,7 +9,7 @@
 		"deploy": "bun run build && ./scripts/deploy.sh",
 		"preview": "vite preview",
 		"lint": "biome lint .",
-		"format": "biome format --write ."
+		"format": "biome check --write ."
 	},
 	"dependencies": {
 		"@emotion/react": "^11.10.4",
@@ -37,6 +37,7 @@
 		"@vitejs/devtools": "^0.1.8",
 		"@vitejs/plugin-react": "^6.0.1",
 		"autoprefixer": "^10.4.8",
+		"babel-plugin-react-compiler": "^1.0.0",
 		"postcss": "^8.4.16",
 		"rollup-plugin-visualizer": "^7.0.1",
 		"tailwindcss": "^4.1.7",
