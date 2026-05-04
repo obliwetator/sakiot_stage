@@ -185,12 +185,8 @@ export const apiSlice = createApi({
 		deleteClip: builder.mutation<void, { guild_id: string; file_name: string }>(
 			{
 				query: ({ guild_id, file_name }) => ({
-					url: `audio/clips/delete/${guild_id}`,
+					url: `audio/clips/${guild_id}/${encodeURIComponent(file_name)}`,
 					method: "DELETE",
-					headers: {
-						"Content-Type": "text/plain",
-					},
-					body: file_name,
 				}),
 				invalidatesTags: ["Clips"],
 			},

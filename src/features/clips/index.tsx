@@ -73,7 +73,6 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 				</AccordionSummary>
 				<AccordionDetails>
 					<Typography>Start time: {formatDuration(el.start_time)}</Typography>
-					<Typography>SOME BS</Typography>
 					<Typography>BY(not working): {el.user_id}</Typography>
 					<Typography>length: {el.length.toFixed(2)}</Typography>
 					<Typography>size: {el.size}</Typography>
