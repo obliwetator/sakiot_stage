@@ -47,6 +47,10 @@ export default function Login(props: {
 			console.error("dev login failed", res.status);
 			return;
 		}
+		// Normally we would have a jwt token returned from the server that we would store in localStorage, but since this is a dev login, we can just set a flag in localStorage to indicate that the user is logged in.
+		// NOTE: It's missing the user_id so this might break stuff on the server since it's not handled for a missing field
+		localStorage.setItem("auth_probe", "logged-in");
+		// read the cookies from the response
 		window.location.reload();
 	};
 
