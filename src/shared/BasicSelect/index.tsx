@@ -3,13 +3,12 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
-import type * as React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { UserGuilds } from "../../Constants";
 
 export function BasicSelect(props: {
 	guildSelected: UserGuilds | null;
-	setGuildSelected: React.Dispatch<React.SetStateAction<UserGuilds | null>>;
+	setGuildSelected: (guild: UserGuilds | null) => void;
 	userGuilds: UserGuilds[] | null;
 }) {
 	const navigate = useNavigate();

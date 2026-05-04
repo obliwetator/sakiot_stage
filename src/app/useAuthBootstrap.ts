@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { setGuildSelected } from "../reducers/appSlice";
 import { useGetAuthDetailsQuery } from "./apiSlice";
 
 export function useAuthBootstrap() {
-	const dispatch = useDispatch();
 	const [hasToken, setHasToken] = useState(
 		!!localStorage.getItem("auth_probe"),
 	);
@@ -21,18 +18,10 @@ export function useAuthBootstrap() {
 	const isLoggedIn = !!authData?.user && !isError;
 
 	useEffect(() => {
-		if (!authData?.guilds) return;
-		const url = window.location.href;
-		const split = url.split("/");
-		const res = split[4];
-		if (res) {
-			const guild = authData.guilds.find(({ id }) => id === res) || null;
-			dispatch(setGuildSelected(guild));
-		}
-		if (authData.token) {
+		if (authData?.token) {
 			localStorage.setItem("auth_probe", authData.token);
 		}
-	}, [authData, dispatch]);
+	}, [authData]);
 
 	useEffect(() => {
 		const handler = (e: MessageEvent) => {

@@ -2,6 +2,8 @@ import { useDispatch } from "react-redux";
 import { Outlet } from "react-router-dom";
 import { useGetAuthDetailsQuery } from "../app/apiSlice";
 import { useAppSelector } from "../app/hooks";
+import { useGuildSync } from "../app/useGuildSync";
+import type { UserGuilds } from "../Constants";
 import ResponsiveAppBar from "../navbar";
 import { setGuildSelected } from "../reducers/appSlice";
 
@@ -15,8 +17,8 @@ export function LayoutsWithNavbar() {
 	const isLoggedIn = !!authData?.user && !isError;
 	const userGuilds = authData?.guilds || null;
 
-	// In the real app, setIsLoggedIn is likely no longer necessary with RTK Query since state is bound to the query,
-	// but we provide a dummy or logic to clear token to avoid breaking ResponsiveAppBar
+	useGuildSync(userGuilds);
+
 	const setIsLoggedIn = (value: boolean | ((prev: boolean) => boolean)) => {
 		if (
 			value === false ||
@@ -27,17 +29,8 @@ export function LayoutsWithNavbar() {
 		}
 	};
 
-	const setGuildSelectedAction = (
-		guild:
-			| import("../Constants").UserGuilds
-			| null
-			| ((
-					prev: import("../Constants").UserGuilds | null,
-			  ) => import("../Constants").UserGuilds | null),
-	) => {
-		// Since setState accepts value or callback:
-		const selected = typeof guild === "function" ? guild(guildSelected) : guild;
-		dispatch(setGuildSelected(selected));
+	const setGuildSelectedAction = (guild: UserGuilds | null) => {
+		dispatch(setGuildSelected(guild));
 	};
 
 	return (

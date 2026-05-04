@@ -22,7 +22,7 @@ function ResponsiveAppBar(props: {
 	isLoggedIn: boolean;
 	setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
 	guildSelected: UserGuilds | null;
-	setGuildSelected: React.Dispatch<React.SetStateAction<UserGuilds | null>>;
+	setGuildSelected: (guild: UserGuilds | null) => void;
 	userGuilds: UserGuilds[] | null;
 }) {
 	const navigate = useNavigate();
