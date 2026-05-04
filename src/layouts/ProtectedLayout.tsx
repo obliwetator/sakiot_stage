@@ -1,16 +1,13 @@
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { Outlet, useNavigate, useParams } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useGetAuthDetailsQuery } from "../app/apiSlice";
 import { useAppSelector } from "../app/hooks";
-import type { AudioParams } from "../Constants";
 import { setGuildSelected } from "../reducers/appSlice";
 
 export const ProtectedLayout = () => {
 	const navigate = useNavigate();
-	const params = useParams<AudioParams>();
 	const dispatch = useDispatch();
 
 	const guildSelected = useAppSelector((state) => state.app.guildSelected);
@@ -27,17 +24,6 @@ export const ProtectedLayout = () => {
 			navigate(value.id);
 		}
 	};
-
-	useEffect(() => {
-		if (params.guild_id && userGuilds) {
-			const guild = userGuilds.find(
-				(element) => element.id === params.guild_id,
-			);
-			if (guild) {
-				dispatch(setGuildSelected(guild));
-			}
-		}
-	}, [params.guild_id, userGuilds, dispatch]);
 
 	if (!userGuilds) {
 		return <>No guilds</>;
