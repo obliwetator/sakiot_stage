@@ -23,7 +23,7 @@ const GuildAdminCooldowns = React.lazy(() =>
 );
 
 const lazyRoute = (node: React.ReactNode) => (
-	<Suspense fallback={<Box p={2}>Loading...</Box>}>{node}</Suspense>
+	<Suspense fallback={<Box p={2}>Loading Route</Box>}>{node}</Suspense>
 );
 
 export function AppRoutes() {

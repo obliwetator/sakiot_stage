@@ -18,7 +18,7 @@ function App() {
 					<Box p={2}>
 						{!isLoggedIn && !isLoading
 							? "You are not logged in or you are not authorized to view this content"
-							: "Loading..."}
+							: "Loading Site"}
 					</Box>
 				</BrowserRouter>
 			</ThemeProvider>

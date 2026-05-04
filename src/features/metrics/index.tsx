@@ -31,7 +31,7 @@ export function Metrics() {
 		);
 	}
 
-	const L = "Loading...";
+	const LoadingLabel = "Loading...";
 
 	return (
 		<Box sx={{ flexGrow: 1, p: { xs: 1.5, md: 3 }, maxWidth: 1400 }}>
@@ -61,11 +61,11 @@ export function Metrics() {
 				</Box>
 			</Box>
 
-			<Overview m={m} localUptime={localUptime} L={L} />
+			<Overview m={m} localUptime={localUptime} L={LoadingLabel} />
 
 			<Divider sx={{ mb: 3 }} />
 
-			<HealthSection m={m} currentTime={currentTime} L={L} />
+			<HealthSection m={m} currentTime={currentTime} L={LoadingLabel} />
 
 			<Divider sx={{ my: 3 }} />
 			<Typography variant="h5" fontWeight={600} gutterBottom>

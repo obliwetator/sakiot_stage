@@ -35,7 +35,7 @@ export default function CustomizedTreeView(_props: {
 		}
 	}, [channelsData, isSuccess]);
 
-	if (!data) return <div className="w-full p-3">Loading</div>;
+	if (!data) return <div className="w-full p-3">Loading Tree</div>;
 
 	const years = data.map((el, index) => (
 		<TreeViewYears el={el} index={index} liveSet={liveSet} key={el.year} />

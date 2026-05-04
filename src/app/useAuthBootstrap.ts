@@ -42,6 +42,9 @@ export function useAuthBootstrap() {
 				return;
 			}
 			if (!localStorage.getItem("auth_probe")) {
+				console.error(
+					"This should not happen - auth_probe should be set at this point",
+				);
 				localStorage.setItem("auth_probe", "logged-in");
 			}
 			setHasToken(true);

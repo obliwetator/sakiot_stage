@@ -170,7 +170,7 @@ export function GuildAdminCooldowns() {
 				)}
 
 				{loadingOverrides ? (
-					<Typography>Loading…</Typography>
+					<Typography>Loading Admin Cooldowns</Typography>
 				) : (
 					<TableContainer>
 						<Table size="small">
