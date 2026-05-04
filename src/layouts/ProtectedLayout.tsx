@@ -15,7 +15,7 @@ export const ProtectedLayout = () => {
 
 	const guildSelected = useAppSelector((state) => state.app.guildSelected);
 	const { data: authData } = useGetAuthDetailsQuery(undefined, {
-		skip: !localStorage.getItem("token"),
+		skip: !localStorage.getItem("auth_probe"),
 	});
 
 	const userGuilds = authData?.guilds || null;

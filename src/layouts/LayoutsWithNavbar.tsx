@@ -9,7 +9,7 @@ export function LayoutsWithNavbar() {
 	const dispatch = useDispatch();
 	const guildSelected = useAppSelector((state) => state.app.guildSelected);
 	const { data: authData, isError } = useGetAuthDetailsQuery(undefined, {
-		skip: !localStorage.getItem("token"),
+		skip: !localStorage.getItem("auth_probe"),
 	});
 
 	const isLoggedIn = !!authData?.user && !isError;
@@ -22,7 +22,7 @@ export function LayoutsWithNavbar() {
 			value === false ||
 			(typeof value === "function" && value(isLoggedIn) === false)
 		) {
-			localStorage.removeItem("token");
+			localStorage.removeItem("auth_probe");
 			window.location.reload();
 		}
 	};

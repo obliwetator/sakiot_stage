@@ -23,7 +23,7 @@ export default function Login(props: {
 		} catch (err) {
 			console.error("logout request failed", err);
 		}
-		localStorage.removeItem("token");
+		localStorage.removeItem("auth_probe");
 		props.setIsLoggedIn(false);
 	};
 
