@@ -3,6 +3,7 @@ import Grid from "@mui/material/Grid";
 import { useDispatch } from "react-redux";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useGetAuthDetailsQuery } from "../app/apiSlice";
+import { isLoggedIn as hasLoggedInCookie } from "../app/authedFetch";
 import { useAppSelector } from "../app/hooks";
 import { setGuildSelected } from "../reducers/appSlice";
 
@@ -12,7 +13,7 @@ export const ProtectedLayout = () => {
 
 	const guildSelected = useAppSelector((state) => state.app.guildSelected);
 	const { data: authData } = useGetAuthDetailsQuery(undefined, {
-		skip: !localStorage.getItem("auth_probe"),
+		skip: !hasLoggedInCookie(),
 	});
 
 	const userGuilds = authData?.guilds || null;

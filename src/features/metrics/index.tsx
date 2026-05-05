@@ -5,6 +5,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { useGetAuthDetailsQuery } from "../../app/apiSlice";
+import { isLoggedIn as hasLoggedInCookie } from "../../app/authedFetch";
 import { HealthSection } from "./HealthSection";
 import { useGuildVoiceStream, useMetricsStream, useNowTick } from "./hooks";
 import { Overview } from "./Overview";
@@ -14,8 +15,7 @@ import { VoiceUsersSection } from "./VoiceUsersSection";
 export function Metrics() {
 	const [selectedGuild, setSelectedGuild] = useState<GuildInfo | null>(null);
 
-	const hasToken = !!localStorage.getItem("auth_probe");
-	useGetAuthDetailsQuery(undefined, { skip: !hasToken });
+	useGetAuthDetailsQuery(undefined, { skip: !hasLoggedInCookie() });
 	const isAdmin = true;
 
 	const { metrics: m, localUptime, refreshCounter } = useMetricsStream(isAdmin);

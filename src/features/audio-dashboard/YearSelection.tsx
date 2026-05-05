@@ -7,6 +7,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import React from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useGetAuthDetailsQuery } from "../../app/apiSlice";
+import { isLoggedIn as hasLoggedInCookie } from "../../app/authedFetch";
 import { useAppSelector } from "../../app/hooks";
 import { AudioInterface } from "./AudioInterface";
 import CustomizedTreeView from "./TreeView";
@@ -17,7 +18,7 @@ export function YearSelection() {
 
 	const guildSelected = useAppSelector((state) => state.app.guildSelected);
 	const { data: authData } = useGetAuthDetailsQuery(undefined, {
-		skip: !localStorage.getItem("auth_probe"),
+		skip: !hasLoggedInCookie(),
 	});
 	const userGuilds = authData?.guilds || null;
 

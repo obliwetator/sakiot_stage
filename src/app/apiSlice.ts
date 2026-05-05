@@ -11,17 +11,18 @@ import { BASE_API_URL, ensureRefreshed, getCsrfToken } from "./authedFetch";
 export { BASE_API_URL };
 
 export interface User {
-	guild_id: string;
-	permissions: number;
-	icon: number;
-	name: string;
-	is_dev?: boolean;
+	user_id: string;
+	username: string;
+	avatar: string;
+	email: string | null;
+	flags: number | null;
+	public_flags: number | null;
+	is_dev: boolean;
 }
 
 export interface AuthDetails {
 	user: User | null;
 	guilds: UserGuilds[] | null;
-	token: string | null;
 }
 
 export interface UserOverride {
@@ -318,18 +319,15 @@ export const apiSlice = createApi({
 		// Combine all 3 requests into a single query to emulate the existing Promise.all behavior
 		getAuthDetails: builder.query<AuthDetails, void>({
 			async queryFn(_arg, _queryApi, _extraOptions, fetchWithBQ) {
-				const [userResult, guildsResult, tokenResult] = await Promise.all([
-					fetchWithBQ("users/@me"),
-					fetchWithBQ("users/@me/guilds"),
-					fetchWithBQ("token"),
+				const [userResult, guildsResult] = await Promise.all([
+					fetchWithBQ("users/current"),
+					fetchWithBQ("users/current/guilds"),
 				]);
 
-				if (userResult.error || guildsResult.error || tokenResult.error) {
+				if (userResult.error || guildsResult.error) {
 					return {
-						error:
-							userResult.error ||
-							guildsResult.error ||
-							(tokenResult.error as FetchBaseQueryError),
+						error: (userResult.error ||
+							guildsResult.error) as FetchBaseQueryError,
 					};
 				}
 
@@ -337,7 +335,6 @@ export const apiSlice = createApi({
 					data: {
 						user: userResult.data as User,
 						guilds: guildsResult.data as UserGuilds[],
-						token: (tokenResult.data as { token: string }).token,
 					},
 				};
 			},

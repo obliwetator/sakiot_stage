@@ -23,6 +23,7 @@ import {
 	useGetAuthDetailsQuery,
 	useGetClipsQuery,
 } from "../../app/apiSlice";
+import { isLoggedIn as hasLoggedInCookie } from "../../app/authedFetch";
 import { useAppSelector } from "../../app/hooks";
 import { PATH_PREFIX_FOR_LOGGED_USERS, type UserGuilds } from "../../Constants";
 import { formatDuration } from "../../utils/formatTime";
@@ -152,7 +153,7 @@ export default function Clips() {
 
 	const guildSelected = useAppSelector((state) => state.app.guildSelected);
 	const { data: authData } = useGetAuthDetailsQuery(undefined, {
-		skip: !localStorage.getItem("auth_probe"),
+		skip: !hasLoggedInCookie(),
 	});
 	const userGuilds = authData?.guilds || null;
 

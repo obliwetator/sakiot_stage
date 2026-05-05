@@ -1,6 +1,7 @@
 import { useDispatch } from "react-redux";
 import { Outlet } from "react-router-dom";
 import { useGetAuthDetailsQuery } from "../app/apiSlice";
+import { isLoggedIn as hasLoggedInCookie } from "../app/authedFetch";
 import { useAppSelector } from "../app/hooks";
 import { useGuildSync } from "../app/useGuildSync";
 import type { UserGuilds } from "../Constants";
@@ -11,7 +12,7 @@ export function LayoutsWithNavbar() {
 	const dispatch = useDispatch();
 	const guildSelected = useAppSelector((state) => state.app.guildSelected);
 	const { data: authData, isError } = useGetAuthDetailsQuery(undefined, {
-		skip: !localStorage.getItem("auth_probe"),
+		skip: !hasLoggedInCookie(),
 	});
 
 	const isLoggedIn = !!authData?.user && !isError;
@@ -24,7 +25,6 @@ export function LayoutsWithNavbar() {
 			value === false ||
 			(typeof value === "function" && value(isLoggedIn) === false)
 		) {
-			localStorage.removeItem("auth_probe");
 			window.location.reload();
 		}
 	};

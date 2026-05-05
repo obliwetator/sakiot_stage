@@ -7,6 +7,10 @@ export function getCsrfToken(): string | null {
 	return match ? match[1] : null;
 }
 
+export function isLoggedIn(): boolean {
+	return /(?:^|;\s*)logged_in=1(?:;|$)/.test(document.cookie);
+}
+
 let refreshInFlight: Promise<boolean> | null = null;
 
 export function ensureRefreshed(): Promise<boolean> {

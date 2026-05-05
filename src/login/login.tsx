@@ -9,9 +9,9 @@ export default function Login(props: {
 	const [logout] = useLogoutMutation();
 
 	const handleLogin = () => {
-		const state = encodeURIComponent(window.location.origin);
+		const origin = encodeURIComponent(window.location.origin);
 		window.open(
-			`https://discord.com/oauth2/authorize?client_id=877617434029350972&redirect_uri=https%3A%2F%2Fdev.patrykstyla.com%2Fapi%2Fdiscord_login&response_type=code&scope=email%20identify%20guilds&state=${state}`,
+			`${BASE_API_URL}oauth/start?origin=${origin}`,
 			"popup",
 			"width=500,height=800",
 		);
@@ -23,7 +23,6 @@ export default function Login(props: {
 		} catch (err) {
 			console.error("logout request failed", err);
 		}
-		localStorage.removeItem("auth_probe");
 		props.setIsLoggedIn(false);
 	};
 
@@ -47,10 +46,6 @@ export default function Login(props: {
 			console.error("dev login failed", res.status);
 			return;
 		}
-		// Normally we would have a jwt token returned from the server that we would store in localStorage, but since this is a dev login, we can just set a flag in localStorage to indicate that the user is logged in.
-		// NOTE: It's missing the user_id so this might break stuff on the server since it's not handled for a missing field
-		localStorage.setItem("auth_probe", "logged-in");
-		// read the cookies from the response
 		window.location.reload();
 	};
 
