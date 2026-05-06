@@ -4,9 +4,11 @@ import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import type React from "react";
 import { useParams } from "react-router-dom";
+import type { VoiceEvent } from "../../../app/apiSlice";
 import { type AudioParams, valuetext } from "../../../Constants";
 import { formatDuration } from "../../../utils/formatTime";
 import WaveFormButton from "../Waveform";
+import { VoiceEventMarkers } from "./VoiceEventMarkers";
 
 const TinyText = styled(Typography)({
 	fontSize: "0.75rem",
@@ -26,6 +28,7 @@ export function DoubleSlider(props: {
 	audioRef: HTMLAudioElement;
 	zoomInStartEnd: number;
 	setIsSliderClicked: React.Dispatch<React.SetStateAction<boolean>>;
+	voiceEvents?: VoiceEvent[];
 }) {
 	const [min, max] = [-60, 60];
 	const params = useParams<AudioParams>();
@@ -33,23 +36,32 @@ export function DoubleSlider(props: {
 	return (
 		<>
 			<WaveFormButton params={params} startEnd={props.startEnd} />
-			<Slider
-				sx={{
-					"& .MuiSlider-thumb": {
-						height: 25,
-						width: 5,
-						borderRadius: "1px",
-					},
-				}}
-				max={props.audioRef.duration}
-				getAriaLabel={() => "Minimum distance"}
-				value={props.startEnd}
-				onChange={props.handleChange}
-				valueLabelDisplay="auto"
-				valueLabelFormat={(value) => <div>{formatDuration(value)}</div>}
-				getAriaValueText={valuetext}
-				disableSwap
-			/>
+			<Box sx={{ position: "relative" }}>
+				<Slider
+					sx={{
+						"& .MuiSlider-thumb": {
+							height: 25,
+							width: 5,
+							borderRadius: "1px",
+						},
+					}}
+					max={props.audioRef.duration}
+					getAriaLabel={() => "Minimum distance"}
+					value={props.startEnd}
+					onChange={props.handleChange}
+					valueLabelDisplay="auto"
+					valueLabelFormat={(value) => <div>{formatDuration(value)}</div>}
+					getAriaValueText={valuetext}
+					disableSwap
+				/>
+				{props.voiceEvents && props.voiceEvents.length > 0 && (
+					<VoiceEventMarkers
+						events={props.voiceEvents}
+						durationSec={props.audioRef.duration}
+						audioRef={props.audioRef}
+					/>
+				)}
+			</Box>
 			<Box
 				sx={{
 					display: "flex",

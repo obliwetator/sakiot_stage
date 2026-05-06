@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import type React from "react";
 import { useParams } from "react-router-dom";
+import type { VoiceEvent } from "../../../app/apiSlice";
 import type { AudioParams, UserGuilds } from "../../../Constants";
 import { ClipDialog } from "./ClipDialog";
 import { DoubleSlider } from "./DoubleSlider";
@@ -22,6 +23,7 @@ export function RangeSlider(props: {
 	 * When present, the slider's right edge advances continuously from this
 	 * anchor instead of stepping with each new HLS segment. */
 	liveStartedAt?: number | null;
+	voiceEvents?: VoiceEvent[];
 }) {
 	const params = useParams<AudioParams>();
 	const range = useRangeSliderState({
@@ -43,6 +45,7 @@ export function RangeSlider(props: {
 				startEnd={range.startEnd}
 				zoomInStartEnd={range.zoomInStartEnd}
 				setIsSliderClicked={range.setIsSliderClicked}
+				voiceEvents={props.voiceEvents}
 			/>
 			<RangeDetails
 				audioRef={props.audioRef}

@@ -6,6 +6,7 @@ import {
 	BASE_API_URL,
 	useCheckSilenceFileQuery,
 	useGetLiveStateQuery,
+	useGetRecordingEventsQuery,
 } from "../../app/apiSlice";
 import { useAppSelector } from "../../app/hooks";
 import type { AudioParams, UserGuilds } from "../../Constants";
@@ -77,6 +78,22 @@ export function AudioInterface(props: {
 		{ skip: !liveStateArgs, pollingInterval: liveStateArgs ? 10_000 : 0 },
 	);
 	const isLive = !!liveState?.live;
+
+	const eventsArgs =
+		!props.isClip && !props.isSilence && !!params.file_name
+			? {
+					guild_id: params.guild_id ?? "",
+					channel_id: params.channel_id ?? "",
+					year: params.year ?? "",
+					month: Number(params.month ?? ""),
+					file_name: params.file_name ?? "",
+					user_id: params.file_name?.split("-")[1],
+				}
+			: undefined;
+	const { data: voiceEvents } = useGetRecordingEventsQuery(
+		eventsArgs ?? ({} as never),
+		{ skip: !eventsArgs },
+	);
 	const mode: "hls" | "blob" =
 		props.isClip || props.isSilence || hlsFailed
 			? "blob"
@@ -292,6 +309,7 @@ export function AudioInterface(props: {
 						liveStartedAt={
 							mode === "hls" && isLive ? (liveState?.started_at ?? null) : null
 						}
+						voiceEvents={voiceEvents}
 					/>
 				</>
 			) : (

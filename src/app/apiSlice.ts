@@ -87,6 +87,13 @@ export interface ClipData {
 	start_time: number;
 }
 
+export interface VoiceEvent {
+	offset_ms: number;
+	user_id: number;
+	channel_id: number | null;
+	event_type: string;
+}
+
 export interface WaveformResponse {
 	progress: number;
 	data?: string;
@@ -239,6 +246,21 @@ export const apiSlice = createApi({
 				method: "HEAD",
 			}),
 		}),
+		getRecordingEvents: builder.query<
+			VoiceEvent[],
+			{
+				guild_id: string;
+				channel_id: string;
+				year: string;
+				month: number;
+				file_name: string;
+				user_id?: string;
+			}
+		>({
+			query: ({ guild_id, channel_id, year, month, file_name, user_id }) => ({
+				url: `audio/events/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}${user_id ? `?user_id=${user_id}` : ""}`,
+			}),
+		}),
 		getLiveState: builder.query<
 			{ live: boolean; started_at: number | null; ended_at: number | null },
 			{
@@ -355,6 +377,7 @@ export const {
 	useLogoutMutation,
 	useCreateClipMutation,
 	useGetLiveStateQuery,
+	useGetRecordingEventsQuery,
 	useGetWaveformQuery,
 	useLazyGetWaveformQuery,
 	useGetStampsQuery,
