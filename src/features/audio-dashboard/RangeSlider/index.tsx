@@ -44,8 +44,6 @@ export function RangeSlider(props: {
 				handleChange={range.handleChange}
 				setStartEnd={range.setStartEnd}
 				startEnd={range.startEnd}
-				zoomInStartEnd={range.zoomInStartEnd}
-				setIsSliderClicked={range.setIsSliderClicked}
 				voiceEvents={props.voiceEvents}
 			/>
 			<RangeDetails

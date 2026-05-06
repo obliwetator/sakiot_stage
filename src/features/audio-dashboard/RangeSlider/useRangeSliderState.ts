@@ -9,8 +9,6 @@ export interface RangeSliderState {
 	playing: boolean;
 	startEnd: number[];
 	setStartEnd: Dispatch<SetStateAction<number[]>>;
-	zoomInStartEnd: number;
-	setIsSliderClicked: Dispatch<SetStateAction<boolean>>;
 	handleChange: (
 		event: Event,
 		newValue: number | number[],
@@ -38,8 +36,6 @@ export function useRangeSliderState(args: {
 		args.audioRef.currentTime || 0,
 		actualDuration,
 	]);
-	const [zoomInStartEnd, setZoomInStartEnd] = useState<number>(0);
-	const [isSliderClicked, setIsSliderClicked] = useState(false);
 	const [rightPinned, setRightPinned] = useState(false);
 
 	useEffect(() => {
@@ -75,7 +71,7 @@ export function useRangeSliderState(args: {
 		const onPlay = () => setPlaying(true);
 		const onPause = () => setPlaying(false);
 		const onTime = () => {
-			if (!isSliderClicked) setStartEnd((prev) => [audio.currentTime, prev[1]]);
+			setStartEnd((prev) => [audio.currentTime, prev[1]]);
 		};
 		audio.addEventListener("play", onPlay);
 		audio.addEventListener("pause", onPause);
@@ -85,7 +81,7 @@ export function useRangeSliderState(args: {
 			audio.removeEventListener("pause", onPause);
 			audio.removeEventListener("timeupdate", onTime);
 		};
-	}, [args.audioRef, isSliderClicked]);
+	}, [args.audioRef]);
 
 	useEffect(() => {
 		const handleArrowKeys = (event: KeyboardEvent) => {
@@ -100,7 +96,6 @@ export function useRangeSliderState(args: {
 			} else {
 				return;
 			}
-			setZoomInStartEnd(0);
 		};
 		window.addEventListener("keydown", handleArrowKeys);
 		return () => window.removeEventListener("keydown", handleArrowKeys);
@@ -109,21 +104,9 @@ export function useRangeSliderState(args: {
 	const startTimer = useCallback(() => {
 		clearInterval(args.intervalRef.current);
 		args.intervalRef.current = setInterval(() => {
-			if (!isSliderClicked) {
-				setZoomInStartEnd((prev) => {
-					if (prev < 0) {
-						if (prev >= -2) return 0;
-						return Math.round(-Math.abs(prev * 0.6666));
-					} else if (prev > 0) {
-						if (prev <= 2) return 0;
-						return Math.round(prev * 0.6666);
-					}
-					return 0;
-				});
-			}
 			setStartEnd((prev) => [args.audioRef.currentTime, prev[1]]);
 		}, 1000);
-	}, [args.audioRef, args.intervalRef, isSliderClicked]);
+	}, [args.audioRef, args.intervalRef]);
 
 	const togglePlay = useCallback(() => {
 		setPlaying((prev) => {
@@ -156,33 +139,20 @@ export function useRangeSliderState(args: {
 		return () => window.removeEventListener("keydown", handleSpace);
 	}, [togglePlay]);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: intervalRef.current is mutable; including it clears the playback timer on each render.
-	useEffect(() => {
-		if (isSliderClicked) startTimer();
-		return () => clearInterval(args.intervalRef.current);
-	}, [isSliderClicked, startTimer]);
-
 	const handleChange = (
 		_event: Event,
 		newValue: number | number[],
 		activeThumb: number,
 	) => {
 		if (!Array.isArray(newValue)) {
-			setIsSliderClicked(true);
 			if (startEnd[0] + newValue < 0) {
 				setStartEnd([0, startEnd[1]]);
-				setZoomInStartEnd(0);
 				return;
 			} else if (startEnd[0] + newValue + MinDistance > startEnd[1]) {
 				setStartEnd([startEnd[1] - MinDistance, startEnd[1]]);
 				args.audioRef.play();
-				setZoomInStartEnd(0);
 				return;
 			}
-			const diff = newValue - zoomInStartEnd;
-			setStartEnd([startEnd[0] + diff, startEnd[1]]);
-			args.audioRef.currentTime = startEnd[0] + diff;
-			setZoomInStartEnd(newValue);
 			return;
 		}
 
@@ -195,15 +165,12 @@ export function useRangeSliderState(args: {
 			setStartEnd([startEnd[0], newEnd]);
 			setRightPinned(true);
 		}
-		setZoomInStartEnd(0);
 	};
 
 	return {
 		playing,
 		startEnd,
 		setStartEnd,
-		zoomInStartEnd,
-		setIsSliderClicked,
 		handleChange,
 		togglePlay,
 		pinEnd: () => setRightPinned(true),

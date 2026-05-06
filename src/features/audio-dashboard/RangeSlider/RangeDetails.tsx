@@ -40,12 +40,14 @@ export function RangeDetails(props: {
 				}}
 			>
 				<Box sx={{ flex: 1, minWidth: 0 }}>
-					value 1: {formatDuration(Math.round(props.startEnd[0]))}
-					<Box sx={{ fontSize: 12, opacity: 0.75 }}>
-						absolute time:{" "}
+					Playback time: {formatDuration(props.startEnd[0])}
+					<Box>
+						Absolute time:{" "}
 						{absoluteTimeMs == null
 							? "-"
-							: new Date(absoluteTimeMs).toLocaleString()}
+							: new Date(
+									Math.floor(absoluteTimeMs / 1000) * 1000,
+								).toLocaleString()}
 					</Box>
 				</Box>
 				<Box sx={{ flex: 1, minWidth: 0 }}>

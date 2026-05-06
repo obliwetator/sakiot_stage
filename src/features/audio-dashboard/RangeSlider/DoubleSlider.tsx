@@ -26,11 +26,8 @@ export function DoubleSlider(props: {
 		activeThumb: number,
 	) => void;
 	audioRef: HTMLAudioElement;
-	zoomInStartEnd: number;
-	setIsSliderClicked: React.Dispatch<React.SetStateAction<boolean>>;
 	voiceEvents?: VoiceEvent[];
 }) {
-	const [min, max] = [-60, 60];
 	const params = useParams<AudioParams>();
 
 	return (
@@ -74,32 +71,6 @@ export function DoubleSlider(props: {
 				<TinyText>
 					{formatDuration(Math.round(props.audioRef.duration))}
 				</TinyText>
-			</Box>
-			<Box>
-				<Slider
-					sx={{
-						"& .MuiSlider-thumb": {
-							height: 25,
-							width: 5,
-							borderRadius: "1px",
-							transition: "none",
-						},
-						"& .MuiSlider-track": {
-							transition: "none",
-						},
-					}}
-					min={min}
-					max={max}
-					step={0.1}
-					getAriaLabel={() => "Minimum distance"}
-					value={props.zoomInStartEnd}
-					onChange={props.handleChange}
-					onChangeCommitted={() => props.setIsSliderClicked(false)}
-					valueLabelDisplay="auto"
-					getAriaValueText={valuetext}
-				/>
-				<TinyText>{formatDuration(props.zoomInStartEnd)} </TinyText>
-				<TinyText>{formatDuration(60)}</TinyText>
 			</Box>
 		</>
 	);
