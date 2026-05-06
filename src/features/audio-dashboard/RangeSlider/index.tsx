@@ -23,6 +23,7 @@ export function RangeSlider(props: {
 	 * When present, the slider's right edge advances continuously from this
 	 * anchor instead of stepping with each new HLS segment. */
 	liveStartedAt?: number | null;
+	recordingStartedAtMs?: number | null;
 	voiceEvents?: VoiceEvent[];
 }) {
 	const params = useParams<AudioParams>();
@@ -53,6 +54,7 @@ export function RangeSlider(props: {
 				startEnd={range.startEnd}
 				setStartEnd={range.setStartEnd}
 				onPinEnd={range.pinEnd}
+				recordingStartedAtMs={props.recordingStartedAtMs}
 			/>
 			<DownloadButton
 				isClip={props.isClip}

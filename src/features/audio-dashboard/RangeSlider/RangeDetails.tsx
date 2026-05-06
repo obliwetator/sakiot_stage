@@ -13,7 +13,13 @@ export function RangeDetails(props: {
 	startEnd: number[];
 	setStartEnd: Dispatch<SetStateAction<number[]>>;
 	onPinEnd: () => void;
+	recordingStartedAtMs?: number | null;
 }) {
+	const absoluteTimeMs =
+		props.recordingStartedAtMs == null
+			? null
+			: props.recordingStartedAtMs + props.startEnd[0] * 1000;
+
 	return (
 		<>
 			<Stack
@@ -35,6 +41,12 @@ export function RangeDetails(props: {
 			>
 				<Box sx={{ flex: 1, minWidth: 0 }}>
 					value 1: {formatDuration(Math.round(props.startEnd[0]))}
+					<Box sx={{ fontSize: 12, opacity: 0.75 }}>
+						absolute time:{" "}
+						{absoluteTimeMs == null
+							? "-"
+							: new Date(absoluteTimeMs).toLocaleString()}
+					</Box>
 				</Box>
 				<Box sx={{ flex: 1, minWidth: 0 }}>
 					Recorded in channel: {props.params.channel_id}

@@ -147,6 +147,13 @@ function AlertDialog(props: { clip_id: string }) {
 	);
 }
 
+function clipAbsoluteStartMs(clip: ClipData | null): number | null {
+	if (!clip?.original_file_name) return null;
+	const ts = Number.parseInt(clip.original_file_name.split("-")[0] ?? "", 10);
+	if (!Number.isFinite(ts)) return null;
+	return ts + clip.start_time * 1000;
+}
+
 export default function Clips() {
 	const params = useParams();
 	const location = useLocation();
@@ -205,6 +212,7 @@ function ClipsLayout(props: {
 	const selectedClip = selectedClipId
 		? props.data.find((c) => c.clip_id === selectedClipId)
 		: null;
+	const absoluteStartMs = clipAbsoluteStartMs(selectedClip ?? null);
 
 	return (
 		<Box
@@ -261,6 +269,7 @@ function ClipsLayout(props: {
 						isClip={true}
 						userGuilds={props.userGuilds}
 						isSilence={false}
+						absoluteStartMs={absoluteStartMs}
 					/>
 				)}
 			</Box>

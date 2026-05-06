@@ -17,6 +17,7 @@ export function AudioInterface(props: {
 	isClip: boolean;
 	userGuilds: UserGuilds[] | null;
 	isSilence: boolean;
+	absoluteStartMs?: number | null;
 }) {
 	const intervalRef = useRef<number | undefined>(undefined);
 	const params = useParams<AudioParams>();
@@ -63,8 +64,8 @@ export function AudioInterface(props: {
 		};
 	}, [shouldCheckSilence, isSuccess, isError, dispatch, props.isSilence]);
 
-	const liveStateArgs =
-		!props.isClip && !props.isSilence && !!params.file_name
+	const recordingStateArgs =
+		!props.isClip && !!params.file_name
 			? {
 					guild_id: params.guild_id ?? "",
 					channel_id: params.channel_id ?? "",
@@ -73,11 +74,14 @@ export function AudioInterface(props: {
 					file_name: params.file_name ?? "",
 				}
 			: undefined;
-	const { data: liveState } = useGetLiveStateQuery(
-		liveStateArgs ?? ({} as never),
-		{ skip: !liveStateArgs, pollingInterval: liveStateArgs ? 10_000 : 0 },
+	const { data: recordingState } = useGetLiveStateQuery(
+		recordingStateArgs ?? ({} as never),
+		{
+			skip: !recordingStateArgs,
+			pollingInterval: recordingStateArgs ? 10_000 : 0,
+		},
 	);
-	const isLive = !!liveState?.live;
+	const isLive = !!recordingState?.live;
 
 	const eventsArgs =
 		!props.isClip && !props.isSilence && !!params.file_name
@@ -110,11 +114,14 @@ export function AudioInterface(props: {
 	// For non-clip/silence files, wait for liveState before opening the
 	// stream — avoids racing a blob-style download against a live
 	// recording that should have used HLS instead.
-	const liveStateResolved =
-		props.isClip || props.isSilence || liveState !== undefined || hlsFailed;
+	const recordingStateResolved =
+		props.isClip ||
+		props.isSilence ||
+		recordingState !== undefined ||
+		hlsFailed;
 	const shouldStream =
 		mode === "blob" &&
-		liveStateResolved &&
+		recordingStateResolved &&
 		!(props.isSilence && !value) &&
 		!!params.file_name;
 
@@ -307,7 +314,12 @@ export function AudioInterface(props: {
 						isSilence={props.isSilence}
 						trueDuration={trueDuration}
 						liveStartedAt={
-							mode === "hls" && isLive ? (liveState?.started_at ?? null) : null
+							mode === "hls" && isLive
+								? (recordingState?.started_at ?? null)
+								: null
+						}
+						recordingStartedAtMs={
+							props.absoluteStartMs ?? recordingState?.started_at ?? null
 						}
 						voiceEvents={voiceEvents}
 					/>
