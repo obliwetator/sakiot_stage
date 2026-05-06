@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import { BrowserRouter } from "react-router-dom";
+import { BundleUpdatePrompt } from "./app/BundleUpdatePrompt";
 import { darkTheme } from "./app/theme";
 import { useAuthBootstrap } from "./app/useAuthBootstrap";
 import { LayoutsWithNavbar } from "./layouts/LayoutsWithNavbar";
@@ -20,6 +21,7 @@ function App() {
 							? "You are not logged in or you are not authorized to view this content"
 							: "Loading Site"}
 					</Box>
+					<BundleUpdatePrompt />
 				</BrowserRouter>
 			</ThemeProvider>
 		);
@@ -31,6 +33,7 @@ function App() {
 			<BrowserRouter>
 				<AppRoutes />
 			</BrowserRouter>
+			<BundleUpdatePrompt />
 			{authData?.user?.is_dev && (
 				<Box
 					sx={{
