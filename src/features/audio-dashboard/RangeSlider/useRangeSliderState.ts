@@ -1,4 +1,4 @@
-import type { Dispatch, MutableRefObject, SetStateAction } from "react";
+import type { Dispatch, RefObject, SetStateAction } from "react";
 import { useCallback, useEffect, useState } from "react";
 
 const ArrowKeySkip = 5;
@@ -20,7 +20,7 @@ export interface RangeSliderState {
 
 export function useRangeSliderState(args: {
 	audioRef: HTMLAudioElement;
-	intervalRef: MutableRefObject<number | undefined>;
+	intervalRef: RefObject<number | undefined>;
 	trueDuration?: number | null;
 	liveStartedAt?: number | null;
 }): RangeSliderState {
@@ -103,7 +103,7 @@ export function useRangeSliderState(args: {
 
 	const startTimer = useCallback(() => {
 		clearInterval(args.intervalRef.current);
-		args.intervalRef.current = setInterval(() => {
+		args.intervalRef.current = window.setInterval(() => {
 			setStartEnd((prev) => [args.audioRef.currentTime, prev[1]]);
 		}, 1000);
 	}, [args.audioRef, args.intervalRef]);

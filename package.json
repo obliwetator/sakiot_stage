@@ -7,6 +7,7 @@
 		"dev": "vite",
 		"build": "biome check . && tsc && vite build",
 		"deploy": "bun run build && ./scripts/deploy.sh",
+		"generate:api-types": "bun scripts/generate-api-types.ts",
 		"preview": "vite preview",
 		"lint": "biome lint .",
 		"format": "biome check --write ."
@@ -20,6 +21,7 @@
 		"@react-spring/web": "^10",
 		"@reduxjs/toolkit": "^2",
 		"@tailwindcss/postcss": "^4.1.7",
+		"@types/node": "^25.6.0",
 		"@wavesurfer/react": "^1.0.12",
 		"async-mutex": "^0.5.0",
 		"hls.js": "^1.6.16",
@@ -38,6 +40,7 @@
 		"@vitejs/plugin-react": "^6.0.1",
 		"autoprefixer": "^10.4.8",
 		"babel-plugin-react-compiler": "^1.0.0",
+		"openapi-typescript": "^7.13.0",
 		"postcss": "^8.4.16",
 		"rollup-plugin-visualizer": "^7.0.1",
 		"tailwindcss": "^4.1.7",
