@@ -24,12 +24,13 @@ export function transform_to_months(data: Channels[]) {
 	data.forEach((channel) => {
 		// Loops over the years in the channel
 		channel.dirs.forEach((dirs) => {
-			const months_obj = Object.keys(dirs.months);
+			const months = dirs.months ?? {};
+			const months_obj = Object.keys(months);
 			// Loops over the months in the year of the channel
 			months_obj.forEach((month_name) => {
 				const month = parseInt(month_name, 10) as months;
 				// In JavaScript, object keys are strings. Using month_name works reliably.
-				const files = dirs.months[month];
+				const files = months[month];
 
 				if (!files) return;
 
@@ -42,6 +43,7 @@ export function transform_to_months(data: Channels[]) {
 						user_id: file.user_id,
 						display_name: file.display_name,
 					};
+					console.log(indi);
 					all_file.push(indi);
 
 					all_stuff.push({

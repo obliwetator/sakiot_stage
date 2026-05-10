@@ -75,7 +75,10 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 				<AccordionDetails>
 					<Typography>Start time: {formatDuration(el.start_time)}</Typography>
 					<Typography>BY(not working): {el.user_id}</Typography>
-					<Typography>length: {el.length.toFixed(2)}</Typography>
+					<Typography>
+						length:{" "}
+						{typeof el.length === "number" ? el.length.toFixed(2) : "unknown"}
+					</Typography>
 					<Typography>size: {el.size}</Typography>
 					<Typography>OG file: {el.original_file_name}</Typography>
 					<div>

@@ -4,44 +4,27 @@ import type {
 	FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { components } from "../api/openapi";
 import type { Channels, UserGuilds } from "../Constants";
 import type { JamItRespStatus } from "../features/audio-dashboard/RangeSlider/JamIt";
 import { BASE_API_URL, ensureRefreshed, getCsrfToken } from "./authedFetch";
 
 export { BASE_API_URL };
 
-export interface User {
-	user_id: string;
-	username: string;
-	avatar: string;
-	email: string | null;
-	flags: number | null;
-	public_flags: number | null;
-	is_dev: boolean;
-}
+type ApiSchema = components["schemas"];
 
-export interface AuthDetails {
+export type User = ApiSchema["UserDataForFrontEnd"];
+
+export type AuthDetails = {
 	user: User | null;
 	guilds: UserGuilds[] | null;
-}
+};
 
-export interface UserOverride {
-	user_id: number;
-	cooldown_seconds: number;
-	updated_at: string;
-}
+export type UserOverride = ApiSchema["UserOverride"];
 
-export interface RemoveSilenceResponse {
-	url?: string;
-	message?: string;
-}
+export type RemoveSilenceResponse = ApiSchema["RemoveSilenceResponse"];
 
-export interface CreateClipResponse {
-	status: string;
-	file: string;
-	id: string;
-	name: string;
-}
+export type CreateClipResponse = ApiSchema["CreateClipResponse"];
 
 const baseQuery = fetchBaseQuery({
 	baseUrl: BASE_API_URL,
@@ -74,25 +57,9 @@ const baseQueryWithReauth: BaseQueryFn<
 	return result;
 };
 
-export interface ClipData {
-	clip_id: string;
-	user_id: string;
-	name: string;
-	original_file_name: string;
-	saved_file_name: string;
-	length: number;
-	size: number;
-	guild_id: string;
-	channel_id: string;
-	start_time: number;
-}
+export type ClipData = ApiSchema["ClipInfo"];
 
-export interface VoiceEvent {
-	offset_ms: number;
-	user_id: number;
-	channel_id: number | null;
-	event_type: string;
-}
+export type VoiceEvent = ApiSchema["VoiceEventDto"];
 
 export interface WaveformResponse {
 	progress: number;
@@ -100,25 +67,7 @@ export interface WaveformResponse {
 	error?: string;
 }
 
-export interface StampData {
-	id: number;
-	guild_id: string;
-	channel_id: string;
-	target_user_id: string;
-	stamper_user_id: string;
-	stamp_ts: number;
-	offset_ms: number;
-	audio_file_id: number | null;
-	note: string | null;
-	created_at: string;
-	target_name: string | null;
-	stamper_name: string | null;
-	channel_name: string | null;
-	file_name: string | null;
-	year: number | null;
-	month: number | null;
-	start_ts: number | null;
-}
+export type StampData = ApiSchema["StampInfo"];
 
 export const apiSlice = createApi({
 	reducerPath: "api",
@@ -290,7 +239,7 @@ export const apiSlice = createApi({
 				url: `audio/waveform/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}${timestamp ? `?t=${timestamp}` : ""}`,
 			}),
 		}),
-		getGuildCooldown: builder.query<{ cooldown_seconds: number }, string>({
+		getGuildCooldown: builder.query<ApiSchema["GuildCooldown"], string>({
 			query: (guild_id) => `admin/guilds/${guild_id}/cooldown`,
 			providesTags: (_r, _e, id) => [{ type: "GuildCooldown", id }],
 		}),

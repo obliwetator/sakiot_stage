@@ -1,3 +1,5 @@
+import type { components } from "./api/openapi";
+
 export const BASE_URL = "https://dev.patrykstyla.com/";
 
 export const PATH_PREFIX_FOR_LOGGED_USERS = "/dashboard";
@@ -5,10 +7,10 @@ export function valuetext(value: number) {
 	return `${value}°C`;
 }
 
-export interface Channels {
-	channel_id: string;
-	dirs: Dirs[];
-}
+type ApiSchema = components["schemas"];
+
+export type Channels = ApiSchema["Channels"];
+
 export type AudioParams2 = {
 	dashboard?: string;
 	audio?: string;
@@ -25,17 +27,13 @@ export type AudioParams =
 	| "month"
 	| "year";
 
-export interface Dirs {
-	year: number;
+export type Dirs = Omit<ApiSchema["Directories"], "months"> & {
 	months: Partial<Record<number, IndividualFileArray>>;
-}
+};
 
 export type IndividualFileArray = IndividualFile[];
-export type IndividualFile = {
+export type IndividualFile = ApiSchema["File"] & {
 	channel_id?: string;
-	file: string;
-	user_id?: string;
-	display_name?: string;
 };
 
 export function getMonthName(monthNumber: number): string {
@@ -59,10 +57,4 @@ export function getMonthName(monthNumber: number): string {
 
 export type months = number;
 
-export interface UserGuilds {
-	id: string;
-	name: string;
-	icon?: string;
-	owner: boolean;
-	permissions: string;
-}
+export type UserGuilds = ApiSchema["GuildDataForFrontEnd"];
