@@ -1,5 +1,6 @@
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { VoiceEvent } from "../../../app/apiSlice";
 
 const LABELS: Record<string, string> = {
@@ -53,16 +54,90 @@ function formatOffset(ms: number): string {
 	return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+const MARKER_PX = 10;
+const COLLISION_GAP_PX = 2;
+const COLLISION_THRESHOLD_PX = MARKER_PX + COLLISION_GAP_PX;
+const LANE_OFFSET_PX = 11;
+
+type Placed = {
+	event: VoiceEvent;
+	pct: number;
+	lane: number;
+};
+
+function assignLanes(
+	events: VoiceEvent[],
+	durationSec: number,
+	widthPx: number,
+): Placed[] {
+	const visible = events
+		.filter((e) => {
+			const sec = e.offset_ms / 1000;
+			return sec >= 0 && sec <= durationSec;
+		})
+		.slice()
+		.sort((a, b) => a.offset_ms - b.offset_ms);
+
+	if (widthPx <= 0 || visible.length === 0) return [];
+
+	const lanesLastPx: number[] = [];
+	const out: Placed[] = [];
+
+	for (const e of visible) {
+		const sec = e.offset_ms / 1000;
+		const px = (sec / durationSec) * widthPx;
+		const pct = (sec / durationSec) * 100;
+
+		let assigned = -1;
+		for (let i = 0; i < lanesLastPx.length; i++) {
+			if (px - lanesLastPx[i] >= COLLISION_THRESHOLD_PX) {
+				assigned = i;
+				break;
+			}
+		}
+		if (assigned === -1) {
+			assigned = lanesLastPx.length;
+			lanesLastPx.push(px);
+		} else {
+			lanesLastPx[assigned] = px;
+		}
+		out.push({ event: e, pct, lane: assigned });
+	}
+	return out;
+}
+
 export function VoiceEventMarkers(props: {
 	events: VoiceEvent[];
 	durationSec: number;
 	audioRef: HTMLAudioElement;
 }) {
+	const containerRef = useRef<HTMLDivElement | null>(null);
+	const [widthPx, setWidthPx] = useState(0);
+
+	useEffect(() => {
+		const el = containerRef.current;
+		if (!el) return;
+		setWidthPx(el.clientWidth);
+		const ro = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				setWidthPx(entry.contentRect.width);
+			}
+		});
+		ro.observe(el);
+		return () => ro.disconnect();
+	}, []);
+
+	const placed = useMemo(
+		() => assignLanes(props.events, props.durationSec, widthPx),
+		[props.events, props.durationSec, widthPx],
+	);
+
 	if (!Number.isFinite(props.durationSec) || props.durationSec <= 0)
 		return null;
 
 	return (
 		<Box
+			ref={containerRef}
 			sx={{
 				position: "absolute",
 				top: 0,
@@ -72,11 +147,11 @@ export function VoiceEventMarkers(props: {
 				pointerEvents: "none",
 			}}
 		>
-			{props.events.map((e) => {
+			{placed.map((p, _) => {
+				const e = p.event;
 				const sec = e.offset_ms / 1000;
-				if (sec < 0 || sec > props.durationSec) return null;
-				const pct = (sec / props.durationSec) * 100;
 				const label = LABELS[e.event_type] ?? e.event_type;
+				const yOffsetPx = -p.lane * LANE_OFFSET_PX;
 				return (
 					<Tooltip
 						key={`${e.user_id}-${e.offset_ms}-${e.event_type}`}
@@ -95,20 +170,21 @@ export function VoiceEventMarkers(props: {
 							}}
 							sx={{
 								position: "absolute",
-								left: `${pct}%`,
+								left: `${p.pct}%`,
 								top: "50%",
-								transform: "translate(-50%, -50%)",
-								width: 10,
-								height: 10,
+								transform: `translate(-50%, calc(-50% + ${yOffsetPx}px))`,
+								width: MARKER_PX,
+								height: MARKER_PX,
 								borderRadius: "50%",
 								bgcolor: colorFor(e.event_type),
 								border: "1.5px solid rgba(255,255,255,0.85)",
 								boxShadow: "0 0 2px rgba(0,0,0,0.6)",
 								pointerEvents: "auto",
 								cursor: "pointer",
-								zIndex: 2,
+								zIndex: 2 + p.lane,
 								"&:hover": {
-									transform: "translate(-50%, -50%) scale(1.4)",
+									transform: `translate(-50%, calc(-50% + ${yOffsetPx}px)) scale(1.4)`,
+									zIndex: 50,
 								},
 								transition: "transform 80ms ease-out",
 							}}

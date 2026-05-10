@@ -325,7 +325,7 @@ export function AudioInterface(props: {
 					/>
 				</>
 			) : (
-				"Loading"
+				"Loading Audio"
 			)}
 		</div>
 	);

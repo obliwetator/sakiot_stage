@@ -43,7 +43,6 @@ export function transform_to_months(data: Channels[]) {
 						user_id: file.user_id,
 						display_name: file.display_name,
 					};
-					console.log(indi);
 					all_file.push(indi);
 
 					all_stuff.push({
