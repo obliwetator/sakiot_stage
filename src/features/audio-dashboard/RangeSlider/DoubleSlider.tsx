@@ -26,6 +26,7 @@ export function DoubleSlider(props: {
 		activeThumb: number,
 	) => void;
 	audioRef: HTMLAudioElement;
+	durationSec: number;
 	voiceEvents?: VoiceEvent[];
 }) {
 	const params = useParams<AudioParams>();
@@ -42,7 +43,7 @@ export function DoubleSlider(props: {
 							borderRadius: "1px",
 						},
 					}}
-					max={props.audioRef.duration}
+					max={props.durationSec}
 					getAriaLabel={() => "Minimum distance"}
 					value={props.startEnd}
 					onChange={props.handleChange}
@@ -54,7 +55,7 @@ export function DoubleSlider(props: {
 				{props.voiceEvents && props.voiceEvents.length > 0 && (
 					<VoiceEventMarkers
 						events={props.voiceEvents}
-						durationSec={props.audioRef.duration}
+						durationSec={props.durationSec}
 						audioRef={props.audioRef}
 					/>
 				)}
@@ -68,9 +69,7 @@ export function DoubleSlider(props: {
 				}}
 			>
 				<TinyText>{formatDuration(props.startEnd[0])} </TinyText>
-				<TinyText>
-					{formatDuration(Math.round(props.audioRef.duration))}
-				</TinyText>
+				<TinyText>{formatDuration(Math.round(props.durationSec))}</TinyText>
 			</Box>
 		</>
 	);
