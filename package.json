@@ -9,6 +9,7 @@
 		"deploy": "bun run build && ./scripts/deploy.sh",
 		"generate:api-types": "bun scripts/generate-api-types.ts",
 		"preview": "vite preview",
+		"test": "bun test",
 		"lint": "biome lint .",
 		"format": "biome check --write ."
 	},

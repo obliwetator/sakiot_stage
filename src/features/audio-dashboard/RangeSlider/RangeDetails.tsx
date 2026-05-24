@@ -12,6 +12,7 @@ export function RangeDetails(props: {
 	params: Readonly<Partial<Record<AudioParams, string>>>;
 	startEnd: number[];
 	setStartEnd: Dispatch<SetStateAction<number[]>>;
+	durationSec: number;
 	onPinEnd: () => void;
 	recordingStartedAtMs?: number | null;
 }) {
@@ -65,6 +66,7 @@ export function RangeDetails(props: {
 						startEnd={props.startEnd}
 						setStartEnd={props.setStartEnd}
 						audioRef={props.audioRef}
+						durationSec={props.durationSec}
 						onPinEnd={props.onPinEnd}
 					/>
 				</Box>

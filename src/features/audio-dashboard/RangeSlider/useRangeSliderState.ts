@@ -9,6 +9,7 @@ export interface RangeSliderState {
 	playing: boolean;
 	startEnd: number[];
 	setStartEnd: Dispatch<SetStateAction<number[]>>;
+	durationSec: number;
 	handleChange: (
 		event: Event,
 		newValue: number | number[],
@@ -24,13 +25,14 @@ export function useRangeSliderState(args: {
 	trueDuration?: number | null;
 	liveStartedAt?: number | null;
 }): RangeSliderState {
-	const [actualDuration, setActualDuration] = useState(
-		args.trueDuration && Number.isFinite(args.trueDuration)
+	const initialDuration = args.liveStartedAt
+		? Math.max(0, (Date.now() - args.liveStartedAt) / 1000)
+		: args.trueDuration && Number.isFinite(args.trueDuration)
 			? args.trueDuration
 			: Number.isFinite(args.audioRef.duration)
 				? args.audioRef.duration
-				: 0,
-	);
+				: 0;
+	const [actualDuration, setActualDuration] = useState(initialDuration);
 	const [playing, setPlaying] = useState(false);
 	const [startEnd, setStartEnd] = useState<number[]>([
 		args.audioRef.currentTime || 0,
@@ -39,6 +41,7 @@ export function useRangeSliderState(args: {
 	const [rightPinned, setRightPinned] = useState(false);
 
 	useEffect(() => {
+		if (args.liveStartedAt) return;
 		if (args.trueDuration && Number.isFinite(args.trueDuration)) {
 			setActualDuration(args.trueDuration);
 			if (!rightPinned) {
@@ -48,7 +51,7 @@ export function useRangeSliderState(args: {
 				]);
 			}
 		}
-	}, [args.trueDuration, rightPinned]);
+	}, [args.liveStartedAt, args.trueDuration, rightPinned]);
 
 	useEffect(() => {
 		if (!args.liveStartedAt) return;
@@ -57,9 +60,11 @@ export function useRangeSliderState(args: {
 			const dur = (Date.now() - startedAt) / 1000;
 			if (dur <= 0) return;
 			setActualDuration(dur);
-			if (!rightPinned) {
-				setStartEnd((prev) => [prev[0], Math.max(prev[1], dur)]);
-			}
+			setStartEnd((prev) => {
+				const end = rightPinned ? Math.min(prev[1], dur) : dur;
+				const start = Math.min(prev[0], Math.max(0, end - MinDistance));
+				return [start, end];
+			});
 		};
 		tick();
 		const id = window.setInterval(tick, 250);
@@ -71,7 +76,10 @@ export function useRangeSliderState(args: {
 		const onPlay = () => setPlaying(true);
 		const onPause = () => setPlaying(false);
 		const onTime = () => {
-			setStartEnd((prev) => [audio.currentTime, prev[1]]);
+			setStartEnd((prev) => [
+				Math.min(audio.currentTime, actualDuration),
+				prev[1],
+			]);
 		};
 		audio.addEventListener("play", onPlay);
 		audio.addEventListener("pause", onPause);
@@ -81,32 +89,45 @@ export function useRangeSliderState(args: {
 			audio.removeEventListener("pause", onPause);
 			audio.removeEventListener("timeupdate", onTime);
 		};
-	}, [args.audioRef]);
+	}, [actualDuration, args.audioRef]);
 
 	useEffect(() => {
 		const handleArrowKeys = (event: KeyboardEvent) => {
 			if (event.key === "ArrowRight") {
 				const skip = event.ctrlKey ? CtrlArrowKeySkip : ArrowKeySkip;
-				setStartEnd((s) => [s[0] + skip, s[1]]);
-				args.audioRef.currentTime += skip;
+				setStartEnd((s) => {
+					const next = Math.min(
+						s[0] + skip,
+						actualDuration,
+						s[1] - MinDistance,
+					);
+					args.audioRef.currentTime = next;
+					return [next, s[1]];
+				});
 			} else if (event.key === "ArrowLeft") {
 				const skip = event.ctrlKey ? CtrlArrowKeySkip : ArrowKeySkip;
-				setStartEnd((s) => [s[0] - skip, s[1]]);
-				args.audioRef.currentTime -= skip;
+				setStartEnd((s) => {
+					const next = Math.max(s[0] - skip, 0);
+					args.audioRef.currentTime = next;
+					return [next, s[1]];
+				});
 			} else {
 				return;
 			}
 		};
 		window.addEventListener("keydown", handleArrowKeys);
 		return () => window.removeEventListener("keydown", handleArrowKeys);
-	}, [args.audioRef]);
+	}, [actualDuration, args.audioRef]);
 
 	const startTimer = useCallback(() => {
 		clearInterval(args.intervalRef.current);
 		args.intervalRef.current = window.setInterval(() => {
-			setStartEnd((prev) => [args.audioRef.currentTime, prev[1]]);
+			setStartEnd((prev) => [
+				Math.min(args.audioRef.currentTime, actualDuration),
+				prev[1],
+			]);
 		}, 1000);
-	}, [args.audioRef, args.intervalRef]);
+	}, [actualDuration, args.audioRef, args.intervalRef]);
 
 	const togglePlay = useCallback(() => {
 		setPlaying((prev) => {
@@ -157,12 +178,19 @@ export function useRangeSliderState(args: {
 		}
 
 		if (activeThumb === 0) {
-			args.audioRef.currentTime = newValue[0];
-			const newStart = Math.min(newValue[0], startEnd[1] - MinDistance);
+			const newStart = Math.max(
+				0,
+				Math.min(newValue[0], startEnd[1] - MinDistance),
+			);
+			args.audioRef.currentTime = newStart;
 			setStartEnd([newStart, startEnd[1]]);
 		} else {
-			const newEnd = Math.max(newValue[1], startEnd[0] + MinDistance);
-			setStartEnd([startEnd[0], newEnd]);
+			const newEnd = Math.min(
+				actualDuration,
+				Math.max(newValue[1], startEnd[0] + MinDistance),
+			);
+			const newStart = Math.min(startEnd[0], Math.max(0, newEnd - MinDistance));
+			setStartEnd([newStart, newEnd]);
 			setRightPinned(true);
 		}
 	};
@@ -171,6 +199,7 @@ export function useRangeSliderState(args: {
 		playing,
 		startEnd,
 		setStartEnd,
+		durationSec: actualDuration,
 		handleChange,
 		togglePlay,
 		pinEnd: () => setRightPinned(true),

@@ -10,6 +10,7 @@ function TimeEditor(props: {
 	startEnd: number[];
 	setStartEnd: React.Dispatch<React.SetStateAction<number[]>>;
 	audioRef: HTMLAudioElement;
+	durationSec: number;
 	onPinEnd?: () => void;
 }) {
 	const [isError, setIsError] = useState(false);
@@ -23,8 +24,8 @@ function TimeEditor(props: {
 		const minDistance = 1;
 		let validEnd = end;
 		if (validEnd - start < minDistance) validEnd = start + minDistance;
-		if (validEnd > props.audioRef.duration) {
-			validEnd = props.audioRef.duration;
+		if (validEnd > props.durationSec) {
+			validEnd = props.durationSec;
 			if (validEnd - start < minDistance)
 				start = Math.max(0, validEnd - minDistance);
 		}
@@ -75,11 +76,14 @@ function TimeEditor(props: {
 						const raw = e.target.value;
 						if (
 							f.clampHour &&
-							(raw as unknown as number) * 3600 > props.audioRef.duration
+							(raw as unknown as number) * 3600 > props.durationSec
 						) {
 							setIsError(true);
-							props.audioRef.currentTime = props.audioRef.duration;
-							props.setStartEnd((prev) => [props.audioRef.duration, prev[1]]);
+							props.audioRef.currentTime = props.durationSec;
+							props.setStartEnd([
+								Math.max(0, props.durationSec - 1),
+								props.durationSec,
+							]);
 							return;
 						}
 						if (typeof raw !== "string" || raw === "") return;
@@ -101,6 +105,7 @@ export function TimeEditors(props: {
 	startEnd: number[];
 	setStartEnd: React.Dispatch<React.SetStateAction<number[]>>;
 	audioRef: HTMLAudioElement;
+	durationSec: number;
 	onPinEnd?: () => void;
 }) {
 	return (

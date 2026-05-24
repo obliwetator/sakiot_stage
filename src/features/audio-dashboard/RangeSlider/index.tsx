@@ -44,6 +44,7 @@ export function RangeSlider(props: {
 				handleChange={range.handleChange}
 				setStartEnd={range.setStartEnd}
 				startEnd={range.startEnd}
+				durationSec={range.durationSec}
 				voiceEvents={props.voiceEvents}
 			/>
 			<RangeDetails
@@ -51,6 +52,7 @@ export function RangeSlider(props: {
 				params={params}
 				startEnd={range.startEnd}
 				setStartEnd={range.setStartEnd}
+				durationSec={range.durationSec}
 				onPinEnd={range.pinEnd}
 				recordingStartedAtMs={props.recordingStartedAtMs}
 			/>
