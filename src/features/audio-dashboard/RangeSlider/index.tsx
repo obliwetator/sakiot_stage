@@ -40,6 +40,7 @@ export function RangeSlider(props: {
 			<WaveFormButton
 				params={params}
 				startEnd={range.startEnd}
+				isSilence={props.isSilence}
 				actionsSlot={
 					<Button variant="contained" onClick={range.togglePlay}>
 						{range.playing ? "Pause" : "Play"}

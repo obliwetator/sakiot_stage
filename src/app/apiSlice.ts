@@ -233,11 +233,26 @@ export const apiSlice = createApi({
 				month: number;
 				file_name: string;
 				timestamp?: number;
+				silence?: boolean;
 			}
 		>({
-			query: ({ guild_id, channel_id, year, month, file_name, timestamp }) => ({
-				url: `audio/waveform/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}${timestamp ? `?t=${timestamp}` : ""}`,
-			}),
+			query: ({
+				guild_id,
+				channel_id,
+				year,
+				month,
+				file_name,
+				timestamp,
+				silence,
+			}) => {
+				const qs = new URLSearchParams();
+				if (timestamp) qs.set("t", String(timestamp));
+				if (silence) qs.set("silence", "true");
+				const suffix = qs.toString() ? `?${qs}` : "";
+				return {
+					url: `audio/waveform/${guild_id}/${channel_id}/${year}/${month}/${encodeURIComponent(file_name)}${suffix}`,
+				};
+			},
 		}),
 		getGuildCooldown: builder.query<ApiSchema["GuildCooldown"], string>({
 			query: (guild_id) => `admin/guilds/${guild_id}/cooldown`,

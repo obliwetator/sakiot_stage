@@ -9,6 +9,8 @@ import type { AudioParams } from "../../Constants";
 function WaveFormButton(props: {
 	params: Readonly<Params<AudioParams>>;
 	startEnd?: number[];
+	/** Generate from the silence-free version instead of the original. */
+	isSilence?: boolean;
 	/** Rendered in the same row, left of the Generate button (e.g. Play). */
 	actionsSlot?: React.ReactNode;
 }) {
@@ -51,6 +53,7 @@ function WaveFormButton(props: {
 			month: Number(props.params.month),
 			file_name: props.params.file_name ?? "",
 			timestamp,
+			silence: props.isSilence,
 		},
 		{
 			skip: !shouldGenerate,
