@@ -9,6 +9,8 @@ import type { AudioParams } from "../../Constants";
 function WaveFormButton(props: {
 	params: Readonly<Params<AudioParams>>;
 	startEnd?: number[];
+	/** Rendered in the same row, left of the Generate button (e.g. Play). */
+	actionsSlot?: React.ReactNode;
 }) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [shouldGenerate, setShouldGenerate] = useState(false);
@@ -150,13 +152,18 @@ function WaveFormButton(props: {
 
 	return (
 		<div style={{ width: "100%", maxWidth: "100%", marginBottom: "20px" }}>
-			<Button
-				variant="contained"
-				onClick={handleClick}
-				disabled={progress !== null}
-			>
-				{progress !== null ? `Generating (${progress}%)` : "Generate Waveform"}
-			</Button>
+			<div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+				{props.actionsSlot}
+				<Button
+					variant="contained"
+					onClick={handleClick}
+					disabled={progress !== null}
+				>
+					{progress !== null
+						? `Generating (${progress}%)`
+						: "Generate Waveform"}
+				</Button>
+			</div>
 			<p>
 				You have to click every time you want to generate a waveform. (for now).
 				Be patient for big files

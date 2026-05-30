@@ -34,7 +34,7 @@ export function LayoutsWithNavbar() {
 	};
 
 	return (
-		<div className="h-full">
+		<div className="h-full flex flex-col">
 			<ResponsiveAppBar
 				isLoggedIn={isLoggedIn}
 				setIsLoggedIn={setIsLoggedIn}
@@ -42,7 +42,9 @@ export function LayoutsWithNavbar() {
 				setGuildSelected={setGuildSelectedAction}
 				userGuilds={userGuilds}
 			/>
-			<Outlet />
+			<div className="flex-1 min-h-0 overflow-auto">
+				<Outlet />
+			</div>
 		</div>
 	);
 }

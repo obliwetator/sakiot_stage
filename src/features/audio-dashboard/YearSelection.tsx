@@ -3,6 +3,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Drawer from "@mui/material/Drawer";
 import { useTheme } from "@mui/material/styles";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import React from "react";
 import { useLocation, useParams } from "react-router-dom";
@@ -17,6 +19,11 @@ export function YearSelection() {
 	const location = useLocation();
 
 	const guildSelected = useAppSelector((state) => state.app.guildSelected);
+	const hasSilence = useAppSelector((state) => state.hasSilence.value);
+	const [tab, setTab] = React.useState<"normal" | "silence">("normal");
+	// Silence tab only exists when a silence-free version is present; fall
+	// back to normal whenever it isn't (e.g. navigating to another file).
+	const activeTab = tab === "silence" && hasSilence ? "silence" : "normal";
 	const { data: authData } = useGetAuthDetailsQuery(undefined, {
 		skip: !hasLoggedInCookie(),
 	});
@@ -38,6 +45,7 @@ export function YearSelection() {
 				display: "flex",
 				flexDirection: { xs: "column", md: "row" },
 				width: "100%",
+				height: { md: "100%" },
 			}}
 		>
 			{isDesktop ? (
@@ -46,7 +54,12 @@ export function YearSelection() {
 						flex: "0 0 20%",
 						minWidth: 220,
 						maxWidth: 320,
-						overflow: "auto",
+						height: "100%",
+						overflowY: "auto",
+						// Hide scrollbar (Firefox / IE / WebKit)
+						scrollbarWidth: "none",
+						msOverflowStyle: "none",
+						"&::-webkit-scrollbar": { display: "none" },
 					}}
 				>
 					{tree}
@@ -71,22 +84,54 @@ export function YearSelection() {
 				</Box>
 			)}
 
-			<Box sx={{ flex: 1, minWidth: 0, px: { xs: 1, md: 2 } }}>
+			<Box
+				sx={{
+					flex: 1,
+					minWidth: 0,
+					px: { xs: 1, md: 2 },
+					height: { md: "100%" },
+					overflowY: { md: "auto" },
+					// Hide scrollbar (Firefox / IE / WebKit)
+					scrollbarWidth: "none",
+					msOverflowStyle: "none",
+					"&::-webkit-scrollbar": { display: "none" },
+				}}
+			>
 				{params.year && (
-					<AudioInterface
-						key={`${location.pathname}-nosilence`}
-						isClip={false}
-						userGuilds={userGuilds}
-						isSilence={false}
-					/>
-				)}
-				{params.year && (
-					<AudioInterface
-						key={`${location.pathname}-silence`}
-						isClip={false}
-						userGuilds={userGuilds}
-						isSilence={true}
-					/>
+					<>
+						<Tabs
+							value={activeTab}
+							onChange={(_e, v) => setTab(v)}
+							sx={{ mb: 1, minHeight: 36 }}
+						>
+							<Tab label="Normal" value="normal" sx={{ minHeight: 36 }} />
+							{hasSilence && (
+								<Tab
+									label="Silence-free"
+									value="silence"
+									sx={{ minHeight: 36 }}
+								/>
+							)}
+						</Tabs>
+						<Box sx={{ display: activeTab === "normal" ? "block" : "none" }}>
+							<AudioInterface
+								key={`${location.pathname}-nosilence`}
+								isClip={false}
+								userGuilds={userGuilds}
+								isSilence={false}
+							/>
+						</Box>
+						{hasSilence && (
+							<Box sx={{ display: activeTab === "silence" ? "block" : "none" }}>
+								<AudioInterface
+									key={`${location.pathname}-silence`}
+									isClip={false}
+									userGuilds={userGuilds}
+									isSilence={true}
+								/>
+							</Box>
+						)}
+					</>
 				)}
 			</Box>
 		</Box>

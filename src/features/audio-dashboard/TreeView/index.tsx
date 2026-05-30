@@ -43,7 +43,7 @@ export default function CustomizedTreeView(_props: {
 	guildSelected: UserGuilds | null;
 }) {
 	const [data, setData] = useState<Dirs[] | null>(null);
-	const [userExpandedItems, setUserExpandedItems] = useState<string[]>([]);
+	const [expandedItems, setExpandedItems] = useState<string[]>([]);
 	const params = useParams();
 	const { data: channelsData, isSuccess } = useGetCurrentGuildDirsQuery(
 		params.guild_id ?? "",
@@ -65,24 +65,27 @@ export default function CustomizedTreeView(_props: {
 		}
 	}, [channelsData, isSuccess]);
 
+	// Auto-expand the path to the selected file when it changes (navigation),
+	// then leave expansion fully under user control so items can be collapsed.
+	const requiredKey = getRequiredExpandedItems(params).join(",");
+	React.useEffect(() => {
+		setExpandedItems((prev) =>
+			Array.from(new Set([...prev, ...requiredKey.split(",")])),
+		);
+	}, [requiredKey]);
+
 	if (!data) return <div className="w-full p-3">Loading Tree</div>;
 
 	const years = data.map((el, index) => (
 		<TreeViewYears el={el} index={index} liveSet={liveSet} key={el.year} />
 	));
-	const requiredExpandedItems = getRequiredExpandedItems(params);
-	const expandedItems = Array.from(
-		new Set([...userExpandedItems, ...requiredExpandedItems]),
-	);
 
 	return (
 		<SimpleTreeView
 			aria-label="customized"
 			expandedItems={expandedItems}
 			onExpandedItemsChange={(_event, itemIds) => {
-				setUserExpandedItems(
-					itemIds.filter((itemId) => !requiredExpandedItems.includes(itemId)),
-				);
+				setExpandedItems(itemIds);
 			}}
 			className="w-full p-3"
 		>

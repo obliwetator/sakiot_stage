@@ -4,6 +4,7 @@ import type React from "react";
 import { useParams } from "react-router-dom";
 import type { VoiceEvent } from "../../../app/apiSlice";
 import type { AudioParams, UserGuilds } from "../../../Constants";
+import WaveFormButton from "../Waveform";
 import { ClipDialog } from "./ClipDialog";
 import { DoubleSlider } from "./DoubleSlider";
 import { DownloadButton } from "./DownloadButton";
@@ -35,10 +36,16 @@ export function RangeSlider(props: {
 	});
 
 	return (
-		<Box sx={{ m: { xs: 1, md: 8 } }}>
-			<Button variant="contained" onClick={range.togglePlay}>
-				{range.playing ? "Pause" : "Play"}
-			</Button>
+		<Box sx={{ mx: { xs: 1, md: 8 }, my: { xs: 1, md: 2 } }}>
+			<WaveFormButton
+				params={params}
+				startEnd={range.startEnd}
+				actionsSlot={
+					<Button variant="contained" onClick={range.togglePlay}>
+						{range.playing ? "Pause" : "Play"}
+					</Button>
+				}
+			/>
 			<DoubleSlider
 				audioRef={props.audioRef}
 				handleChange={range.handleChange}
