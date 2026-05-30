@@ -19,6 +19,7 @@ export function RangeSlider(props: {
 	isClip: boolean;
 	userGuilds: UserGuilds[] | null;
 	isSilence: boolean;
+	isLive?: boolean;
 	trueDuration?: number | null;
 	/** Wall-clock recording start (epoch ms) for live HLS sources.
 	 * When present, the slider's right edge advances continuously from this
@@ -74,7 +75,11 @@ export function RangeSlider(props: {
 				startEnd={range.startEnd}
 				disabled={props.isClip}
 			/>
-			<SilenceButton params={params} isSilence={props.isSilence} />
+			<SilenceButton
+				params={params}
+				isSilence={props.isSilence}
+				isLive={props.isLive}
+			/>
 			<JamIt disabled={props.isClip} userGuilds={props.userGuilds} />
 		</Box>
 	);

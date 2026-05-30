@@ -34,6 +34,7 @@ export function AudioInterface(props: {
 	const [trueDuration, setTrueDuration] = useState<number | null>(null);
 	const dispatch = useDispatch();
 	const value = useAppSelector((state) => state.hasSilence.value);
+	const silenceVersion = useAppSelector((state) => state.hasSilence.version);
 
 	const shouldCheckSilence =
 		!props.isClip && !props.isSilence && !!params.file_name;
@@ -109,7 +110,7 @@ export function AudioInterface(props: {
 	// the audio element so playback can start before the full file lands.
 	const streamUrl = props.isClip
 		? `${BASE_API_URL}audio/clips/${params.guild_id}/${encodeURIComponent(params.file_name ?? "")}`
-		: `${BASE_API_URL}audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${encodeURIComponent(params.file_name ?? "")}.ogg${props.isSilence ? "?silence=true" : ""}`;
+		: `${BASE_API_URL}audio/${params.guild_id}/${params.channel_id}/${params.year}/${params.month}/${encodeURIComponent(params.file_name ?? "")}.ogg${props.isSilence ? `?silence=true&v=${silenceVersion}` : ""}`;
 
 	// For non-clip/silence files, wait for liveState before opening the
 	// stream — avoids racing a blob-style download against a live
@@ -312,6 +313,7 @@ export function AudioInterface(props: {
 						isClip={props.isClip}
 						userGuilds={props.userGuilds}
 						isSilence={props.isSilence}
+						isLive={isLive}
 						trueDuration={trueDuration}
 						liveStartedAt={
 							mode === "hls" && isLive
