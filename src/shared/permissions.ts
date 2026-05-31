@@ -13,3 +13,12 @@ export function isGuildAdmin(g: UserGuilds | null): boolean {
 		return false;
 	}
 }
+
+export function canDeleteClip(
+	guild: UserGuilds | null,
+	currentUserId: string | null | undefined,
+	clipOwnerId: string | null | undefined,
+): boolean {
+	if (isGuildAdmin(guild)) return true;
+	return Boolean(currentUserId && clipOwnerId && currentUserId === clipOwnerId);
+}

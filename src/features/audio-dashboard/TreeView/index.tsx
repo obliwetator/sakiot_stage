@@ -6,28 +6,22 @@ import {
 	useGetCurrentGuildDirsQuery,
 	useGetLiveStemsQuery,
 } from "../../../app/apiSlice";
-import type { Dirs, UserGuilds } from "../../../Constants";
+import type { Dirs, months, UserGuilds } from "../../../Constants";
 import { transform_to_months } from "../data";
 import { TreeViewYears } from "./TreeViewYears";
 
-function getExpansionIds(date: Date) {
-	const year = date.getFullYear();
-	const month = date.getMonth() + 1;
-	const day = date.getDate();
-
-	return [`${year}`, `${year}-${month}`, `${year}-${month}-${day}`];
-}
-
-function getRequiredExpandedItems(params: {
+// Expansion path to the currently open file, or null if none is selected.
+function getFileExpansion(params: {
 	year?: string;
 	month?: string;
 	file_name?: string;
-}) {
+}): string[] | null {
 	const year = Number(params.year);
 	const month = Number(params.month);
 	const fileTimestamp = Number(params.file_name?.slice(0, 13));
 
 	if (
+		params.file_name &&
 		Number.isFinite(year) &&
 		Number.isFinite(month) &&
 		Number.isFinite(fileTimestamp)
@@ -36,7 +30,30 @@ function getRequiredExpandedItems(params: {
 		return [`${year}`, `${year}-${month}`, `${year}-${month}-${day}`];
 	}
 
-	return getExpansionIds(new Date());
+	return null;
+}
+
+// Expansion path to the topmost (newest) day actually present in the tree.
+// Mirrors the render order: years desc, months desc, days desc.
+function getTopmostExpansion(data: Dirs[]): string[] {
+	const year = data[0];
+	if (!year) return [];
+
+	const topMonth = Object.keys(year.months)
+		.map(Number)
+		.sort((a, b) => b - a)[0];
+	if (topMonth === undefined) return [`${year.year}`];
+
+	const files = year.months[topMonth as months] ?? [];
+	let topDay: number | undefined;
+	for (const f of files) {
+		const day = new Date(parseInt(f.file.slice(0, 13), 10)).getDate();
+		if (topDay === undefined || day > topDay) topDay = day;
+	}
+
+	const ids = [`${year.year}`, `${year.year}-${topMonth}`];
+	if (topDay !== undefined) ids.push(`${year.year}-${topMonth}-${topDay}`);
+	return ids;
 }
 
 export default function CustomizedTreeView(_props: {
@@ -65,10 +82,17 @@ export default function CustomizedTreeView(_props: {
 		}
 	}, [channelsData, isSuccess]);
 
-	// Auto-expand the path to the selected file when it changes (navigation),
-	// then leave expansion fully under user control so items can be collapsed.
-	const requiredKey = getRequiredExpandedItems(params).join(",");
+	// Auto-expand the path to the selected file, or — when none is selected —
+	// the topmost day present in the tree. Runs once whenever that target
+	// changes (navigation / data load), then expansion is fully user-controlled.
+	const requiredItems = useMemo(() => {
+		const fileExpansion = getFileExpansion(params);
+		if (fileExpansion) return fileExpansion;
+		return data ? getTopmostExpansion(data) : [];
+	}, [params, data]);
+	const requiredKey = requiredItems.join(",");
 	React.useEffect(() => {
+		if (!requiredKey) return;
 		setExpandedItems((prev) =>
 			Array.from(new Set([...prev, ...requiredKey.split(",")])),
 		);

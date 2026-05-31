@@ -26,10 +26,15 @@ import {
 import { isLoggedIn as hasLoggedInCookie } from "../../app/authedFetch";
 import { useAppSelector } from "../../app/hooks";
 import { PATH_PREFIX_FOR_LOGGED_USERS, type UserGuilds } from "../../Constants";
+import { canDeleteClip } from "../../shared/permissions";
 import { formatDuration } from "../../utils/formatTime";
 import { AudioInterface } from "../audio-dashboard/AudioInterface";
 
-function SimpleAccordion(props: { data: ClipData[] }) {
+function SimpleAccordion(props: {
+	data: ClipData[];
+	currentUserId: string | null;
+	guildSelected: UserGuilds | null;
+}) {
 	const navigate = useNavigate();
 	const [expanded, setExpanded] = useState<string | false>(false);
 
@@ -82,7 +87,14 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 					<Typography>size: {el.size}</Typography>
 					<Typography>OG file: {el.original_file_name}</Typography>
 					<div>
-						<AlertDialog clip_id={el.clip_id} />
+						<AlertDialog
+							clip_id={el.clip_id}
+							canDelete={canDeleteClip(
+								props.guildSelected,
+								props.currentUserId,
+								el.user_id,
+							)}
+						/>
 					</div>
 				</AccordionDetails>
 			</Accordion>
@@ -91,10 +103,11 @@ function SimpleAccordion(props: { data: ClipData[] }) {
 	return <div>{elements}</div>;
 }
 
-function AlertDialog(props: { clip_id: string }) {
+function AlertDialog(props: { clip_id: string; canDelete: boolean }) {
 	const [open, setOpen] = useState(false);
 
 	const handleClickOpen = () => {
+		if (!props.canDelete) return;
 		setOpen(true);
 	};
 
@@ -124,7 +137,12 @@ function AlertDialog(props: { clip_id: string }) {
 
 	return (
 		<div>
-			<Button variant="contained" color="error" onClick={handleClickOpen}>
+			<Button
+				variant="contained"
+				color="error"
+				disabled={!props.canDelete}
+				onClick={handleClickOpen}
+			>
 				Delete
 			</Button>
 			<Dialog
@@ -186,6 +204,8 @@ export default function Clips() {
 				params={params}
 				location={location}
 				userGuilds={userGuilds}
+				currentUserId={authData?.user?.user_id ?? null}
+				guildSelected={guildSelected}
 			/>
 		);
 	} else {
@@ -198,6 +218,8 @@ function ClipsLayout(props: {
 	params: { file_name?: string };
 	location: ReturnType<typeof useLocation>;
 	userGuilds: UserGuilds[] | null;
+	currentUserId: string | null;
+	guildSelected: UserGuilds | null;
 }) {
 	const theme = useTheme();
 	const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
@@ -207,7 +229,13 @@ function ClipsLayout(props: {
 		if (!isDesktop) setDrawerOpen(false);
 	}, [isDesktop]);
 
-	const list = <SimpleAccordion data={props.data} />;
+	const list = (
+		<SimpleAccordion
+			data={props.data}
+			currentUserId={props.currentUserId}
+			guildSelected={props.guildSelected}
+		/>
+	);
 
 	const selectedClipId = props.params.file_name
 		? decodeURIComponent(props.params.file_name)
