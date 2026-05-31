@@ -31,28 +31,30 @@ const baseQuery = fetchBaseQuery({
 	fetchFn: (input, init) => fetch(input, { ...init, credentials: "include" }),
 });
 
+function withCsrfHeader(args: string | FetchArgs): string | FetchArgs {
+	if (typeof args === "string") return args;
+
+	const method = (args.method || "GET").toUpperCase();
+	if (method === "GET" || method === "HEAD") return args;
+
+	const csrf = getCsrfToken();
+	if (!csrf) return args;
+
+	const headers = new Headers(args.headers as HeadersInit | undefined);
+	headers.set("X-CSRF-Token", csrf);
+	return { ...args, headers };
+}
+
 const baseQueryWithReauth: BaseQueryFn<
 	string | FetchArgs,
 	unknown,
 	FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-	if (typeof args !== "string") {
-		const method = (args.method || "GET").toUpperCase();
-		if (method !== "GET" && method !== "HEAD") {
-			const csrf = getCsrfToken();
-			if (csrf) {
-				const headers = new Headers(args.headers as HeadersInit | undefined);
-				headers.set("X-CSRF-Token", csrf);
-				args = { ...args, headers };
-			}
-		}
-	}
-
-	let result = await baseQuery(args, api, extraOptions);
+	let result = await baseQuery(withCsrfHeader(args), api, extraOptions);
 
 	if (result.error && result.error.status === 401) {
 		const ok = await ensureRefreshed();
-		if (ok) result = await baseQuery(args, api, extraOptions);
+		if (ok) result = await baseQuery(withCsrfHeader(args), api, extraOptions);
 	}
 	return result;
 };
@@ -117,10 +119,10 @@ export const apiSlice = createApi({
 			}),
 		}),
 		refresh: builder.mutation<void, void>({
-			query: () => "refresh",
+			query: () => ({ url: "refresh", method: "POST" }),
 		}),
 		logout: builder.mutation<void, void>({
-			query: () => ({ url: "logout", method: "GET" }),
+			query: () => ({ url: "logout", method: "POST" }),
 		}),
 		getCurrentGuildDirs: builder.query<Channels[], string>({
 			query: (guild_id) => `current/${guild_id}`,

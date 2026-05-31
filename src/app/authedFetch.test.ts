@@ -82,5 +82,10 @@ describe("authedFetch", () => {
 			`${BASE_API_URL}refresh`,
 			`${BASE_API_URL}protected`,
 		]);
+		const [, refreshInit] = fetchMock.mock.calls[1];
+		expect(refreshInit?.method).toBe("POST");
+		expect(new Headers(refreshInit?.headers).get("X-CSRF-Token")).toBe(
+			"csrf-123",
+		);
 	});
 });

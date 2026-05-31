@@ -17,8 +17,13 @@ export function ensureRefreshed(): Promise<boolean> {
 	if (refreshInFlight) return refreshInFlight;
 	refreshInFlight = (async () => {
 		try {
+			const headers = new Headers();
+			const csrf = getCsrfToken();
+			if (csrf) headers.set("X-CSRF-Token", csrf);
 			const res = await fetch(`${BASE_API_URL}refresh`, {
+				method: "POST",
 				credentials: "include",
+				headers,
 			});
 			return res.ok;
 		} catch {
@@ -56,6 +61,14 @@ export async function authedFetch(
 	if (res.status !== 401) return res;
 
 	const ok = await ensureRefreshed();
-	if (ok) res = await fetch(url, opts);
+	if (ok) {
+		const retryHeaders = buildHeaders(init);
+		const retryOpts: RequestInit = {
+			...init,
+			headers: retryHeaders,
+			credentials: "include",
+		};
+		res = await fetch(url, retryOpts);
+	}
 	return res;
 }

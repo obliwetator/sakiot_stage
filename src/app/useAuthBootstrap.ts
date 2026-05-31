@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useGetAuthDetailsQuery } from "./apiSlice";
-import { isLoggedIn as hasLoggedInCookie } from "./authedFetch";
+import { BASE_API_URL, isLoggedIn as hasLoggedInCookie } from "./authedFetch";
 
 export function useAuthBootstrap() {
 	const [hasToken, setHasToken] = useState(hasLoggedInCookie());
@@ -17,8 +17,9 @@ export function useAuthBootstrap() {
 	const isLoggedIn = !!authData?.user && !isError;
 
 	useEffect(() => {
+		const apiOrigin = new URL(BASE_API_URL, window.location.origin).origin;
 		const handler = (e: MessageEvent) => {
-			if (e.origin !== "https://dev.patrykstyla.com") return;
+			if (e.origin !== apiOrigin) return;
 			if (e.data.success !== 1) {
 				console.error("something failed when authenticating");
 				return;

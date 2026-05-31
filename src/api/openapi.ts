@@ -184,9 +184,9 @@ export interface paths {
 			path?: never;
 			cookie?: never;
 		};
-		get: operations["logout"];
+		get?: never;
 		put?: never;
-		post?: never;
+		post: operations["logout"];
 		delete?: never;
 		options?: never;
 		head?: never;
@@ -200,9 +200,9 @@ export interface paths {
 			path?: never;
 			cookie?: never;
 		};
-		get: operations["refresh_jwt"];
+		get?: never;
 		put?: never;
-		post?: never;
+		post: operations["refresh_jwt"];
 		delete?: never;
 		options?: never;
 		head?: never;
@@ -1113,6 +1113,15 @@ export interface operations {
 				};
 				content?: never;
 			};
+			/** @description Missing or invalid CSRF token */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					"application/json": components["schemas"]["ApiError"];
+				};
+			};
 		};
 	};
 	refresh_jwt: {
@@ -1139,6 +1148,15 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content?: never;
+			};
+			/** @description Missing or invalid CSRF token */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					"application/json": components["schemas"]["ApiError"];
+				};
 			};
 			/** @description Server error */
 			500: {
