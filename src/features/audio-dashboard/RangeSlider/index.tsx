@@ -42,6 +42,7 @@ export function RangeSlider(props: {
 				params={params}
 				startEnd={range.startEnd}
 				isSilence={props.isSilence}
+				isClip={props.isClip}
 				actionsSlot={
 					<Button variant="contained" onClick={range.togglePlay}>
 						{range.playing ? "Pause" : "Play"}

@@ -256,6 +256,21 @@ export const apiSlice = createApi({
 				};
 			},
 		}),
+		// Clips are their own trimmed file, keyed by clip_id — separate endpoint
+		// from the recording waveform (which needs channel_id/year/month).
+		getClipWaveform: builder.query<
+			WaveformResponse,
+			{ guild_id: string; clip_id: string; timestamp?: number }
+		>({
+			query: ({ guild_id, clip_id, timestamp }) => {
+				const qs = new URLSearchParams();
+				if (timestamp) qs.set("t", String(timestamp));
+				const suffix = qs.toString() ? `?${qs}` : "";
+				return {
+					url: `audio/clips/waveform/${guild_id}/${encodeURIComponent(clip_id)}${suffix}`,
+				};
+			},
+		}),
 		getGuildCooldown: builder.query<ApiSchema["GuildCooldown"], string>({
 			query: (guild_id) => `admin/guilds/${guild_id}/cooldown`,
 			providesTags: (_r, _e, id) => [{ type: "GuildCooldown", id }],
@@ -346,6 +361,7 @@ export const {
 	useGetRecordingEventsQuery,
 	useGetWaveformQuery,
 	useLazyGetWaveformQuery,
+	useGetClipWaveformQuery,
 	useGetStampsQuery,
 	useGetGuildCooldownQuery,
 	useSetGuildCooldownMutation,
