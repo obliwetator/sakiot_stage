@@ -3,7 +3,10 @@ import { useWavesurfer } from "@wavesurfer/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Params } from "react-router-dom";
 import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline.js";
-import { useGetWaveformQuery } from "../../app/apiSlice";
+import {
+	useGetClipWaveformQuery,
+	useGetWaveformQuery,
+} from "../../app/apiSlice";
 import type { AudioParams } from "../../Constants";
 
 function WaveFormButton(props: {
@@ -11,6 +14,8 @@ function WaveFormButton(props: {
 	startEnd?: number[];
 	/** Generate from the silence-free version instead of the original. */
 	isSilence?: boolean;
+	/** Clip view: waveform comes from the clip's own file, not a recording. */
+	isClip?: boolean;
 	/** Rendered in the same row, left of the Generate button (e.g. Play). */
 	actionsSlot?: React.ReactNode;
 }) {
@@ -45,7 +50,10 @@ function WaveFormButton(props: {
 		),
 	});
 
-	const { data: waveformData, error: queryError } = useGetWaveformQuery(
+	// Both hooks must be called (RTK rule); gate each with `skip` by mode.
+	// On the clip route, `params.file_name` holds the clip_id.
+	const isClip = !!props.isClip;
+	const recording = useGetWaveformQuery(
 		{
 			guild_id: props.params.guild_id ?? "",
 			channel_id: props.params.channel_id ?? "",
@@ -56,11 +64,24 @@ function WaveFormButton(props: {
 			silence: props.isSilence,
 		},
 		{
-			skip: !shouldGenerate,
+			skip: !shouldGenerate || isClip,
 			// Poll every 1 second while generating
-			pollingInterval: shouldGenerate ? 1000 : 0,
+			pollingInterval: shouldGenerate && !isClip ? 1000 : 0,
 		},
 	);
+	const clip = useGetClipWaveformQuery(
+		{
+			guild_id: props.params.guild_id ?? "",
+			clip_id: props.params.file_name ?? "",
+			timestamp,
+		},
+		{
+			skip: !shouldGenerate || !isClip,
+			pollingInterval: shouldGenerate && isClip ? 1000 : 0,
+		},
+	);
+	const waveformData = isClip ? clip.data : recording.data;
+	const queryError = isClip ? clip.error : recording.error;
 
 	useEffect(() => {
 		// Stop generating (polling) if we hit 100% or an error
