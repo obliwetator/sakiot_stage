@@ -110,7 +110,7 @@ export const apiSlice = createApi({
 				idempotency_key,
 			}) => ({
 				url: `remove_silence/${guild_id}/${channel_id}/${year}/${month}/${file_name}`,
-				method: "GET",
+				method: "POST",
 				headers: {
 					Accept: "application/json",
 					"Content-Type": "application/json",
